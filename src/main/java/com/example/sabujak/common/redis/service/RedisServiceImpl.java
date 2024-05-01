@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.sabujak.common.exception.ErrorCode.JSON_PROCESSING_ERROR;
+import static com.example.sabujak.common.exception.ErrorCode.COMMON_JSON_PROCESSING_ERROR;
 
 @Slf4j
 @Component
@@ -32,7 +32,7 @@ public class RedisServiceImpl implements RedisService {
             return Optional.empty();
         } catch (JsonProcessingException e) {
             log.error("error occurred while processing JSON", e);
-            throw new CustomException(JSON_PROCESSING_ERROR);
+            throw new CustomException(COMMON_JSON_PROCESSING_ERROR);
         }
     }
 
