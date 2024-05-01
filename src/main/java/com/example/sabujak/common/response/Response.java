@@ -5,19 +5,18 @@ public record Response<T>(
         T data,
         String message
 ) {
-    private static final String STATUS_SUCCESS = "SUCCESS";
-    private static final String STATUS_FAIL = "FAIL";
-    private static final String ERROR_STATUS = "ERROR";
+    private static final String SUCCESS_STATUS = "SUCCESS";
+    private static final String FAIL_STATUS = "FAIL";
 
     public static <T> Response<T> success() {
-        return new Response<>(STATUS_SUCCESS, null, null);
+        return new Response<>(SUCCESS_STATUS, null, null);
     }
 
     public static <T> Response<T> success(T data) {
-        return new Response<>(STATUS_SUCCESS, data, null);
+        return new Response<>(SUCCESS_STATUS, data, null);
     }
 
     public static <T> Response<T> fail(String message) {
-        return new Response<>(STATUS_FAIL, null, message);
+        return new Response<>(FAIL_STATUS, null, message);
     }
 }
