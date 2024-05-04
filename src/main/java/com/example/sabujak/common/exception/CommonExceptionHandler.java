@@ -14,7 +14,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.sabujak.common.exception.ErrorCode.*;
+import static com.example.sabujak.common.exception.CommonErrorCode.*;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(value = CustomException.class)
     public ResponseEntity<Response<Void>> handleCustomException(CustomException e) {
-        HttpStatus status = e.getErrorCode().getStatus();
+        HttpStatus status = e.getErrorCode().getHttpStatus();
         String message = e.getErrorCode().getMessage();
 
         log.error("[CustomException] Status: {}, Message: {}", status, message);
