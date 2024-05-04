@@ -1,6 +1,6 @@
 package com.example.sabujak.common.redis.service;
 
-import com.example.sabujak.common.exception.CustomException;
+import com.example.sabujak.common.exception.CommonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.sabujak.common.exception.ErrorCode.COMMON_JSON_PROCESSING_ERROR;
+import static com.example.sabujak.common.exception.CommonErrorCode.COMMON_JSON_PROCESSING_ERROR;
 
 @Slf4j
 @Component
@@ -32,7 +32,7 @@ public class RedisServiceImpl implements RedisService {
             return Optional.empty();
         } catch (JsonProcessingException e) {
             log.error("error occurred while processing JSON", e);
-            throw new CustomException(COMMON_JSON_PROCESSING_ERROR);
+            throw new CommonException(COMMON_JSON_PROCESSING_ERROR);
         }
     }
 
@@ -42,14 +42,13 @@ public class RedisServiceImpl implements RedisService {
         try {
             String value = objectMapper.writeValueAsString(data);
             redisTemplate.opsForValue().set(key, value, expiration, TimeUnit.MILLISECONDS);
-        }
-        catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             log.error("error occurred while processing JSON", e);
         }
     }
 
     @Override
-    public void delete(String key){
+    public void delete(String key) {
         log.info("delete data from redis with key: {}", key);
         redisTemplate.delete(key);
     }
