@@ -1,6 +1,6 @@
 package com.example.sabujak.common.api.service;
 
-import com.example.sabujak.common.exception.CustomException;
+import com.example.sabujak.common.exception.CommonException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
-import static com.example.sabujak.common.exception.ErrorCode.COMMON_SYSTEM_ERROR;
+import static com.example.sabujak.common.exception.CommonErrorCode.COMMON_SYSTEM_ERROR;
 
 @Slf4j
 @Component
@@ -25,10 +25,10 @@ public class RestTemplateServiceImpl implements RestTemplateService {
     private final RestTemplate restTemplate;
 
     @Override
-    public <T> Optional<T> get(String url, HttpHeaders headers, Class<T> responseType) {
+    public <T> Optional<T> get(String url, HttpHeaders headers, Class<T> type) {
         try {
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, request, type);
             return Optional.ofNullable(response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error(
@@ -38,7 +38,25 @@ public class RestTemplateServiceImpl implements RestTemplateService {
             return Optional.empty();
         } catch (RestClientException e) {
             log.error("[RestTemplate GET Error] Message: {}", e.getMessage(), e);
-            throw new CustomException(COMMON_SYSTEM_ERROR);
+            throw new CommonException(COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public <T, R> Optional<T> post(String url, HttpHeaders headers, R body, Class<T> type) {
+        try {
+            HttpEntity<R> request = new HttpEntity<>(body, headers);
+            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.POST, request, type);
+            return Optional.ofNullable(response.getBody());
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error(
+                    "[RestTemplate POST Error] Status Code: {} Message: {} Error Response Body: {}",
+                    e.getStatusCode(), e.getMessage(), e.getResponseBodyAsString()
+            );
+            return Optional.empty();
+        } catch (RestClientException e) {
+            log.error("[RestTemplate POST Error] Message: {}", e.getMessage(), e);
+            throw new CommonException(COMMON_SYSTEM_ERROR);
         }
     }
 }
