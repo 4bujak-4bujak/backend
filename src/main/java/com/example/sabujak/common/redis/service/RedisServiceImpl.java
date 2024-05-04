@@ -44,6 +44,7 @@ public class RedisServiceImpl implements RedisService {
             redisTemplate.opsForValue().set(key, value, expiration, TimeUnit.MILLISECONDS);
         } catch (JsonProcessingException e) {
             log.error("error occurred while processing JSON", e);
+            throw new CommonException(COMMON_JSON_PROCESSING_ERROR);
         }
     }
 
