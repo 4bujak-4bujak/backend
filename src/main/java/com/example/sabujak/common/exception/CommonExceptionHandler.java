@@ -1,6 +1,6 @@
 package com.example.sabujak.common.exception;
 
-import com.example.sabujak.common.response.Response;
+import com.example.sabujak.common.response.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +22,17 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CommonExceptionHandler {
 
     @ExceptionHandler(value = CustomException.class)
-    public ResponseEntity<Response<Void>> handleCustomException(CustomException e) {
+    public ResponseEntity<CommonResponse<Void>> handleCustomException(CustomException e) {
         HttpStatus status = e.getErrorCode().getHttpStatus();
         String message = e.getErrorCode().getMessage();
 
         log.error("[CustomException] Status: {}, Message: {}", status, message);
 
-        return new ResponseEntity<>(Response.fail(message), status);
+        return new ResponseEntity<>(CommonResponse.fail(message), status);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<Response<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<CommonResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         BindingResult bindingResult = e.getBindingResult();
 
         List<String> errorMessages = bindingResult.getFieldErrors().stream()
@@ -43,24 +43,24 @@ public class CommonExceptionHandler {
 
         log.error("[HandleMethodArgumentNotValidException] Message: {}", errorMessage);
 
-        return ResponseEntity.badRequest().body(Response.fail(errorMessage));
+        return ResponseEntity.badRequest().body(CommonResponse.fail(errorMessage));
     }
 
     @ExceptionHandler(value = NoResourceFoundException.class)
-    public ResponseEntity<Response<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
+    public ResponseEntity<CommonResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
         log.error("[NoResourceFoundException] URL = {}, Message = {}", e.getResourcePath(), e.getMessage());
-        return new ResponseEntity<>(Response.fail(COMMON_RESOURCE_NOT_FOUND.getMessage()), NOT_FOUND);
+        return new ResponseEntity<>(CommonResponse.fail(COMMON_RESOURCE_NOT_FOUND.getMessage()), NOT_FOUND);
     }
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
-    public ResponseEntity<Response<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<CommonResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("[HttpMessageNotReadableException] Message: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Response.fail(COMMON_JSON_PROCESSING_ERROR.getMessage()));
+        return ResponseEntity.badRequest().body(CommonResponse.fail(COMMON_JSON_PROCESSING_ERROR.getMessage()));
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Response<Void>> handleException(Exception e) {
+    public ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
         log.error("[Exception] Message: {}", e.getMessage(), e);
-        return ResponseEntity.internalServerError().body(Response.fail(COMMON_SYSTEM_ERROR.getMessage()));
+        return ResponseEntity.internalServerError().body(CommonResponse.fail(COMMON_SYSTEM_ERROR.getMessage()));
     }
 }
