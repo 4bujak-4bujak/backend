@@ -71,4 +71,18 @@ public class AuthController {
 
         return ResponseEntity.ok(Response.success(null));
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코드 검증 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "코드 검증 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "핸드폰 코드 검증", description = "사용자가 입력한 코드와 핸드폰으로 발송한 코드가 일치하는지 확인합니다.")
+    @PostMapping("/auth/phone/verify")
+    public ResponseEntity<Response<Void>> verifyPhoneCode(@RequestBody @Valid VerifyRequestDto.PhoneCode phoneCode) {
+        boolean isSuccess = authService.verifyPhoneCode(phoneCode);
+        if (isSuccess) {
+            return ResponseEntity.ok(Response.success(null));
+        } else {
+            return ResponseEntity.ok(Response.fail("코드 검증에 실패했습니다."));
+        }
+    }
 }

@@ -23,4 +23,12 @@ public record VerifyRequestDto() {
                             @NotNull
                             String code) {
     }
+
+    @Schema(description = "이메일 인증 코드 검증 Request DTO")
+    public record PhoneCode(@Schema(description = "핸드폰 번호", example = "01012341234")
+                            @NotNull String phoneNumber,
+                            @Schema(description = "인증 코드", example = "123456")
+                            @NotNull
+                            String code) {
+    }
 }

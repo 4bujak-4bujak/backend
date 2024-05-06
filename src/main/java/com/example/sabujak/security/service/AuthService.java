@@ -131,4 +131,14 @@ public class AuthService {
 
         return message;
     }
+
+    public boolean verifyPhoneCode(VerifyRequestDto.PhoneCode phoneCode) {
+        String codeInRedis = redisService.get(PHONE_CODE_PREFIX + phoneCode.phoneNumber(), String.class)
+                .orElseThrow(() -> new AuthException(EXPIRED_PHONE_CODE));
+
+        if (!codeInRedis.equals(phoneCode.code())) {
+            throw new AuthException(INVALID_PHONE_CODE);
+        }
+        return true;
+    }
 }
