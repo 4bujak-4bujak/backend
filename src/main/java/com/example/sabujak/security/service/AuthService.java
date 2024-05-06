@@ -43,6 +43,8 @@ public class AuthService {
     public void signUp(MemberRequestDto.SignUp signUp) {
         if (memberRepository.existsByMemberEmail(signUp.memberEmail())) {
             throw new AuthException(EMAIL_ALREADY_EXISTS);
+        } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.memberEmail()))) {
+            throw new AuthException(UNCONTRACTED_COMPANY);
         }
 
         String encryptedPassword = bCryptPasswordEncoder.encode(signUp.memberPassword());
