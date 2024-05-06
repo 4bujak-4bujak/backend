@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static com.example.sabujak.common.exception.CommonErrorCode.SENDING_MAIL_FAIL;
@@ -17,6 +18,7 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
+    @Async
     public void sendEmail(String toEmail, String title, String text) {
         SimpleMailMessage emailForm = createSimpleEmailForm(toEmail, title, text);
         try {
@@ -27,6 +29,7 @@ public class MailService {
         }
     }
 
+    @Async
     public void sendEmail(MimeMessage message) {
         try {
             mailSender.send(message);
