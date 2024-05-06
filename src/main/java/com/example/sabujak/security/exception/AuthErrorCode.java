@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum AuthErrorCode implements ErrorCode {
 
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 가입된 이메일 입니다."),
+    PHONE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 가입된 전화번호 입니다."),
     UNCONTRACTED_COMPANY(HttpStatus.BAD_REQUEST, "가입되지 않은 회사입니다."),
     EXPIRED_EMAIL_CODE(HttpStatus.BAD_REQUEST, "이메일 인증 코드가 만료되었습니다."),
     INVALID_EMAIL_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 이메일 인증 코드입니다."),

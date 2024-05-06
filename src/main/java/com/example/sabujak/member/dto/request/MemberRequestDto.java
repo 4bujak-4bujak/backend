@@ -12,6 +12,7 @@ import java.time.LocalDate;
 
 public record MemberRequestDto() {
 
+    @Schema(description = "회원 가입 Request DTO")
     public record SignUp(
             @Schema(description = "이메일", example = "test@gmail.com")
             @NotNull

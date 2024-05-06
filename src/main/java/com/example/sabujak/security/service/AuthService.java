@@ -2,6 +2,7 @@ package com.example.sabujak.security.service;
 
 import com.example.sabujak.common.email.service.MailService;
 import com.example.sabujak.common.redis.service.RedisService;
+import com.example.sabujak.common.sms.SmsService;
 import com.example.sabujak.company.repository.CompanyRepository;
 import com.example.sabujak.member.dto.request.MemberRequestDto;
 import com.example.sabujak.member.repository.MemberRepository;
@@ -10,6 +11,7 @@ import com.example.sabujak.security.exception.AuthException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import net.nurigo.sdk.message.model.Message;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.example.sabujak.security.constants.SecurityConstants.EMAIL_CODE_EXPIRATION_MILLIS;
-import static com.example.sabujak.security.constants.SecurityConstants.EMAIL_CODE_PREFIX;
+import static com.example.sabujak.security.constants.SecurityConstants.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.*;
 
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisService redisService;
     private final MailService mailService;
+    private final SmsService smsService;
     private final SpringTemplateEngine templateEngine;
 
     @Transactional
@@ -64,12 +66,6 @@ public class AuthService {
 
 
         mailService.sendEmail(createCodeMailForm(email.emailAddress(), expiredAt, verifyCode));
-    }
-
-    private String generateVerifyCode() {
-        SecureRandom random = new SecureRandom();
-        int randomNumber = random.nextInt(1000000);
-        return String.format("%06d", randomNumber);
     }
 
     private String getEmailDomain(String email) {
@@ -105,5 +101,34 @@ public class AuthService {
             throw new AuthException(INVALID_EMAIL_CODE);
         }
         return true;
+    }
+
+    public void requestPhoneVerify(VerifyRequestDto.Phone phone) {
+        if (memberRepository.existsByMemberEmail(phone.phoneNumber())) {
+            throw new AuthException(PHONE_ALREADY_EXISTS);
+        }
+        String verificationCode = generateVerifyCode();
+
+        redisService.set(PHONE_CODE_PREFIX + phone.phoneNumber(), verificationCode, (long) PHONE_CODE_EXPIRATION_MILLIS);
+
+        smsService.sendSms(phone.phoneNumber(), createSmsVerificationText(verificationCode));
+    }
+
+    private String generateVerifyCode() {
+        SecureRandom random = new SecureRandom();
+        int randomNumber = random.nextInt(1000000);
+        return String.format("%06d", randomNumber);
+    }
+
+    private Message createSmsVerificationText(String verificationCode) {
+        Message message = new Message();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("[Offispace] 본인확인 인증번호\n");
+        sb.append("[").append(verificationCode).append("]\n").append("를 입력해주세요\n");
+
+        message.setText(sb.toString());
+
+        return message;
     }
 }

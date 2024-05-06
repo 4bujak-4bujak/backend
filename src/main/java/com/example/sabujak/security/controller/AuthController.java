@@ -60,4 +60,15 @@ public class AuthController {
             return ResponseEntity.ok(Response.fail("코드 검증에 실패했습니다."));
         }
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "인증 요청 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "인증 요청 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "휴대폰 인증 요청", description = "입력한 휴대폰 번호로 인증 코드를 보냅니다.")
+    @PostMapping("/auth/phone")
+    public ResponseEntity<Response<Void>> requestPhoneVerify(@RequestBody @Valid VerifyRequestDto.Phone phone) {
+        authService.requestPhoneVerify(phone);
+
+        return ResponseEntity.ok(Response.success(null));
+    }
 }
