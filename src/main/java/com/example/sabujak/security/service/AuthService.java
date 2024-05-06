@@ -23,8 +23,7 @@ import java.time.format.DateTimeFormatter;
 
 import static com.example.sabujak.security.constants.SecurityConstants.EMAIL_CODE_EXPIRATION_MILLIS;
 import static com.example.sabujak.security.constants.SecurityConstants.EMAIL_CODE_PREFIX;
-import static com.example.sabujak.security.exception.AuthErrorCode.EMAIL_ALREADY_EXISTS;
-import static com.example.sabujak.security.exception.AuthErrorCode.UNCONTRACTED_COMPANY;
+import static com.example.sabujak.security.exception.AuthErrorCode.*;
 
 @RequiredArgsConstructor
 @Service
@@ -65,7 +64,6 @@ public class AuthService {
 
 
         mailService.sendEmail(createCodeMailForm(email.emailAddress(), expiredAt, verifyCode));
-
     }
 
     private String generateVerifyCode() {
@@ -97,5 +95,15 @@ public class AuthService {
         helper.setFrom("zoomin3022@gmail.com");
 
         return message;
+    }
+
+    public boolean verifyEmailCode(VerifyRequestDto.EmailCode emailCode) {
+        String codeInRedis = redisService.get(EMAIL_CODE_PREFIX + emailCode.emailAddress(), String.class)
+                .orElseThrow(() -> new AuthException(EXPIRED_EMAIL_CODE));
+
+        if (!codeInRedis.equals(emailCode.code())) {
+            throw new AuthException(INVALID_EMAIL_CODE);
+        }
+        return true;
     }
 }

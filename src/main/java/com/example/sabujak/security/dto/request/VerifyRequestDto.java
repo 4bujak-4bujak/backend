@@ -7,4 +7,7 @@ public record VerifyRequestDto() {
 
     public record Phone(String phoneNumber) {
     }
+
+    public record EmailCode(String emailAddress, String code) {
+    }
 }
