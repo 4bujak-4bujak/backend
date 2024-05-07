@@ -71,7 +71,7 @@ public class Member extends BaseEntity implements UserDetails {
     private Role memberRole = Role.ROLE_USER;
 
     @Builder
-    public Member(String memberEmail, String memberPassword, String memberName, String memberPhone, LocalDate memberBirthDate, Job memberJob, Gender memberGender, boolean memberSmsAgree) {
+    private Member(String memberEmail, String memberPassword, String memberName, String memberPhone, LocalDate memberBirthDate, Job memberJob, Gender memberGender, boolean memberSmsAgree) {
         this.memberEmail = memberEmail;
         this.memberPassword = memberPassword;
         this.memberName = memberName;
