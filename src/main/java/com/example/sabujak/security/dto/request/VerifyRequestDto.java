@@ -3,7 +3,7 @@ package com.example.sabujak.security.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-public record VerifyRequestDto() {
+public class VerifyRequestDto {
 
     @Schema(description = "이메일 인증 코드 Request DTO")
     public record Email(

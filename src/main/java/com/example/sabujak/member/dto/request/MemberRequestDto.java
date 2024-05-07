@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
-public record MemberRequestDto() {
+public class MemberRequestDto {
 
     @Schema(description = "회원 가입 Request DTO")
     public record SignUp(
