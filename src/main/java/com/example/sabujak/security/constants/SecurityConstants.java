@@ -6,4 +6,17 @@ public class SecurityConstants {
 
     public static final String EMAIL_CODE_PREFIX = "email_code:";
     public static final String PHONE_CODE_PREFIX = "phone_code:";
+
+    public static final String[] AUTH_WHITELIST = {
+            "/login", "/reissue", "/auth/**",
+            "/", "/error",
+
+            "/favicon.ico",
+
+            /* swagger v3 */
+            "/swagger-resources/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/api-docs",
+    };
 }
