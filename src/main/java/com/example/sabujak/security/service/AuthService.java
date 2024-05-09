@@ -43,6 +43,8 @@ public class AuthService {
     public void signUp(MemberRequestDto.SignUp signUp) {
         if (memberRepository.existsByMemberEmail(signUp.memberEmail())) {
             throw new AuthException(EMAIL_ALREADY_EXISTS);
+        } else if (memberRepository.existsByMemberPhone(signUp.memberPhone())) {
+            throw new AuthException(PHONE_ALREADY_EXISTS);
         } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.memberEmail()))) {
             throw new AuthException(UNCONTRACTED_COMPANY);
         }
@@ -106,7 +108,7 @@ public class AuthService {
     }
 
     public void requestPhoneVerify(VerifyRequestDto.Phone phone) {
-        if (memberRepository.existsByMemberEmail(phone.phoneNumber())) {
+        if (memberRepository.existsByMemberPhone(phone.phoneNumber())) {
             throw new AuthException(PHONE_ALREADY_EXISTS);
         }
         String verificationCode = generateVerifyCode();
