@@ -16,3 +16,27 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: username
+    password: password
+    properties:
+      smtp:
+        auth: true
+        starttls-enable: true
+        starttls-required: true
+        connection-timeout: 5000
+        timeout: 5000
+        write-timeout: 5000
+
+springdoc:
+  swagger-ui:
+    path: /api-docs
+
+coolsms:
+  api:
+    key: key
+    secret: secret
+    from: from
