@@ -1,15 +1,24 @@
 package com.example.sabujak.common.config;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class SwaggerConfig {
@@ -51,5 +60,39 @@ public class SwaggerConfig {
                 // API 마다 Security 인증 컴포넌트 설정
                 .addSecurityItem(addSecurityItem)
                 .info(info);
+    }
+
+    @Bean
+    public OpenApiCustomizer customizeLoginApi() {
+        return openApi -> {
+            openApi.getComponents().addSchemas("LoginRequest", new Schema<>()
+                    .type("object")
+                    .properties(Map.of(
+                            "email", new Schema<>().type("string").description("이메일").example("test@gmail.com").format("email"),
+                            "password", new Schema<>().type("string").description("비밀번호").example("!password12")
+                    ))
+                    .required(List.of("email", "password"))
+            );
+
+            Operation loginOperation = new Operation()
+                    .summary("로그인")
+                    .description("로그인 요청을 보냅니다")
+                    .tags(List.of("인증"))
+                    .requestBody(new RequestBody()
+                            .description("로그인 요청")
+                            .content(new Content()
+                                    .addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
+                                            new MediaType().schema(new Schema<>().$ref("#/components/schemas/LoginRequest"))))
+                            .required(true))
+                    .responses(new ApiResponses()
+                            .addApiResponse("200", new ApiResponse().description("로그인 성공")));
+
+            PathItem loginPathItem = new PathItem().post(loginOperation);
+
+            Paths paths = openApi.getPaths();
+            if (paths == null) paths = new Paths();
+            paths.addPathItem("/login", loginPathItem);
+            openApi.setPaths(paths);
+        };
     }
 }
