@@ -43,5 +43,13 @@ public class MemberRequestDto {
                     .build();
         }
     }
+
+    @Schema(description = "비밀번호 수정 Request DTO")
+    public record ChangePassword(
+            @Schema(description = "현재 비밀번호", example = "!password11")
+            @NotNull String currentPassword,
+            @Schema(description = "새 비밀번호", example = "!password12")
+            @NotNull String newPassword) {
+    }
 }
 

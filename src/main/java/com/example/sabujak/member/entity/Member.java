@@ -71,6 +71,10 @@ public class Member extends BaseEntity {
         this.memberDeleteCheck = true;
     }
 
+    public void changeMemberPassword(String encryptedPassword) {
+        this.memberPassword = encryptedPassword;
+    }
+
     private String generateRandomNickname() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder result = new StringBuilder();
