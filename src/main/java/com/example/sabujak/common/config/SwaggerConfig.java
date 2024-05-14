@@ -108,13 +108,35 @@ public class SwaggerConfig {
                             .addApiResponse("200", new ApiResponse().description("토큰 재발급 성공"))
                             .addApiResponse("401", new ApiResponse().description("인증 실패")));
 
+            Operation logoutOperation = new Operation()
+                    .summary("로그아웃")
+                    .description("Access 토큰과 refreshToken을 사용하여 로그아웃을 진행합니다.\n 아래 parameter는 Swagger가 자동으로 해주지만 이런게 들어간다는 용도로 넣었습니다")
+                    .tags(List.of("인증"))
+                    .addParametersItem(new Parameter()
+                            .in("header")
+                            .name("Authorization")
+                            .description("Bearer [accessToken]")
+                            .required(false)
+                            .schema(new Schema<>().type("string")))
+                    .addParametersItem(new Parameter()
+                            .in("cookie")
+                            .name("refreshToken")
+                            .description("Refresh Token")
+                            .required(false)
+                            .schema(new Schema<>().type("string")))
+                    .responses(new ApiResponses()
+                            .addApiResponse("200", new ApiResponse().description("로그아웃 성공"))
+                            .addApiResponse("401", new ApiResponse().description("로그아웃 실패")));
+
             PathItem loginPathItem = new PathItem().post(loginOperation);
             PathItem reissuePathItem = new PathItem().post(reissueOperation);
+            PathItem logoutPathItem = new PathItem().post(logoutOperation);
 
             Paths paths = openApi.getPaths();
             if (paths == null) paths = new Paths();
             paths.addPathItem("/login", loginPathItem);
             paths.addPathItem("/reissue", reissuePathItem);
+            paths.addPathItem("/logout", logoutPathItem);
             openApi.setPaths(paths);
         };
     }

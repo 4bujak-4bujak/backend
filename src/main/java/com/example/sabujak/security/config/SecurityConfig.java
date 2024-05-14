@@ -2,6 +2,8 @@ package com.example.sabujak.security.config;
 
 import com.example.sabujak.security.authentication.CustomAccessDeniedHandler;
 import com.example.sabujak.security.authentication.CustomAuthenticationEntryPoint;
+import com.example.sabujak.security.logout.CustomLogoutHandler;
+import com.example.sabujak.security.logout.CustomLogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +35,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final TokenAuthenticationConfig tokenAuthenticationConfig;
     private final TokenReissueConfig tokenReissueConfig;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+    private final CustomLogoutHandler customLogoutHandler;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -73,6 +77,11 @@ public class SecurityConfig {
                 .with(
                         tokenReissueConfig,
                         Customizer.withDefaults()
+                )
+                .logout(logoutConfigurer ->
+                        logoutConfigurer
+                                .addLogoutHandler(customLogoutHandler)
+                                .logoutSuccessHandler(customLogoutSuccessHandler)
                 )
                 .build();
     }

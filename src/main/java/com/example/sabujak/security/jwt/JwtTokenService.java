@@ -88,4 +88,10 @@ public class JwtTokenService {
         TokenDto.AccessToken reissuedAccessToken = new TokenDto.AccessToken(tokenUtil.generateAccessToken(Instant.now(), email, userRole));
         return reissuedAccessToken;
     }
+
+    public void removeRefreshToken(String accessToken) {
+        Claims claims = tokenUtil.parseExpiredAccessTokenClaims(accessToken);
+        String email = claims.get(JWT_USER_KEY).toString();
+        redisService.delete(REFRESH_TOKEN_PREFIX + email);
+    }
 }
