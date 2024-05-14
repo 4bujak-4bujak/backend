@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,6 +26,7 @@ public class JwtTokenService {
 
     private final RedisService redisService;
     private final JwtTokenUtil tokenUtil;
+    private final UserDetailsService userDetailsService;
 
     public TokenDto.AccessAndRefreshToken generateTokenAfterLoginSuccess(UserDetailsDto userDetailsDto) {
 
@@ -63,5 +66,26 @@ public class JwtTokenService {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList())
         );
+    }
+
+    public String validateRefreshTokenAndReturnEmail(String accessToken, String refreshToken) {
+        Claims claims = tokenUtil.parseExpiredAccessTokenClaims(accessToken);
+        Claims refreshClaims = tokenUtil.parseClaims(refreshToken);
+        String email = claims.get(JWT_USER_KEY).toString();
+
+        String refreshTokenInRedis = redisService.get(REFRESH_TOKEN_PREFIX + email, String.class).get();
+        if(refreshTokenInRedis.equals(refreshToken)) {
+            return email;
+        } return null;
+    }
+
+    public TokenDto.AccessToken reissueToken(String email) {
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        final String userRole = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        TokenDto.AccessToken reissuedAccessToken = new TokenDto.AccessToken(tokenUtil.generateAccessToken(Instant.now(), email, userRole));
+        return reissuedAccessToken;
     }
 }

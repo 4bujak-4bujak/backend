@@ -9,8 +9,12 @@ public class SecurityConstants {
 
     public static final String LOGIN_URL_PATTERN = "/login";
     public static final String LOGIN_HTTP_METHOD = "POST";
+    public static final String REISSUE_URL_PATTERN = "/reissue";
+    public static final String REISSUE_HTTP_METHOD = "POST";
+
 
     public static final String EXCEPTION_ATTRIBUTE = "exception";
+    public static final String VALIDATED_EMAIL = "validatedEmail";
 
 
     public static final String[] AUTH_WHITELIST = {

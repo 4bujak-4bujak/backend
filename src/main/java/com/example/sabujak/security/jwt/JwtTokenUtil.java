@@ -72,4 +72,9 @@ public class JwtTokenUtil {
     public Claims parseTokenClaims(String accessToken) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
     }
+
+    public Claims parseExpiredAccessTokenClaims(String accessToken) {
+        return Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(Integer.MAX_VALUE).build()
+                .parseClaimsJws(accessToken).getBody();
+    }
 }

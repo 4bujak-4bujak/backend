@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final TokenAuthenticationConfig tokenAuthenticationConfig;
+    private final TokenReissueConfig tokenReissueConfig;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -67,6 +68,10 @@ public class SecurityConfig {
                 )
                 .with(
                         tokenAuthenticationConfig,
+                        Customizer.withDefaults()
+                )
+                .with(
+                        tokenReissueConfig,
                         Customizer.withDefaults()
                 )
                 .build();

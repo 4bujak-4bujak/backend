@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -75,7 +76,7 @@ public class SwaggerConfig {
             );
 
             Operation loginOperation = new Operation()
-                    .summary("로그인")
+                    .summary("로그인 (토큰 X)")
                     .description("로그인 요청을 보냅니다")
                     .tags(List.of("인증"))
                     .requestBody(new RequestBody()
@@ -87,11 +88,33 @@ public class SwaggerConfig {
                     .responses(new ApiResponses()
                             .addApiResponse("200", new ApiResponse().description("로그인 성공")));
 
+            Operation reissueOperation = new Operation()
+                    .summary("토큰 재발급")
+                    .description("Access 토큰과 refreshToken을 사용하여 Access 토큰을 재발급합니다.\n 아래 parameter는 Swagger가 자동으로 해주지만 이런게 들어간다는 용도로 넣었습니다")
+                    .tags(List.of("인증"))
+                    .addParametersItem(new Parameter()
+                            .in("header")
+                            .name("Authorization")
+                            .description("Bearer [accessToken]")
+                            .required(false)
+                            .schema(new Schema<>().type("string")))
+                    .addParametersItem(new Parameter()
+                            .in("cookie")
+                            .name("refreshToken")
+                            .description("Refresh Token")
+                            .required(false)
+                            .schema(new Schema<>().type("string")))
+                    .responses(new ApiResponses()
+                            .addApiResponse("200", new ApiResponse().description("토큰 재발급 성공"))
+                            .addApiResponse("401", new ApiResponse().description("인증 실패")));
+
             PathItem loginPathItem = new PathItem().post(loginOperation);
+            PathItem reissuePathItem = new PathItem().post(reissueOperation);
 
             Paths paths = openApi.getPaths();
             if (paths == null) paths = new Paths();
             paths.addPathItem("/login", loginPathItem);
+            paths.addPathItem("/reissue", reissuePathItem);
             openApi.setPaths(paths);
         };
     }
