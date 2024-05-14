@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String memberEmail) throws UsernameNotFoundException {
         Member member = memberRepository.findByMemberEmail(memberEmail)
-                .orElseThrow(() -> new AuthException(INVALID_EMAIL_OR_PASSWORD));
+                .orElseThrow(() -> new UsernameNotFoundException(INVALID_EMAIL_OR_PASSWORD.getMessage()));
         return new UserDetailsDto(member);
     }
 }
