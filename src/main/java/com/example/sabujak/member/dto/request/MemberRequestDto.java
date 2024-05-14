@@ -13,12 +13,12 @@ public class MemberRequestDto {
     public record SignUp(
             @Schema(description = "이메일", example = "test@gmail.com")
             @NotNull
-            @Email String memberEmail,
+            @Email String email,
 
             @Schema(description = "비밀번호", example = "!password11")
             @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,16}$",
                     message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상 16자 이하로 입력해주세요.")
-            @NotNull String memberPassword,
+            @NotNull String password,
 
             @Schema(description = "이름", example = "주우민")
             @NotNull String memberName,
@@ -34,7 +34,7 @@ public class MemberRequestDto {
     ) {
         public Member toEntity(String encryptedPassword) {
             return Member.builder()
-                    .memberEmail(memberEmail)
+                    .memberEmail(email)
                     .memberPassword(encryptedPassword)
                     .memberName(memberName)
                     .memberPhone(memberPhone)

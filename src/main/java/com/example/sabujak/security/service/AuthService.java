@@ -41,15 +41,15 @@ public class AuthService {
 
     @Transactional
     public void signUp(MemberRequestDto.SignUp signUp) {
-        if (memberRepository.existsByMemberEmail(signUp.memberEmail())) {
+        if (memberRepository.existsByMemberEmail(signUp.email())) {
             throw new AuthException(EMAIL_ALREADY_EXISTS);
         } else if (memberRepository.existsByMemberPhone(signUp.memberPhone())) {
             throw new AuthException(PHONE_ALREADY_EXISTS);
-        } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.memberEmail()))) {
+        } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.email()))) {
             throw new AuthException(UNCONTRACTED_COMPANY);
         }
 
-        String encryptedPassword = bCryptPasswordEncoder.encode(signUp.memberPassword());
+        String encryptedPassword = bCryptPasswordEncoder.encode(signUp.password());
 
         memberRepository.save(signUp.toEntity(encryptedPassword));
     }
