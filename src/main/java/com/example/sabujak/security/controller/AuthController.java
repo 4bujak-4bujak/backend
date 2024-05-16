@@ -28,7 +28,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가입 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "가입 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "회원 가입", description = "회원 가입 시도")
+    @Operation(summary = "회원 가입 (토큰 X)", description = "회원 가입 시도")
     @PostMapping("/members")
     public ResponseEntity<Response<Void>> signUp(@RequestBody @Valid MemberRequestDto.SignUp signUp) {
         authService.signUp(signUp);
@@ -39,7 +39,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "인증 요청 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "인증 요청 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "이메일 인증 요청", description = "입력한 이메일로 인증 코드를 보냅니다.")
+    @Operation(summary = "이메일 인증 요청 (토큰 X)", description = "입력한 이메일로 인증 코드를 보냅니다.")
     @PostMapping("/auth/email")
     public ResponseEntity<Response<Void>> requestEmailVerify(@RequestBody @Valid VerifyRequestDto.Email email) throws MessagingException {
         authService.requestEmailVerify(email);
@@ -50,7 +50,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코드 검증 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "코드 검증 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "이메일 코드 검증", description = "사용자가 입력한 코드와 이메일로 발송한 코드가 일치하는지 확인합니다.")
+    @Operation(summary = "이메일 코드 검증 (토큰 X)", description = "사용자가 입력한 코드와 이메일로 발송한 코드가 일치하는지 확인합니다.")
     @PostMapping("/auth/email/verify")
     public ResponseEntity<Response<Void>> verifyEmailCode(@RequestBody @Valid VerifyRequestDto.EmailCode emailCode) {
         authService.verifyEmailCode(emailCode);
@@ -61,7 +61,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "인증 요청 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "인증 요청 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "휴대폰 인증 요청", description = "입력한 휴대폰 번호로 인증 코드를 보냅니다.")
+    @Operation(summary = "휴대폰 인증 요청 (토큰 X)", description = "입력한 휴대폰 번호로 인증 코드를 보냅니다.")
     @PostMapping("/auth/phone")
     public ResponseEntity<Response<Void>> requestPhoneVerify(@RequestBody @Valid VerifyRequestDto.Phone phone) {
         authService.requestPhoneVerify(phone);
@@ -72,7 +72,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코드 검증 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "코드 검증 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "핸드폰 코드 검증", description = "사용자가 입력한 코드와 핸드폰으로 발송한 코드가 일치하는지 확인합니다.")
+    @Operation(summary = "핸드폰 코드 검증 (토큰 X)", description = "사용자가 입력한 코드와 핸드폰으로 발송한 코드가 일치하는지 확인합니다.")
     @PostMapping("/auth/phone/verify")
     public ResponseEntity<Response<Void>> verifyPhoneCode(@RequestBody @Valid VerifyRequestDto.PhoneCode phoneCode) {
         authService.verifyPhoneCode(phoneCode);

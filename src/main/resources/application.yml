@@ -40,3 +40,7 @@ coolsms:
     key: key
     secret: secret
     from: from
+
+jwt:
+  secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
+  issuer: issuer
