@@ -3,9 +3,9 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/test
+    destination: /home/ubuntu/sabujak
 permissions:
-  - object: /home/ubuntu/test/
+  - object: /home/ubuntu/sabujak/
     owner: ubuntu
     group: ubuntu
 hooks:
