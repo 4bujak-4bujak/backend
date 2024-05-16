@@ -31,7 +31,7 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
 
         Server localServer = new Server().description("로컬 서버").url("http://localhost:8080");
-        Server deployedServer = new Server().description("배포된 서버").url("https://www.4bujak.site");
+        Server deployedServer = new Server().description("배포된 서버").url("https://joo-api.store");
 
         Info info = new Info()
                 .title("Offispace API 명세서")
