@@ -40,3 +40,15 @@ coolsms:
     key: key
     secret: secret
     from: from
+
+cloud:
+  aws:
+    credentials:
+      access-key: accesskey
+      secret-key: secretkey
+    s3:
+      bucket: bucketname
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
