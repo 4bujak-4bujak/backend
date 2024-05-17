@@ -1,6 +1,7 @@
 package com.example.sabujak.member.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
+import com.example.sabujak.common.image.MemberImage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -55,6 +56,10 @@ public class Member extends BaseEntity {
     @Column(name = "member_role")
     @Enumerated(EnumType.STRING)
     private Role memberRole = Role.ROLE_USER;
+
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private MemberImage image;
 
     @Builder
     private Member(String memberEmail, String memberPassword, String memberName, String memberPhone, Job memberJob, boolean memberSmsAgree) {
