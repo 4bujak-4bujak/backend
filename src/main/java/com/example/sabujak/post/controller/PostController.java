@@ -1,6 +1,7 @@
 package com.example.sabujak.post.controller;
 
 import com.example.sabujak.common.response.Response;
+import com.example.sabujak.post.dto.PostLikeSaveRequest;
 import com.example.sabujak.post.dto.PostSaveRequest;
 import com.example.sabujak.post.dto.PostSaveResponse;
 import com.example.sabujak.post.service.PostService;
@@ -25,5 +26,15 @@ public class PostController {
     ) {
         String email = access.getEmail();
         return ResponseEntity.ok(Response.success(postService.savePost(postSaveRequest, email)));
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<Response<Void>> savePostLike(
+            @RequestBody @Validated PostLikeSaveRequest postLikeSaveRequest,
+            @AuthenticationPrincipal AuthRequestDto.Access access
+    ) {
+        String email = access.getEmail();
+        postService.savePostLike(postLikeSaveRequest, email);
+        return ResponseEntity.ok(Response.success());
     }
 }
