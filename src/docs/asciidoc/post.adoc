@@ -4,11 +4,8 @@
 
 === 1. 게시글 작성
 
-==== HTTP query parameters
-include::{snippets}/post_controller_test/post_register_success/query-parameters.adoc[]
-
 ==== HTTP request fields
-include::{snippets}/post_controller_test/post_register_success/response-fields.adoc[]
+include::{snippets}/post_controller_test/post_register_success/request-fields.adoc[]
 
 ==== HTTP request
 include::{snippets}/post_controller_test/post_register_success/http-request.adoc[]
