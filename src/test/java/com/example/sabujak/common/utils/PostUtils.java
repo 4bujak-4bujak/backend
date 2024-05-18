@@ -14,7 +14,7 @@ public final class PostUtils {
     private PostUtils() {
     }
 
-    public static Post savePost() {
+    public static Post createPost() {
         return Post.builder()
                 .category(OWNER)
                 .tag(FREE)

@@ -1,7 +1,5 @@
 == 커뮤니티
 
-=== 게시글
-
 === 1. 게시글 작성
 
 ==== HTTP request fields
@@ -15,3 +13,17 @@ include::{snippets}/post_controller_test/post_register_success/response-fields.a
 
 ==== HTTP response
 include::{snippets}/post_controller_test/post_register_success/http-response.adoc[]
+
+=== 2. 게시글 좋아요
+
+==== HTTP request fields
+include::{snippets}/post_controller_test/post_like_register_success/request-fields.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/post_like_register_success/http-request.adoc[]
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/post_like_register_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/post_like_register_success/http-response.adoc[]
