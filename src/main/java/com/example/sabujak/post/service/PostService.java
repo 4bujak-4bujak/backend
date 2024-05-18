@@ -4,7 +4,6 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.post.dto.PostSaveRequest;
 import com.example.sabujak.post.dto.PostSaveResponse;
-import com.example.sabujak.post.entity.Category;
 import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.repository.PostRepository;
 import com.example.sabujak.security.exception.AuthException;
@@ -24,11 +23,11 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Transactional
-    public PostSaveResponse savePost(Category category, PostSaveRequest postSaveRequest, String email) {
+    public PostSaveResponse savePost(PostSaveRequest postSaveRequest, String email) {
         Member member = findMember(email);
 
         Post post = Post.builder()
-                .category(category)
+                .category(postSaveRequest.category())
                 .tag(postSaveRequest.tag())
                 .title(postSaveRequest.title())
                 .content(postSaveRequest.content())

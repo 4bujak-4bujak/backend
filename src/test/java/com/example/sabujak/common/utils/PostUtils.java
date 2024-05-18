@@ -24,6 +24,6 @@ public final class PostUtils {
     }
 
     public static PostSaveRequest createPostSaveRequest() {
-        return new PostSaveRequest(FREE, POST_TITLE, POST_CONTENT);
+        return new PostSaveRequest(OWNER, FREE, POST_TITLE, POST_CONTENT);
     }
 }

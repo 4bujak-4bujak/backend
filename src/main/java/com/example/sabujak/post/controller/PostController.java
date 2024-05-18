@@ -3,7 +3,6 @@ package com.example.sabujak.post.controller;
 import com.example.sabujak.common.response.Response;
 import com.example.sabujak.post.dto.PostSaveRequest;
 import com.example.sabujak.post.dto.PostSaveResponse;
-import com.example.sabujak.post.entity.Category;
 import com.example.sabujak.post.service.PostService;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +20,10 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Response<PostSaveResponse>> savePost(
-            @RequestParam Category category,
             @RequestBody @Validated PostSaveRequest postSaveRequest,
             @AuthenticationPrincipal AuthRequestDto.Access access
     ) {
         String email = access.getEmail();
-        return ResponseEntity.ok(Response.success(postService.savePost(category, postSaveRequest, email)));
+        return ResponseEntity.ok(Response.success(postService.savePost(postSaveRequest, email)));
     }
 }
