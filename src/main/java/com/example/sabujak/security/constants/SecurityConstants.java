@@ -29,4 +29,8 @@ public class SecurityConstants {
             "/swagger-ui/**",
             "/api-docs",
     };
+
+    public static final String[] PERMIT_ALL_GET_ENDPOINTS = {
+            "/posts/{postId}"
+    };
 }
