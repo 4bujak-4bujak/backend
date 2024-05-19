@@ -2,9 +2,10 @@ package com.example.sabujak.post.service;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
-import com.example.sabujak.post.dto.PostLikeSaveRequest;
-import com.example.sabujak.post.dto.PostSaveRequest;
-import com.example.sabujak.post.dto.PostSaveResponse;
+import com.example.sabujak.post.dto.PostResponse;
+import com.example.sabujak.post.dto.SavePostLikeRequest;
+import com.example.sabujak.post.dto.SavePostRequest;
+import com.example.sabujak.post.dto.SavePostResponse;
 import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.entity.PostLike;
 import com.example.sabujak.post.entity.PostLikeId;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static com.example.sabujak.post.exception.PostErrorCode.POST_NOT_FOUND;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
@@ -29,41 +32,70 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
+    @Transactional(readOnly = true)
+    public PostResponse getPost(Long postId, String viewerEmail) {
+        Post post = findPostWithMember(postId);
+        post.increaseViewCount();
+
+        Member member = post.getMember();
+        String writerEmail = member.getMemberEmail();
+
+        boolean isAuthenticated = viewerEmail != null;
+        boolean isWriter = isAuthenticated && isWriter(writerEmail, viewerEmail);
+        boolean isLiked = isAuthenticated && isLiked(postId, viewerEmail);
+
+        log.info("Getting post with ID: [{}] viewer email: [{}]", postId, viewerEmail);
+
+        return PostResponse.of(post, member, isWriter, isLiked);
+    }
+
     @Transactional
-    public PostSaveResponse savePost(PostSaveRequest postSaveRequest, String email) {
+    public SavePostResponse savePost(SavePostRequest savePostRequest, String email) {
         Member member = findMember(email);
 
         Post post = Post.builder()
-                .category(postSaveRequest.category())
-                .tag(postSaveRequest.tag())
-                .title(postSaveRequest.title())
-                .content(postSaveRequest.content())
+                .category(savePostRequest.category())
+                .tag(savePostRequest.tag())
+                .title(savePostRequest.title())
+                .content(savePostRequest.content())
                 .build();
         post.setMember(member);
 
         log.info("Saving post for member with email: [{}]", email);
 
-        return PostSaveResponse.of(postRepository.save(post));
+        return SavePostResponse.of(postRepository.save(post));
     }
 
     @Transactional
-    public void savePostLike(PostLikeSaveRequest postLikeSaveRequest, String email) {
-        Member member = findMember(email);
+    public void savePostLike(SavePostLikeRequest savePostLikeRequest, String email) {
+        Long postId = savePostLikeRequest.postId();
 
-        Post post = findPost(postLikeSaveRequest.postId());
+        Post post = findPost(postId);
         post.increaseLikeCount();
 
+        PostLikeId postLikeId = createPostLikeId(postId, email);
         PostLike postLike = PostLike.builder()
-                .id(
-                        PostLikeId.builder()
-                                .postId(post.getId())
-                                .memberId(member.getMemberId())
-                                .build()
-                )
+                .id(postLikeId)
                 .build();
         postLikeRepository.save(postLike);
 
         log.info("Saved post like for member with email: [{}] post ID: [{}]", email, post.getId());
+    }
+
+    private boolean isWriter(String writerEmail, String viewerEmail) {
+        return viewerEmail.equals(writerEmail);
+    }
+
+    private boolean isLiked(Long postId, String viewerEmail) {
+        PostLikeId postLikeId = createPostLikeId(postId, viewerEmail);
+        return findPostLike(postLikeId).isPresent();
+    }
+
+    public PostLikeId createPostLikeId(Long postId, String memberEmail) {
+        return PostLikeId.builder()
+                .postId(postId)
+                .memberEmail(memberEmail)
+                .build();
     }
 
     public Member findMember(String email) {
@@ -74,5 +106,14 @@ public class PostService {
     public Post findPost(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    }
+
+    public Post findPostWithMember(Long postId) {
+        return postRepository.findWithMemberById(postId)
+                .orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    }
+
+    public Optional<PostLike> findPostLike(PostLikeId postLikeId) {
+        return postLikeRepository.findById(postLikeId);
     }
 }
