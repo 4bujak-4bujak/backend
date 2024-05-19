@@ -35,6 +35,27 @@ include::{snippets}/post_controller_test/post_register_success/response-fields.a
 ==== HTTP response
 include::{snippets}/post_controller_test/post_register_success/http-response.adoc[]
 
+=== 2. 게시글 삭제
+
+==== HTTP path parameters
+include::{snippets}/post_controller_test/post_delete_success/path-parameters.adoc[]
+
+==== 2.1 성공
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/post_delete_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/post_delete_success/http-response.adoc[]
+
+==== 2.1 실패
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/post_delete_fail/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/post_delete_fail/http-response.adoc[]
+
 === 3. 게시글 좋아요
 
 ==== HTTP request fields

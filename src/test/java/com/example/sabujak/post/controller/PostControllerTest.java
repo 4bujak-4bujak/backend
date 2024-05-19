@@ -1,6 +1,8 @@
 package com.example.sabujak.post.controller;
 
 import com.example.sabujak.common.config.TestInitializer;
+import com.example.sabujak.member.entity.Member;
+import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.Post;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.example.sabujak.common.utils.MemberUtils.createInvaildMember;
 import static com.example.sabujak.common.utils.PostLikesUtils.createPostLike;
 import static com.example.sabujak.common.utils.PostLikesUtils.createPostLikeId;
 import static com.example.sabujak.common.utils.PostUtils.*;
@@ -35,6 +38,9 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 public class PostControllerTest extends TestInitializer {
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private PostRepository postRepository;
 
     @Autowired
@@ -43,7 +49,7 @@ public class PostControllerTest extends TestInitializer {
     @Test
     @DisplayName("게시글_조회_성공_테스트")
     void post_get_success() {
-        Long postId = savePost().getId();
+        Long postId = savePost(member).getId();
         savePostLike(postId);
         String url = "/posts/{postId}";
 
@@ -90,9 +96,9 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_조회_실패_테스트")
+    @DisplayName("게시글_조회_실패_테스트_존재하지_않는_게시글")
     void post_get_fail() {
-        Long postId = savePost().getId();
+        Long postId = savePost(member).getId();
         savePostLike(postId);
         Long testPostId = 2L;
         String url = "/posts/{postId}";
@@ -165,9 +171,81 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
+    @DisplayName("게시글_삭제_성공_테스트")
+    void post_delete_success() {
+        Post post = savePost(member);
+        Long postId = post.getId();
+        String url = "/posts/{postId}";
+
+        // given
+        RequestSpecification specification = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE);
+
+        // when
+        Response response = specification
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        DEFAULT_IDENTIFIER,
+                        pathParameters(
+                                parameterWithName("postId").description("게시글 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("errorCode").type(NULL).description("에러 코드"),
+                                fieldWithPath("data").type(NULL).description("응답 데이터"),
+                                fieldWithPath("message").type(NULL).description("응답 메시지")
+                        )
+                ))
+                .when()
+                .delete(url, postId);
+
+        // then
+        response
+                .then().log().all()
+                .assertThat().statusCode(is(OK.value()));
+    }
+
+    @Test
+    @DisplayName("게시글_삭제_실패_테스트_권한_없음")
+    void post_delete_fail() {
+        Post post = savePost(saveInvaildMember());
+        Long postId = post.getId();
+        String url = "/posts/{postId}";
+
+        // given
+        RequestSpecification specification = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE);
+
+        // when
+        Response response = specification
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        DEFAULT_IDENTIFIER,
+                        pathParameters(
+                                parameterWithName("postId").description("게시글 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("errorCode").type(STRING).description("에러 코드"),
+                                fieldWithPath("data").type(NULL).description("응답 데이터"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지")
+                        )
+                ))
+                .when()
+                .delete(url, postId);
+
+        // then
+        response
+                .then().log().all()
+                .assertThat().statusCode(is(BAD_REQUEST.value()));
+    }
+
+    @Test
     @DisplayName("게시글_좋아요_등록_성공_테스트")
     void post_like_register_success() {
-        SavePostLikeRequest request = new SavePostLikeRequest(savePost().getId());
+        SavePostLikeRequest request = new SavePostLikeRequest(savePost(member).getId());
         String url = "/posts/like";
 
         // given
@@ -200,7 +278,12 @@ public class PostControllerTest extends TestInitializer {
                 .assertThat().statusCode(is(OK.value()));
     }
 
-    private Post savePost() {
+    private Member saveInvaildMember() {
+        Member member = createInvaildMember();
+        return memberRepository.save(member);
+    }
+
+    private Post savePost(Member member) {
         Post post = createPost();
         post.setMember(member);
         return postRepository.save(post);
