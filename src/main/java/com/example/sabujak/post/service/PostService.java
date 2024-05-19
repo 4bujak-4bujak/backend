@@ -80,7 +80,6 @@ public class PostService {
         log.info("Post successfully deleted. Post ID: [{}], Member Email: [{}]", postId, email);
     }
 
-
     @Transactional
     public void savePostLike(SavePostLikeRequest savePostLikeRequest, String email) {
         Long postId = savePostLikeRequest.postId();
