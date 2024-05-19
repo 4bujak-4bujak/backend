@@ -20,8 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.example.sabujak.post.exception.PostErrorCode.POST_DELETE_DENIED;
-import static com.example.sabujak.post.exception.PostErrorCode.POST_NOT_FOUND;
+import static com.example.sabujak.post.exception.PostErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 
 @Slf4j
@@ -96,6 +95,16 @@ public class PostService {
         postLikeRepository.save(postLike);
 
         log.info("Like Post successfully saved. Post ID: [{}], Member Email: [{}]", post.getId(), email);
+    }
+
+    @Transactional
+    public void deletePostLike(Long postId, String email) {
+        PostLikeId postLikeId = createPostLikeId(postId, email);
+        PostLike postLike = findPostLike(postLikeId)
+                .orElseThrow(() -> new PostException(POST_LIKE_NOT_FOUND));
+        postLikeRepository.delete(postLike);
+
+        log.info("Post Like successfully deleted. Post ID: [{}], Member Email: [{}]", postId, email);
     }
 
     private boolean isWriter(String writerEmail, String viewerEmail) {
