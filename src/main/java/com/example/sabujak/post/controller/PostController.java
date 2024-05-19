@@ -57,4 +57,14 @@ public class PostController {
         postService.savePostLike(savePostLikeRequest, email);
         return ResponseEntity.ok(Response.success());
     }
+
+    @DeleteMapping("/{postId}/like")
+    public ResponseEntity<Response<Void>> deletePostLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal AuthRequestDto.Access access
+    ) {
+        String email = access.getEmail();
+        postService.deletePostLike(postId, email);
+        return ResponseEntity.ok(Response.success());
+    }
 }
