@@ -15,11 +15,11 @@ import static lombok.AccessLevel.PROTECTED;
 public class PostLikeId implements Serializable {
 
     private Long postId;
-    private Long memberId;
+    private String memberEmail;
 
     @Builder
-    private PostLikeId(Long postId, Long memberId) {
+    private PostLikeId(Long postId, String memberEmail) {
         this.postId = postId;
-        this.memberId = memberId;
+        this.memberEmail = memberEmail;
     }
 }
