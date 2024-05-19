@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.example.sabujak.post.exception.PostErrorCode.POST_DELETE_DENIED;
 import static com.example.sabujak.post.exception.PostErrorCode.POST_NOT_FOUND;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 
@@ -44,7 +45,7 @@ public class PostService {
         boolean isWriter = isAuthenticated && isWriter(writerEmail, viewerEmail);
         boolean isLiked = isAuthenticated && isLiked(postId, viewerEmail);
 
-        log.info("Getting post with ID: [{}] viewer email: [{}]", postId, viewerEmail);
+        log.info("Getting post. Post ID: [{}] Viewer Email: [{}]", postId, viewerEmail);
 
         return PostResponse.of(post, member, isWriter, isLiked);
     }
@@ -61,10 +62,25 @@ public class PostService {
                 .build();
         post.setMember(member);
 
-        log.info("Saving post for member with email: [{}]", email);
+        log.info("Saving post. Member Email: [{}]", email);
 
         return SavePostResponse.of(postRepository.save(post));
     }
+
+    @Transactional
+    public void deletePost(Long postId, String email) {
+        Post post = findPostWithMember(postId);
+        String writerEmail = post.getMember().getMemberEmail();
+
+        if (!writerEmail.equals(email)) {
+            log.warn("Unauthorized attempt to delete post. Post ID: [{}], Member Email: [{}]", postId, email);
+            throw new PostException(POST_DELETE_DENIED);
+        }
+
+        postRepository.delete(post);
+        log.info("Post successfully deleted. Post ID: [{}], Member Email: [{}]", postId, email);
+    }
+
 
     @Transactional
     public void savePostLike(SavePostLikeRequest savePostLikeRequest, String email) {
@@ -79,7 +95,7 @@ public class PostService {
                 .build();
         postLikeRepository.save(postLike);
 
-        log.info("Saved post like for member with email: [{}] post ID: [{}]", email, post.getId());
+        log.info("Like Post successfully saved. Post ID: [{}], Member Email: [{}]", post.getId(), email);
     }
 
     private boolean isWriter(String writerEmail, String viewerEmail) {
