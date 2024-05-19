@@ -77,7 +77,7 @@ public class PostService {
         }
 
         postRepository.delete(post);
-        log.info("Post successfully deleted. Post ID: [{}], Member Email: [{}]", postId, email);
+        log.info("Post deleted successfully. Post ID: [{}], Member Email: [{}]", postId, email);
     }
 
     @Transactional
@@ -93,7 +93,7 @@ public class PostService {
                 .build();
         postLikeRepository.save(postLike);
 
-        log.info("Like Post successfully saved. Post ID: [{}], Member Email: [{}]", post.getId(), email);
+        log.info("Like Post saved successfully. Post ID: [{}], Member Email: [{}]", post.getId(), email);
     }
 
     @Transactional
@@ -103,7 +103,7 @@ public class PostService {
                 .orElseThrow(() -> new PostException(POST_LIKE_NOT_FOUND));
         postLikeRepository.delete(postLike);
 
-        log.info("Post Like successfully deleted. Post ID: [{}], Member Email: [{}]", postId, email);
+        log.info("Post Like deleted successfully. Post ID: [{}], Member Email: [{}]", postId, email);
     }
 
     private boolean isWriter(String writerEmail, String viewerEmail) {
