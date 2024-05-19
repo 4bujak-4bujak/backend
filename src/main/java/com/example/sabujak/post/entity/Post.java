@@ -1,5 +1,6 @@
 package com.example.sabujak.post.entity;
 
+import com.example.sabujak.comment.entity.Comment;
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
@@ -7,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -33,6 +37,12 @@ public class Post extends BaseEntity {
     private int viewCount = 0;
     private int likeCount = 0;
     private int commentCount = 0;
+
+    @OneToMany(
+            mappedBy = "post", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
+    )
+    private List<Comment> comments;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
