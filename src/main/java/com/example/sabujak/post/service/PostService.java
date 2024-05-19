@@ -98,6 +98,9 @@ public class PostService {
 
     @Transactional
     public void deletePostLike(Long postId, String email) {
+        Post post = findPost(postId);
+        post.decreaseLikeCount();
+
         PostLikeId postLikeId = createPostLikeId(postId, email);
         PostLike postLike = findPostLike(postLikeId)
                 .orElseThrow(() -> new PostException(POST_LIKE_NOT_FOUND));

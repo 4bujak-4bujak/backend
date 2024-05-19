@@ -12,7 +12,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(
             value = "select p " +
                     "from Post p " +
-                    "join fetch p.member " +
+                    "join fetch p.member m " +
                     "where p.id = :postId"
     )
     Optional<Post> findWithMemberById(@Param("postId") Long postId);
