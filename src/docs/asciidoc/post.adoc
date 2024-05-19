@@ -1,6 +1,27 @@
 == 커뮤니티
 
-=== 1. 게시글 작성
+=== 1. 게시글 조회
+
+==== HTTP path parameters
+include::{snippets}/post_controller_test/post_get_success/path-parameters.adoc[]
+
+=== 1-1. 성공
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/post_get_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/post_get_success/http-response.adoc[]
+
+=== 1-2. 실패
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/post_get_fail/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/post_get_fail/http-response.adoc[]
+
+=== 2. 게시글 작성
 
 ==== HTTP request fields
 include::{snippets}/post_controller_test/post_register_success/request-fields.adoc[]
@@ -14,7 +35,7 @@ include::{snippets}/post_controller_test/post_register_success/response-fields.a
 ==== HTTP response
 include::{snippets}/post_controller_test/post_register_success/http-response.adoc[]
 
-=== 2. 게시글 좋아요
+=== 3. 게시글 좋아요
 
 ==== HTTP request fields
 include::{snippets}/post_controller_test/post_like_register_success/request-fields.adoc[]

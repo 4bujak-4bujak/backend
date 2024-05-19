@@ -1,6 +1,6 @@
 package com.example.sabujak.common.utils;
 
-import com.example.sabujak.post.dto.PostSaveRequest;
+import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.Post;
 
 import static com.example.sabujak.post.entity.Category.OWNER;
@@ -23,7 +23,7 @@ public final class PostUtils {
                 .build();
     }
 
-    public static PostSaveRequest createPostSaveRequest() {
-        return new PostSaveRequest(OWNER, FREE, POST_TITLE, POST_CONTENT);
+    public static SavePostRequest createSavePostRequest() {
+        return new SavePostRequest(OWNER, FREE, POST_TITLE, POST_CONTENT);
     }
 }

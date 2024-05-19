@@ -1,7 +1,7 @@
 package com.example.sabujak.post.service;
 
 import com.example.sabujak.common.config.TestInitializer;
-import com.example.sabujak.post.dto.PostLikeSaveRequest;
+import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.repository.PostRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +26,7 @@ public class PostLikeConcurrencyTest extends TestInitializer {
     @DisplayName("좋아요_동시성_테스트")
     void PostLikeConcurrency() throws InterruptedException {
         Post post = savePost();
-        PostLikeSaveRequest request = new PostLikeSaveRequest(post.getId());
+        SavePostLikeRequest request = new SavePostLikeRequest(post.getId());
 
         int numberOfThreads = 1000;
 
