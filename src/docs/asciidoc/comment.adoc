@@ -1,0 +1,15 @@
+== 커뮤니티 - 댓글
+
+=== 1. 댓글 작성
+
+==== HTTP request fields
+include::{snippets}/comment_controller_test/comment_register_success/request-fields.adoc[]
+
+==== HTTP request
+include::{snippets}/comment_controller_test/comment_register_success/http-request.adoc[]
+
+==== HTTP response fields
+include::{snippets}/comment_controller_test/comment_register_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/comment_controller_test/comment_register_success/http-response.adoc[]

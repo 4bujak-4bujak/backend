@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.example.sabujak.common.utils.MemberUtils.createInvaildMember;
-import static com.example.sabujak.common.utils.PostLikesUtils.createPostLike;
-import static com.example.sabujak.common.utils.PostLikesUtils.createPostLikeId;
+import static com.example.sabujak.common.utils.PostLikeUtils.createPostLike;
+import static com.example.sabujak.common.utils.PostLikeUtils.createPostLikeId;
 import static com.example.sabujak.common.utils.PostUtils.*;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;

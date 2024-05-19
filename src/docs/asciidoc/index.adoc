@@ -1,0 +1,7 @@
+= Community API
+
+=== 1. 게시글
+include::post.adoc[]
+
+=== 2. 댓글
+include::comment.adoc[]

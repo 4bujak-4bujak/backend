@@ -3,9 +3,9 @@ package com.example.sabujak.common.utils;
 import com.example.sabujak.post.entity.PostLike;
 import com.example.sabujak.post.entity.PostLikeId;
 
-public class PostLikesUtils {
+public class PostLikeUtils {
 
-    private PostLikesUtils() {
+    private PostLikeUtils() {
     }
 
     public static PostLikeId createPostLikeId(Long postId, String memberEmail) {
