@@ -1,9 +1,10 @@
 package com.example.sabujak.post.controller;
 
 import com.example.sabujak.common.response.Response;
-import com.example.sabujak.post.dto.PostLikeSaveRequest;
-import com.example.sabujak.post.dto.PostSaveRequest;
-import com.example.sabujak.post.dto.PostSaveResponse;
+import com.example.sabujak.post.dto.PostResponse;
+import com.example.sabujak.post.dto.SavePostLikeRequest;
+import com.example.sabujak.post.dto.SavePostRequest;
+import com.example.sabujak.post.dto.SavePostResponse;
 import com.example.sabujak.post.service.PostService;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -19,22 +20,31 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<Response<PostResponse>> getPost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal AuthRequestDto.Access access
+    ) {
+        String email = access != null ? access.getEmail() : null;
+        return ResponseEntity.ok(Response.success(postService.getPost(postId, email)));
+    }
+
     @PostMapping
-    public ResponseEntity<Response<PostSaveResponse>> savePost(
-            @RequestBody @Validated PostSaveRequest postSaveRequest,
+    public ResponseEntity<Response<SavePostResponse>> savePost(
+            @RequestBody @Validated SavePostRequest savePostRequest,
             @AuthenticationPrincipal AuthRequestDto.Access access
     ) {
         String email = access.getEmail();
-        return ResponseEntity.ok(Response.success(postService.savePost(postSaveRequest, email)));
+        return ResponseEntity.ok(Response.success(postService.savePost(savePostRequest, email)));
     }
 
     @PostMapping("/like")
     public ResponseEntity<Response<Void>> savePostLike(
-            @RequestBody @Validated PostLikeSaveRequest postLikeSaveRequest,
+            @RequestBody @Validated SavePostLikeRequest savePostLikeRequest,
             @AuthenticationPrincipal AuthRequestDto.Access access
     ) {
         String email = access.getEmail();
-        postService.savePostLike(postLikeSaveRequest, email);
+        postService.savePostLike(savePostLikeRequest, email);
         return ResponseEntity.ok(Response.success());
     }
 }
