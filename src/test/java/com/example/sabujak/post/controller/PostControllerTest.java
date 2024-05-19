@@ -47,10 +47,9 @@ public class PostControllerTest extends TestInitializer {
     private PostLikeRepository postLikeRepository;
 
     @Test
-    @DisplayName("게시글_조회_성공_테스트")
+    @DisplayName("게시글_조회_성공")
     void post_get_success() {
         Long postId = savePost(member).getId();
-        savePostLike(postId);
         String url = "/posts/{postId}";
 
         // given
@@ -96,11 +95,10 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_조회_실패_테스트_존재하지_않는_게시글")
+    @DisplayName("게시글_조회_실패: 존재하지_않는_게시글")
     void post_get_fail() {
-        Long postId = savePost(member).getId();
-        savePostLike(postId);
-        Long testPostId = 2L;
+        savePost(member);
+        Long postId = 2L;
         String url = "/posts/{postId}";
 
         // given
@@ -123,7 +121,7 @@ public class PostControllerTest extends TestInitializer {
                         )
                 ))
                 .when()
-                .get(url, testPostId);
+                .get(url, postId);
 
         // then
         response
@@ -132,7 +130,7 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_등록_성공_테스트")
+    @DisplayName("게시글_등록_성공")
     void post_register_success() {
         SavePostRequest request = createSavePostRequest();
         String url = "/posts";
@@ -171,7 +169,7 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_삭제_성공_테스트")
+    @DisplayName("게시글_삭제_성공")
     void post_delete_success() {
         Post post = savePost(member);
         Long postId = post.getId();
@@ -207,7 +205,7 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_삭제_실패_테스트_권한_없음")
+    @DisplayName("게시글_삭제_실패: 권한이_존재하지_않음")
     void post_delete_fail() {
         Post post = savePost(saveInvaildMember());
         Long postId = post.getId();
@@ -243,9 +241,11 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
-    @DisplayName("게시글_좋아요_등록_성공_테스트")
+    @DisplayName("게시글_좋아요_등록_성공")
     void post_like_register_success() {
-        SavePostLikeRequest request = new SavePostLikeRequest(savePost(member).getId());
+        Post post = savePost(member);
+        Long postId = post.getId();
+        SavePostLikeRequest request = new SavePostLikeRequest(postId);
         String url = "/posts/like";
 
         // given
@@ -265,7 +265,7 @@ public class PostControllerTest extends TestInitializer {
                         responseFields(
                                 fieldWithPath("status").type(STRING).description("응답 상태"),
                                 fieldWithPath("errorCode").type(NULL).description("에러 코드"),
-                                fieldWithPath("data").type(NULL).description("데이터"),
+                                fieldWithPath("data").type(NULL).description("응답 데이터"),
                                 fieldWithPath("message").type(NULL).description("응답 메시지")
                         )
                 ))
@@ -276,6 +276,80 @@ public class PostControllerTest extends TestInitializer {
         response
                 .then().log().all()
                 .assertThat().statusCode(is(OK.value()));
+    }
+
+    @Test
+    @DisplayName("게시글_좋아요_삭제_성공")
+    void post_like_delete_success() {
+        Post post = savePost(member);
+        Long postId = post.getId();
+        savePostLike(postId, member.getMemberEmail());
+        String url = "/posts/{postId}/like";
+
+        // given
+        RequestSpecification specification = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE);
+
+        // when
+        Response response = specification
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        DEFAULT_IDENTIFIER,
+                        pathParameters(
+                                parameterWithName("postId").description("게시글 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("errorCode").type(NULL).description("에러 코드"),
+                                fieldWithPath("data").type(NULL).description("응답 데이터"),
+                                fieldWithPath("message").type(NULL).description("응답 메시지")
+                        )
+                ))
+                .when()
+                .delete(url, postId);
+
+        // then
+        response
+                .then().log().all()
+                .assertThat().statusCode(is(OK.value()));
+    }
+
+    @Test
+    @DisplayName("게시글_좋아요_삭제_실패: 존재하지_않는_관심_글")
+    void post_like_delete_fail() {
+        Post post = savePost(member);
+        savePostLike(post.getId(), member.getMemberEmail());
+        Long postId = 2L;
+        String url = "/posts/{postId}/like";
+
+        // given
+        RequestSpecification specification = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE);
+
+        // when
+        Response response = specification
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        DEFAULT_IDENTIFIER,
+                        pathParameters(
+                                parameterWithName("postId").description("게시글 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("errorCode").type(STRING).description("에러 코드"),
+                                fieldWithPath("data").type(NULL).description("응답 데이터"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지")
+                        )
+                ))
+                .when()
+                .delete(url, postId);
+
+        // then
+        response
+                .then().log().all()
+                .assertThat().statusCode(is(BAD_REQUEST.value()));
     }
 
     private Member saveInvaildMember() {
@@ -289,8 +363,8 @@ public class PostControllerTest extends TestInitializer {
         return postRepository.save(post);
     }
 
-    private void savePostLike(Long postId) {
-        PostLikeId postLikeId = createPostLikeId(postId, member.getMemberEmail());
+    private void savePostLike(Long postId, String memberEmail) {
+        PostLikeId postLikeId = createPostLikeId(postId, memberEmail);
         PostLike postLike = createPostLike(postLikeId);
         postLikeRepository.save(postLike);
     }
