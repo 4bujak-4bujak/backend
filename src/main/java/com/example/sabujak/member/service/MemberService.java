@@ -21,11 +21,11 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public MemberResponseDto getMyInfo(String email) {
+    public MemberResponseDto.AllInformation getMyInfo(String email) {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        return MemberResponseDto.of(member);
+        return MemberResponseDto.AllInformation.of(member);
 
     }
 
@@ -38,5 +38,13 @@ public class MemberService {
             throw new AuthException(INVALID_CURRENT_PASSWORD);
         }
         member.changeMemberPassword(bCryptPasswordEncoder.encode(passwordDto.newPassword()));
+    }
+
+
+    public MemberResponseDto.NameAndCompany getMemberNameAndCompany(String email) {
+        final Member member = memberRepository.findWithCompanyByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        return MemberResponseDto.NameAndCompany.of(member);
     }
 }

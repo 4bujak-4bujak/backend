@@ -4,6 +4,7 @@ import com.example.sabujak.common.email.service.MailService;
 import com.example.sabujak.common.image.MemberImage;
 import com.example.sabujak.common.redis.service.RedisService;
 import com.example.sabujak.common.sms.SmsService;
+import com.example.sabujak.company.entity.Company;
 import com.example.sabujak.company.repository.CompanyRepository;
 import com.example.sabujak.member.dto.request.MemberRequestDto;
 import com.example.sabujak.member.entity.Member;
@@ -43,16 +44,17 @@ public class AuthService {
 
     @Transactional
     public void signUp(MemberRequestDto.SignUp signUp) {
+        Company company = companyRepository.findByCompanyEmailDomain(getEmailDomain(signUp.email()))
+                .orElseThrow(() -> new AuthException(UNCONTRACTED_COMPANY));
         if (memberRepository.existsByMemberEmail(signUp.email())) {
             throw new AuthException(EMAIL_ALREADY_EXISTS);
         } else if (memberRepository.existsByMemberPhone(signUp.memberPhone())) {
             throw new AuthException(PHONE_ALREADY_EXISTS);
-        } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.email()))) {
-            throw new AuthException(UNCONTRACTED_COMPANY);
         }
         String encryptedPassword = bCryptPasswordEncoder.encode(signUp.password());
         Member member = signUp.toEntity(encryptedPassword);
         member.setImage(MemberImage.createDefaultMemberImage());
+        member.setCompany(company);
         memberRepository.save(member);
     }
 

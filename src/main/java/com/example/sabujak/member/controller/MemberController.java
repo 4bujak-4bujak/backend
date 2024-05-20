@@ -31,17 +31,31 @@ public class MemberController {
     private final MemberService memberService;
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "가입 성공", content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "404", description = "가입 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "회원 정보 조회", description = "자신의 회원 정보를 조회")
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
     //swagger
     @GetMapping("/members")
-    public ResponseEntity<Response<MemberResponseDto>> getMyInfo(@AuthenticationPrincipal AuthRequestDto.Access access) {
+    public ResponseEntity<Response<MemberResponseDto.AllInformation>> getMyInfo(@AuthenticationPrincipal AuthRequestDto.Access access) {
 
         return ResponseEntity.ok(Response.success(memberService.getMyInfo(access.getEmail())));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "회사 + 실명", description = "회사 + 실명만 나타내줌")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    //swagger
+    @GetMapping("/members/company")
+    public ResponseEntity<Response<MemberResponseDto.NameAndCompany>> getMemberNameAndCompany(@AuthenticationPrincipal AuthRequestDto.Access access) {
+
+        return ResponseEntity.ok(Response.success(memberService.getMemberNameAndCompany(access.getEmail())));
     }
 
     @ApiResponses(value = {
@@ -53,7 +67,7 @@ public class MemberController {
     })
     //swagger
     @PatchMapping("/members/password")
-    public ResponseEntity<Response<MemberResponseDto>> changMyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
+    public ResponseEntity<Response<Void>> changMyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
                                                                        @RequestBody MemberRequestDto.ChangePassword passwordDto) {
         memberService.changeMyPassword(access.getEmail(), passwordDto);
         return ResponseEntity.ok(Response.success(null));

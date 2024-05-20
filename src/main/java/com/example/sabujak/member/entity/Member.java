@@ -62,6 +62,7 @@ public class Member extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
+    @Setter
     private Company company;
 
     @Builder
