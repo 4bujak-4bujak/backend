@@ -23,7 +23,7 @@ public class MemberRequestDto {
             @Schema(description = "이름", example = "주우민")
             @NotNull String memberName,
 
-            @Schema(description = "직군", example = "REPRESENTATIVE")
+            @Schema(description = "직군", example = "OWNER")
             @NotNull Job memberJob,
 
             @Schema(description = "핸드폰 번호", example = "01012341234")

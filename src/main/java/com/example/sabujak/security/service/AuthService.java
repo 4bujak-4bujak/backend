@@ -1,10 +1,12 @@
 package com.example.sabujak.security.service;
 
 import com.example.sabujak.common.email.service.MailService;
+import com.example.sabujak.common.image.MemberImage;
 import com.example.sabujak.common.redis.service.RedisService;
 import com.example.sabujak.common.sms.SmsService;
 import com.example.sabujak.company.repository.CompanyRepository;
 import com.example.sabujak.member.dto.request.MemberRequestDto;
+import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.security.dto.request.VerifyRequestDto;
 import com.example.sabujak.security.exception.AuthException;
@@ -48,10 +50,10 @@ public class AuthService {
         } else if (!companyRepository.existsByCompanyEmailDomain(getEmailDomain(signUp.email()))) {
             throw new AuthException(UNCONTRACTED_COMPANY);
         }
-
         String encryptedPassword = bCryptPasswordEncoder.encode(signUp.password());
-
-        memberRepository.save(signUp.toEntity(encryptedPassword));
+        Member member = signUp.toEntity(encryptedPassword);
+        member.setImage(MemberImage.createDefaultMemberImage());
+        memberRepository.save(member);
     }
 
     public void requestEmailVerify(VerifyRequestDto.Email email) throws MessagingException {
