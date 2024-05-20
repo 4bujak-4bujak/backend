@@ -1,7 +1,7 @@
 package com.example.sabujak.common.utils;
 
-import com.example.sabujak.comment.dto.SaveCommentRequest;
-import com.example.sabujak.comment.entity.Comment;
+import com.example.sabujak.post.dto.SaveCommentRequest;
+import com.example.sabujak.post.entity.Comment;
 
 public class CommentUtils {
 

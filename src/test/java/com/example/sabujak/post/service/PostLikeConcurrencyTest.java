@@ -4,6 +4,7 @@ import com.example.sabujak.common.config.TestInitializer;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.repository.PostRepository;
+import com.example.sabujak.post.service.facade.PostFacade;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import static com.example.sabujak.common.utils.PostUtils.createPost;
 public class PostLikeConcurrencyTest extends TestInitializer {
 
     @Autowired
-    private PostService postService;
+    private PostFacade postFacade;
 
     @Autowired
     private PostRepository postRepository;
@@ -36,7 +37,7 @@ public class PostLikeConcurrencyTest extends TestInitializer {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    postService.savePostLike(request, "test@email.com");
+                    postFacade.savePostLike(request, "test@email.com");
                 }
                 finally {
                     latch.countDown();

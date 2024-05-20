@@ -1,4 +1,4 @@
-== 커뮤니티 - 게시글
+== 커뮤니티
 
 === 1. 게시글 조회
 
@@ -90,3 +90,44 @@ include::{snippets}/post_controller_test/post_like_delete_fail/response-fields.a
 
 ==== HTTP response
 include::{snippets}/post_controller_test/post_like_delete_fail/http-response.adoc[]
+
+=== 4. 댓글 작성
+
+==== HTTP path parameters
+include::{snippets}/post_controller_test/comment_register_success/path-parameters.adoc[]
+
+==== HTTP request fields
+include::{snippets}/post_controller_test/comment_register_success/request-fields.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/comment_register_success/http-request.adoc[]
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/comment_register_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/comment_register_success/http-response.adoc[]
+
+=== 5. 댓글 삭제
+
+=== 5.1 성공
+
+==== HTTP path parameters
+include::{snippets}/post_controller_test/comment_delete_success/path-parameters.adoc[]
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/comment_delete_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/comment_delete_success/http-response.adoc[]
+
+=== 5.2 실패
+
+==== HTTP path parameters
+include::{snippets}/post_controller_test/comment_delete_fail/path-parameters.adoc[]
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/comment_delete_fail/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/comment_delete_fail/http-response.adoc[]
