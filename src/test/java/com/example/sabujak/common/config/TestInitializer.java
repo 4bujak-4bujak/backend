@@ -4,6 +4,7 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.security.jwt.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -11,6 +12,7 @@ import java.time.Instant;
 
 import static com.example.sabujak.member.entity.Job.OWNER;
 
+@ExtendWith(DatabaseClearExtension.class)
 public abstract class TestInitializer extends Documentation {
 
     private static final String EMAIL = "test@email.com";
