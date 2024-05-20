@@ -1,12 +1,12 @@
 package com.example.sabujak.post.entity;
 
-import com.example.sabujak.comment.entity.Comment;
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @Entity
 @NoArgsConstructor(access = PROTECTED)
+@ToString
 public class Post extends BaseEntity {
 
     @Id
