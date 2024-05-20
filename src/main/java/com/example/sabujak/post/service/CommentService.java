@@ -28,7 +28,7 @@ public class CommentService {
     }
 
     public boolean isWriter(String requester, String writer) {
-        return !requester.equals(writer);
+        return requester.equals(writer);
     }
 
     public void isWriterOrThrow(String requester, String writer) {
