@@ -18,6 +18,7 @@ public record PostResponse(
         int commentCount,
         Job job,
         String nickname,
+        String profile,
         boolean isWriter,
         boolean isLiked
 ) {
@@ -33,6 +34,7 @@ public record PostResponse(
                 post.getCommentCount(),
                 member.getMemberJob(),
                 member.getMemberNickname(),
+                member.getImage().getImageUrl(),
                 isWriter,
                 isLiked
         );
