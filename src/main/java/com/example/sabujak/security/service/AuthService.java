@@ -9,6 +9,7 @@ import com.example.sabujak.company.repository.CompanyRepository;
 import com.example.sabujak.member.dto.request.MemberRequestDto;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
+import com.example.sabujak.security.dto.request.AuthRequestDto;
 import com.example.sabujak.security.dto.request.VerifyRequestDto;
 import com.example.sabujak.security.exception.AuthException;
 import jakarta.mail.MessagingException;
@@ -148,5 +149,27 @@ public class AuthService {
             throw new AuthException(INVALID_PHONE_CODE);
         }
         return true;
+    }
+
+    public void requestEmailVerifyToChangePassword(VerifyRequestDto.Email email) throws MessagingException {
+        if (!memberRepository.existsByMemberEmail(email.emailAddress())) {
+            throw new AuthException(ACCOUNT_NOT_EXISTS);
+        }
+        String verifyCode = generateVerifyCode();
+
+        int expiredAtSeconds = EMAIL_CODE_EXPIRATION_MILLIS / 1000;
+        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(expiredAtSeconds);
+
+        redisService.set(EMAIL_CODE_PREFIX + email.emailAddress(), verifyCode, (long) EMAIL_CODE_EXPIRATION_MILLIS);
+
+        mailService.sendEmail(createCodeMailForm(email.emailAddress(), expiredAt, verifyCode));
+    }
+
+    @Transactional
+    public void resetPassword(AuthRequestDto.ResetPassword passwordDto) {
+        Member member = memberRepository.findByMemberEmail(passwordDto.email())
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        member.changeMemberPassword(bCryptPasswordEncoder.encode(passwordDto.password()));
     }
 }
