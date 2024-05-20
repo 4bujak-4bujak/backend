@@ -1,6 +1,6 @@
-package com.example.sabujak.comment.repository;
+package com.example.sabujak.post.repository;
 
-import com.example.sabujak.comment.entity.Comment;
+import com.example.sabujak.post.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

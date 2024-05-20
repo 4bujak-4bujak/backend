@@ -1,8 +1,7 @@
-package com.example.sabujak.comment.entity;
+package com.example.sabujak.post.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.member.entity.Member;
-import com.example.sabujak.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
