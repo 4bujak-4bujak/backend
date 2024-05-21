@@ -2,8 +2,28 @@
 
 === 1. 게시글 조회
 
+=== 1. 전체 조회
+
+==== HTTP query parameters
+include::{snippets}/post_controller_test/all_post_get_success/query-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/all_post_get_success/http-request.adoc[]
+
+==== HTTP response fields
+include::{snippets}/post_controller_test/all_post_get_success/response-fields.adoc[]
+
+==== HTTP response
+include::{snippets}/post_controller_test/all_post_get_success/http-response.adoc[]
+
+
+=== 2. 상세 조회
+
 ==== HTTP path parameters
 include::{snippets}/post_controller_test/post_get_success/path-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/post_get_success/http-request.adoc[]
 
 === 1-1. 성공
 
@@ -40,6 +60,9 @@ include::{snippets}/post_controller_test/post_register_success/http-response.ado
 ==== HTTP path parameters
 include::{snippets}/post_controller_test/post_delete_success/path-parameters.adoc[]
 
+==== HTTP request
+include::{snippets}/post_controller_test/post_delete_success/http-request.adoc[]
+
 ==== 2.1 성공
 
 ==== HTTP response fields
@@ -74,6 +97,9 @@ include::{snippets}/post_controller_test/post_like_register_success/http-respons
 
 ==== HTTP path parameters
 include::{snippets}/post_controller_test/post_like_delete_success/path-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/post_like_delete_success/http-request.adoc[]
 
 ==== 3.1 성공
 
@@ -110,10 +136,13 @@ include::{snippets}/post_controller_test/comment_register_success/http-response.
 
 === 5. 댓글 삭제
 
-=== 5.1 성공
-
 ==== HTTP path parameters
 include::{snippets}/post_controller_test/comment_delete_success/path-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/post_controller_test/comment_delete_success/http-request.adoc[]
+
+=== 5.1 성공
 
 ==== HTTP response fields
 include::{snippets}/post_controller_test/comment_delete_success/response-fields.adoc[]
@@ -122,9 +151,6 @@ include::{snippets}/post_controller_test/comment_delete_success/response-fields.
 include::{snippets}/post_controller_test/comment_delete_success/http-response.adoc[]
 
 === 5.2 실패
-
-==== HTTP path parameters
-include::{snippets}/post_controller_test/comment_delete_fail/path-parameters.adoc[]
 
 ==== HTTP response fields
 include::{snippets}/post_controller_test/comment_delete_fail/response-fields.adoc[]
