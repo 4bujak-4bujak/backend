@@ -42,19 +42,6 @@ public class MemberController {
     }
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "회사 + 실명", description = "회사 + 실명만 나타내줌")
-    @Parameters({
-            @Parameter(name = "access", hidden = true)
-    })
-    @GetMapping("/members/company")
-    public ResponseEntity<Response<MemberResponseDto.NameAndCompany>> getMemberNameAndCompany(@AuthenticationPrincipal AuthRequestDto.Access access) {
-
-        return ResponseEntity.ok(Response.success(memberService.getMemberNameAndCompany(access.getEmail())));
-    }
-
-    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "변경 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "변경 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "비밀번호 변경", description = "자신의 비밀 번호를 변경")

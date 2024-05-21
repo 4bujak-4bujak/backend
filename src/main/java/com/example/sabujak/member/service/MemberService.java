@@ -22,7 +22,7 @@ public class MemberService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public MemberResponseDto.AllInformation getMyInfo(String email) {
-        final Member member = memberRepository.findByMemberEmail(email)
+        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
         return MemberResponseDto.AllInformation.of(member);
@@ -40,17 +40,9 @@ public class MemberService {
         member.changeMemberPassword(bCryptPasswordEncoder.encode(passwordDto.newPassword()));
     }
 
-
-    public MemberResponseDto.NameAndCompany getMemberNameAndCompany(String email) {
-        final Member member = memberRepository.findWithCompanyByMemberEmail(email)
-                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-
-        return MemberResponseDto.NameAndCompany.of(member);
-    }
-
     @Transactional
     public void signOut(String email) {
-        final Member member = memberRepository.findWithCompanyByMemberEmail(email)
+        final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
         member.signOut();

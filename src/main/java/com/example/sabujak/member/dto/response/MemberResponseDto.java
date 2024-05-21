@@ -11,21 +11,27 @@ public class MemberResponseDto {
                                  String memberEmail,
                                  @Schema(description = "이름", example = "주우민")
                                  String memberName,
+                                 @Schema(description = "회사", example = "네이버")
+                                 String companyName,
                                  @Schema(description = "닉네임", example = "zoomin")
                                  String memberNickName,
                                  @Schema(description = "직업군", example = "OWNER")
                                  Job memberJob,
                                  @Schema(description = "sms동의여부", example = "true")
                                  boolean memberSmsAgree,
+                                 @Schema(description = "핸드폰 번호", example = "01012341234")
+                                 String memberPhone,
                                  @Schema(description = "이미지 url", example = "image.com")
                                  String imageUrl) {
         public static MemberResponseDto.AllInformation of(Member member) {
             return new MemberResponseDto.AllInformation(
                     member.getMemberEmail(),
                     member.getMemberName(),
+                    member.getCompany().getCompanyName(),
                     member.getMemberNickname(),
                     member.getMemberJob(),
                     member.isMemberSmsAgree(),
+                    member.getMemberPhone(),
                     member.getImage().getImageUrl());
         }
     }
