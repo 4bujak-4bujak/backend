@@ -4,19 +4,20 @@ import com.example.sabujak.post.dto.*;
 import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
-import com.example.sabujak.post.entity.Comment;
+import com.example.sabujak.post.entity.*;
 import com.example.sabujak.post.service.CommentService;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
-import com.example.sabujak.post.entity.PostLike;
-import com.example.sabujak.post.entity.PostLikeId;
-import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.service.PostLikeService;
 import com.example.sabujak.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -29,6 +30,18 @@ public class PostFacade {
     private final CommentService commentService;
 
     @Transactional(readOnly = true)
+    public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
+        log.info("Getting Posts. Category: [{}], Cursor ID: [{}], Viewer Email: [{}]", category, cursorId, viewerEmail);
+
+        CustomSlice<Post> posts = postService.findPosts(category, cursorId, pageable);
+        List<PostResponse> postResponses = posts.content().stream()
+                .map(post -> createPostResponse(post, viewerEmail))
+                .collect(Collectors.toList());
+
+        return new CustomSlice<>(postResponses, posts.hasNext());
+    }
+
+    @Transactional(readOnly = true)
     public PostResponse getPost(Long postId, String viewerEmail) {
         log.info("Getting Post. Post ID: [{}] Viewer Email: [{}]", postId, viewerEmail);
 
@@ -36,16 +49,7 @@ public class PostFacade {
         postService.increaseViewCount(post);
         log.info("Increased Post View Count. View Count: [{}]", post.getViewCount());
 
-        Member writer = post.getMember();
-        String writerEmail = writer.getMemberEmail();
-        log.info("Writer Email: [{}]", writer);
-
-        boolean isAuthenticated = (viewerEmail != null);
-        boolean isWriter = isAuthenticated && postService.isWriter(viewerEmail, writerEmail);
-        boolean isLiked = isAuthenticated && postLikeService.isLiked(postId, viewerEmail);
-        log.info("Status Checked. Is Writer: [{}] Is Liked: [{}]", isWriter, isLiked);
-
-        return PostResponse.of(post, writer, isWriter, isLiked);
+        return createPostResponse(post, viewerEmail);
     }
 
     @Transactional
@@ -133,5 +137,18 @@ public class PostFacade {
 
         commentService.deleteComment(comment);
         log.info("Deleted Comment. Comment: [{}]", comment);
+    }
+
+    private PostResponse createPostResponse(Post post, String viewerEmail) {
+        Member writer = post.getMember();
+        String writerEmail = writer.getMemberEmail();
+        log.info("Writer Email: [{}]", writerEmail);
+
+        boolean isAuthenticated = (viewerEmail != null);
+        boolean isWriter = isAuthenticated && postService.isWriter(viewerEmail, writerEmail);
+        boolean isLiked = isAuthenticated && postLikeService.isLiked(post.getId(), viewerEmail);
+        log.info("Status Checked. Is Writer: [{}] Is Liked: [{}]", isWriter, isLiked);
+
+        return PostResponse.of(post, writer, isWriter, isLiked);
     }
 }

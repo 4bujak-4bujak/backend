@@ -1,17 +1,39 @@
 package com.example.sabujak.post.service;
 
+import com.example.sabujak.post.dto.CustomSlice;
+import com.example.sabujak.post.entity.Category;
 import com.example.sabujak.post.entity.Post;
 import com.example.sabujak.post.exception.PostException;
 import com.example.sabujak.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.example.sabujak.post.constants.PaginationConstants.ORIGIN_POST_PAGE_SIZE;
 import static com.example.sabujak.post.exception.PostErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+
+    public CustomSlice<Post> findPosts(Category category, Long cursorId, Pageable pageable) {
+        List<Post> posts = postRepository.findAllWithMembersByCategoryAndId(category, cursorId, pageable);
+        boolean hasNext = posts.size() > ORIGIN_POST_PAGE_SIZE;
+        log.info("Get [{}] Posts. One More Retrieved: [{}]", posts.size(), hasNext);
+        if (hasNext) {
+            posts = posts.stream()
+                    .limit(ORIGIN_POST_PAGE_SIZE)
+                    .collect(Collectors.toList());
+        }
+        return new CustomSlice<>(posts, hasNext);
+    }
 
     public Post findPost(Long postId) {
         return postRepository.findById(postId)
