@@ -47,4 +47,12 @@ public class MemberService {
 
         return MemberResponseDto.NameAndCompany.of(member);
     }
+
+    @Transactional
+    public void signOut(String email) {
+        final Member member = memberRepository.findWithCompanyByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        member.signOut();
+    }
 }

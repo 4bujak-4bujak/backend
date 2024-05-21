@@ -41,6 +41,9 @@ public record UserDetailsDto(Member member) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        if(member.getMemberDeleteCheck()){
+            return false;
+        }
         return true;
     }
 }

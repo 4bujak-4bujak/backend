@@ -76,7 +76,7 @@ public class Member extends BaseEntity {
         this.memberNickname = generateRandomNickname();
     }
 
-    public void delete() {
+    public void signOut() {
         this.memberDeleteCheck = true;
     }
 
