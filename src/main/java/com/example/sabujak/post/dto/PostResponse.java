@@ -1,6 +1,5 @@
 package com.example.sabujak.post.dto;
 
-import com.example.sabujak.member.entity.Job;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.post.entity.Category;
 import com.example.sabujak.post.entity.Post;
@@ -8,6 +7,7 @@ import com.example.sabujak.post.entity.Tag;
 import java.time.LocalDateTime;
 
 public record PostResponse(
+        Long postId,
         Category category,
         Tag tag,
         String title,
@@ -16,13 +16,14 @@ public record PostResponse(
         int viewCount,
         int likeCount,
         int commentCount,
-        Job job,
-        String nickname,
+        WriterResponse writer,
         boolean isWriter,
         boolean isLiked
 ) {
     public static PostResponse of(Post post, Member member, boolean isWriter, boolean isLiked) {
+        WriterResponse writer = WriterResponse.of(member);
         return new PostResponse(
+                post.getId(),
                 post.getCategory(),
                 post.getTag(),
                 post.getTitle(),
@@ -31,8 +32,7 @@ public record PostResponse(
                 post.getViewCount(),
                 post.getLikeCount(),
                 post.getCommentCount(),
-                member.getMemberJob(),
-                member.getMemberNickname(),
+                writer,
                 isWriter,
                 isLiked
         );
