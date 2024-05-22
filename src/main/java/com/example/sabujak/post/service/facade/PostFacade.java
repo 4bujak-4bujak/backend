@@ -107,6 +107,18 @@ public class PostFacade {
         log.info("Deleted Post Like. Post Like: [{}]", postLike);
     }
 
+    @Transactional(readOnly = true)
+    public CustomSlice<CommentResponse> getComments(Long postId, Long cursorId, Pageable pageable, String viewerEmail) {
+        log.info("Getting Comments. Post ID: [{}], Cursor ID: [{}], Viewer Email: [{}]", postId, cursorId, viewerEmail);
+
+        CustomSlice<Comment> comments = commentService.findComments(postId, cursorId, pageable);
+        List<CommentResponse> commentResponses = comments.content().stream()
+                .map(comment -> createCommentResponse(comment, viewerEmail))
+                .collect(Collectors.toList());
+
+        return new CustomSlice<>(commentResponses, comments.hasNext());
+    }
+
     @Transactional
     public void saveComment(Long postId, SaveCommentRequest saveCommentRequest, String writerEmail) {
         log.info("Saving Post Comment. Post ID: [{}], Writer Email: [{}]", postId, writerEmail);
@@ -150,5 +162,17 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}] Is Liked: [{}]", isWriter, isLiked);
 
         return PostResponse.of(post, writer, isWriter, isLiked);
+    }
+
+    private CommentResponse createCommentResponse(Comment comment, String viewerEmail) {
+        Member writer = comment.getMember();
+        String writerEmail = writer.getMemberEmail();
+        log.info("Writer Email: [{}]", writerEmail);
+
+        boolean isAuthenticated = (viewerEmail != null);
+        boolean isWriter = isAuthenticated && commentService.isWriter(viewerEmail, writerEmail);
+        log.info("Status Checked. Is Writer: [{}]", isWriter);
+
+        return CommentResponse.of(comment, writer, isWriter);
     }
 }
