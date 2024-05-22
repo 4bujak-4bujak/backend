@@ -24,7 +24,6 @@ public class Post extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "post_id")
     private Long id;
 
     @Enumerated(STRING)

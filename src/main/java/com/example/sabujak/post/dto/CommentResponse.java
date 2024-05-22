@@ -5,7 +5,7 @@ import com.example.sabujak.post.entity.Comment;
 
 import java.time.LocalDateTime;
 
-public record CommentResponse (
+public record CommentResponse(
         Long commentId,
         String content,
         LocalDateTime createdDate,
