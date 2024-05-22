@@ -21,6 +21,18 @@ public class AuthRequestDto {
     ) {
     }
 
+    @Schema(description = "비밀번호 재설정 Request DTO")
+    public record ResetPassword(
+            @Schema(description = "이메일", example = "test@gmail.com")
+            @NotNull
+            @Email
+            String email,
+            @Schema(description = "비밀번호", example = "!password11")
+            @NotNull
+            String password
+    ) {
+    }
+
     @Getter
     public static class Access {
         private String email;

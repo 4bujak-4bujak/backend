@@ -1,5 +1,6 @@
 package com.example.sabujak.company.entity;
 
+import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -59,4 +62,7 @@ public class Company {
     @NotNull
     @Column(name = "contract_manager_contact")
     private String contractManagerContact;
+
+    @OneToMany(mappedBy = "company")
+    private List<Member> members = new ArrayList<>();
 }
