@@ -42,6 +42,20 @@ public class MemberController {
     }
 
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "검증 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "검증 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "비밀번호 검증", description = "비밀번호 변경을 위한 기존 비밀번호 검증")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @PostMapping("/members/password/verify")
+    public ResponseEntity<Response<Void>> verifyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                          @RequestBody MemberRequestDto.VerifyPassword verifyPassword) {
+        memberService.verifyPassword(access.getEmail(), verifyPassword.password());
+        return ResponseEntity.ok(Response.success(null));
+    }
+
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "변경 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "변경 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "비밀번호 변경", description = "자신의 비밀 번호를 변경")
@@ -50,8 +64,8 @@ public class MemberController {
     })
     @PatchMapping("/members/password")
     public ResponseEntity<Response<Void>> changMyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                          @RequestBody MemberRequestDto.ChangePassword passwordDto) {
-        memberService.changeMyPassword(access.getEmail(), passwordDto);
+                                                          @RequestBody MemberRequestDto.ChangePassword changePassword) {
+        memberService.changeMyPassword(access.getEmail(), changePassword.newPassword());
         return ResponseEntity.ok(Response.success(null));
     }
 

@@ -30,21 +30,27 @@ public class MemberService {
     }
 
     @Transactional
-    public void changeMyPassword(String email, MemberRequestDto.ChangePassword passwordDto) {
-        final Member member = memberRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-
-        if(!bCryptPasswordEncoder.matches(passwordDto.currentPassword(), member.getMemberPassword())) {
-            throw new AuthException(INVALID_CURRENT_PASSWORD);
-        }
-        member.changeMemberPassword(bCryptPasswordEncoder.encode(passwordDto.newPassword()));
-    }
-
-    @Transactional
     public void signOut(String email) {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
         member.signOut();
+    }
+
+    public void verifyPassword(String email, String password) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        if(!bCryptPasswordEncoder.matches(password, member.getMemberPassword())) {
+            throw new AuthException(INVALID_CURRENT_PASSWORD);
+        }
+    }
+
+    @Transactional
+    public void changeMyPassword(String email, String newPassword) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        member.changeMemberPassword(bCryptPasswordEncoder.encode(newPassword));
     }
 }
