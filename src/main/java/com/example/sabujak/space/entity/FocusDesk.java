@@ -1,6 +1,7 @@
 package com.example.sabujak.space.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,13 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "focus_desk")
-public class FocusDesk {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "focus_desk_id")
-    private Long focusDeskId;
-
+public class FocusDesk extends Space {
 
     //얘는 좀더 고민하다가 나중에 FocusDeskRoom을 따로 추가?
 }

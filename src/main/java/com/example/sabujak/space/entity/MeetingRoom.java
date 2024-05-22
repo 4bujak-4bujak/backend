@@ -1,6 +1,8 @@
 package com.example.sabujak.space.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,12 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "meeting_room")
-public class MeetingRoom {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "meeting_room_id")
-    private Long meetingRoomId;
+public class MeetingRoom extends Space {
 
     @Column(name = "meeting_room_capacity")
     @Positive
