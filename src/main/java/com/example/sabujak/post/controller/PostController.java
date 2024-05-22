@@ -90,6 +90,22 @@ public class PostController {
         return ResponseEntity.ok(Response.success());
     }
 
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<Response<CustomSlice<CommentResponse>>> getComments(
+            @PathVariable Long postId,
+            @RequestParam(required = false) Long cursorId,
+            @PageableDefault(
+                    page = DEFAULT_PAGE,
+                    size = DEFAULT_COMMENT_PAGE_SIZE,
+                    sort = DEFAULT_SORT_FIELD,
+                    direction = DESC
+            ) Pageable pageable,
+            @AuthenticationPrincipal Access access
+    ) {
+        String email = getEmailOrNull(access);
+        return ResponseEntity.ok(Response.success(postFacade.getComments(postId, cursorId, pageable, email)));
+    }
+
     @PostMapping("/{postId}/comments")
     public ResponseEntity<Response<Void>> saveComment(
             @PathVariable Long postId,
