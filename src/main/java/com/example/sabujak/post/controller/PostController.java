@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.sabujak.post.constants.PaginationConstants.*;
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -53,11 +54,12 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Response<SavePostResponse>> savePost(
-            @RequestBody @Validated SavePostRequest savePostRequest,
-            @AuthenticationPrincipal Access access
+            @RequestPart(value = "request") @Validated SavePostRequest savePostRequest,
+            @RequestPart(required = false) MultipartFile[] images
+            //@AuthenticationPrincipal Access access
     ) {
-        String email = access.getEmail();
-        return ResponseEntity.ok(Response.success(postFacade.savePost(savePostRequest, email)));
+        //String email = access.getEmail();
+        return ResponseEntity.ok(Response.success(postFacade.savePost(savePostRequest, "test@naver.com",images)));
     }
 
     @DeleteMapping("/{postId}")
