@@ -55,11 +55,11 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Response<SavePostResponse>> savePost(
             @RequestPart(value = "request") @Validated SavePostRequest savePostRequest,
-            @RequestPart(required = false) MultipartFile[] images
-            //@AuthenticationPrincipal Access access
+            @RequestPart(required = false) MultipartFile[] images,
+            @AuthenticationPrincipal Access access
     ) {
-        //String email = access.getEmail();
-        return ResponseEntity.ok(Response.success(postFacade.savePost(savePostRequest, "test@naver.com",images)));
+        String email = access.getEmail();
+        return ResponseEntity.ok(Response.success(postFacade.savePost(savePostRequest, email,images)));
     }
 
     @DeleteMapping("/{postId}")
