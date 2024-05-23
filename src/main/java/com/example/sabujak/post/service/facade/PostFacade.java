@@ -1,5 +1,10 @@
 package com.example.sabujak.post.service.facade;
 
+import com.example.sabujak.image.dto.response.ImageResponseDto;
+import com.example.sabujak.image.entity.Image;
+import com.example.sabujak.image.entity.ImageType;
+import com.example.sabujak.image.entity.PostImage;
+import com.example.sabujak.image.service.ImageService;
 import com.example.sabujak.post.dto.*;
 import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
@@ -15,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +34,8 @@ public class PostFacade {
     private final PostService postService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
+    private final ImageService imageService;
+
 
     @Transactional(readOnly = true)
     public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
@@ -53,13 +61,18 @@ public class PostFacade {
     }
 
     @Transactional
-    public SavePostResponse savePost(SavePostRequest savePostRequest, String writerEmail) {
+    public SavePostResponse savePost(SavePostRequest savePostRequest, String writerEmail, MultipartFile[] images) {
         Member writer = memberService.findMember(writerEmail);
         Post post = savePostRequest.toEntity(writer);
         log.info("Saving Post. Writer Email: [{}] Post: [{}]", writerEmail, post);
 
         postService.savePost(post);
+
         log.info("Saved Post. Post ID: [{}]", post.getId());
+
+        saveImagesToPost(post, images);
+
+        log.info("Saved images.");
 
         return SavePostResponse.of(post);
     }
@@ -150,5 +163,9 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}] Is Liked: [{}]", isWriter, isLiked);
 
         return PostResponse.of(post, writer, isWriter, isLiked);
+    }
+
+    private void saveImagesToPost(Post post, MultipartFile[] images) {
+        imageService.saveImages(images, post);
     }
 }
