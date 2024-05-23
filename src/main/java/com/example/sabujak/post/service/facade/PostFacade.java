@@ -83,7 +83,7 @@ public class PostFacade {
         Long postId = savePostLikeRequest.postId();
         log.info("Saving Post Like. Post ID: [{}], Member Email: [{}]", postId, email);
 
-        Post post = postService.findPost(postId);
+        Post post = postService.findByIdWithPessimisticLock(postId);
         postService.increaseLikeCount(post);
         log.info("Increased Post Like Count. Like Count: [{}]", post.getLikeCount());
 
