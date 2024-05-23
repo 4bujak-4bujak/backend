@@ -1,6 +1,7 @@
 package com.example.sabujak.post.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
+import com.example.sabujak.image.entity.PostImage;
 import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static jakarta.persistence.CascadeType.ALL;
@@ -44,6 +46,12 @@ public class Post extends BaseEntity {
             cascade = ALL, orphanRemoval = true
     )
     private List<Comment> comments;
+
+    @OneToMany(
+            mappedBy = "post", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
+    )
+    private List<PostImage> images = new ArrayList<>();
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
