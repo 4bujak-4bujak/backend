@@ -35,6 +35,11 @@ public class PostService {
         return new CustomSlice<>(posts, hasNext);
     }
 
+    public Post findByIdWithPessimisticLock(Long postId) {
+        return postRepository.findByIdWithPessimisticLock(postId)
+                .orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    }
+
     public Post findPost(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(POST_NOT_FOUND));
