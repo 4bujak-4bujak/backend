@@ -4,11 +4,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.example.sabujak.image.dto.response.ImageResponseDto;
 import com.example.sabujak.image.entity.*;
 import com.example.sabujak.image.exception.ImageException;
 import com.example.sabujak.image.repository.ImageRepository;
-import com.example.sabujak.post.entity.Post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,16 +37,7 @@ public class ImageService {
 
     private final List<String> allowExtensionList = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
 
-    @Transactional
-    public void saveImages(MultipartFile[] imageFiles, Post post) {
-        for (MultipartFile imageFile : imageFiles) {
-            saveImageToPost(imageFile, post);
-        }
-
-    }
-
-    @Transactional
-    public void saveImageToPost(MultipartFile imageFile, Post post) {
+    public String saveImage(MultipartFile imageFile) {
         // 이미지 가 빈 파일 일 경우
         if (imageFile.isEmpty() || Objects.isNull(imageFile)) {
             log.error("[ImageService saveImage] empty image file. imageName: {}", imageFile.getOriginalFilename());
@@ -59,20 +48,12 @@ public class ImageService {
         String originName = imageFile.getOriginalFilename();
         String ext = originName.substring(originName.lastIndexOf(".")); //확장자
         String uploadingName = UUID.randomUUID().toString().substring(0, 10) + originName;// 변경된 파일 명
-        String imageUrl = uploadImage(imageFile, ext, uploadingName);
-
-
-        PostImage image = PostImage.builder()
-                .imageUrl(imageUrl)
-                .build();
-        imageRepository.save(image);
-        mappingPostAndImages(image, post);
-        ;
+        return uploadImage(imageFile, ext, uploadingName);
     }
 
     private String uploadImage(MultipartFile image,
-                                         String ext,
-                                         String uploadingName)  {
+                               String ext,
+                               String uploadingName)  {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType("image/" + ext.substring(1));
 
@@ -131,13 +112,4 @@ public class ImageService {
         log.info("[ImageService findImageByUrl] imageUrl: {}", imageUrl);
         return imageRepository.findByImageUrl(imageUrl).orElseThrow();
     }
-
-    private void mappingPostAndImages(PostImage image,Post post) {
-        post.getImages().add(image);
-        image.setPost(post);
-    }
-
-
-
-
 }
