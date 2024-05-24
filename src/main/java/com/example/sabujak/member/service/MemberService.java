@@ -1,6 +1,5 @@
 package com.example.sabujak.member.service;
 
-import com.example.sabujak.member.dto.request.MemberRequestDto;
 import com.example.sabujak.member.dto.response.MemberResponseDto;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
@@ -25,7 +24,7 @@ public class MemberService {
         final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        return MemberResponseDto.AllInformation.of(member);
+        return MemberResponseDto.AllInformation.from(member);
 
     }
 
