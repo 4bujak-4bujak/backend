@@ -3,6 +3,7 @@ package com.example.sabujak.post.entity;
 import jakarta.persistence.Embeddable;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
+@ToString
 public class PostLikeId implements Serializable {
 
     private Long postId;

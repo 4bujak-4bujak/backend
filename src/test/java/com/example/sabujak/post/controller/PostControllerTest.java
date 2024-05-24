@@ -416,6 +416,54 @@ public class PostControllerTest extends TestInitializer {
     }
 
     @Test
+    @DisplayName("전체_댓글_조회_성공")
+    void all_comment_get_success() {
+        Post post = savePost(member);
+        for(int i = 0; i < 10; i ++) {
+            saveComment(post, member);
+        }
+        Long postId = post.getId();
+        Long cursorId = 11L;
+        String url = "/posts/{postId}/comments?cursorId={cursorId}";
+
+        // given
+        RequestSpecification specification = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE);
+
+        // when
+        Response response = specification
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        DEFAULT_IDENTIFIER,
+                        queryParameters(
+                                parameterWithName("cursorId").description("커서 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("errorCode").type(NULL).description("에러 코드"),
+
+                                fieldWithPath("data.content[0].commentId").type(NUMBER).description("댓글 아이디"),
+                                fieldWithPath("data.content[0].content").type(STRING).description("댓글 내용"),
+                                fieldWithPath("data.content[0].createdDate").type(STRING).description("댓글 생성일"),
+                                fieldWithPath("data.content[0].writer.job").type(STRING).description("작성자 관심 직무"),
+                                fieldWithPath("data.content[0].writer.nickname").type(STRING).description("작성자 닉네임"),
+                                fieldWithPath("data.content[0].isWriter").type(BOOLEAN).description("작성자 여부"),
+                                fieldWithPath("data.hasNext").type(BOOLEAN).description("다음 페이지 존재 여부"),
+
+                                fieldWithPath("message").type(NULL).description("응답 메시지")
+                        )
+                ))
+                .when()
+                .get(url, postId, cursorId);
+
+        // then
+        response
+                .then().log().all()
+                .assertThat().statusCode(is(OK.value()));
+    }
+
+    @Test
     @DisplayName("댓글_등록_성공")
     void comment_register_success() {
         Post post = savePost(member);

@@ -10,7 +10,6 @@ import lombok.*;
 public class PostLike {
 
     @EmbeddedId
-    @Column(name = "post_like_id")
     private PostLikeId id;
 
     @Builder
