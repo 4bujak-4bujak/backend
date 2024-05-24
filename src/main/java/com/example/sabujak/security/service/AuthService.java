@@ -1,11 +1,11 @@
 package com.example.sabujak.security.service;
 
 import com.example.sabujak.common.email.service.MailService;
-import com.example.sabujak.common.image.MemberImage;
 import com.example.sabujak.common.redis.service.RedisService;
 import com.example.sabujak.common.sms.SmsService;
 import com.example.sabujak.company.entity.Company;
 import com.example.sabujak.company.repository.CompanyRepository;
+import com.example.sabujak.image.entity.MemberImage;
 import com.example.sabujak.member.dto.request.MemberRequestDto;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
