@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
 
+import static com.example.sabujak.image.entity.MemberImage.createDefaultMemberImage;
 import static com.example.sabujak.member.entity.Job.OWNER;
 
 @ExtendWith(DatabaseClearExtension.class)
@@ -48,6 +49,7 @@ public abstract class TestInitializer extends Documentation {
                 .memberJob(OWNER)
                 .memberSmsAgree(true)
                 .build();
+        member.setImage(createDefaultMemberImage());
 
         return memberRepository.save(member);
     }
