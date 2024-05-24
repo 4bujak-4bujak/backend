@@ -2,13 +2,11 @@ package com.example.sabujak.member.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.image.entity.MemberImage;
+import com.example.sabujak.company.entity.Company;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.security.SecureRandom;
 
@@ -57,9 +55,15 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role memberRole = Role.ROLE_USER;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "image_id")
+    @Setter
     private MemberImage image;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    @Setter
+    private Company company;
 
     @Builder
     private Member(String memberEmail, String memberPassword, String memberName, String memberPhone, Job memberJob, boolean memberSmsAgree) {
@@ -72,7 +76,7 @@ public class Member extends BaseEntity {
         this.memberNickname = generateRandomNickname();
     }
 
-    public void delete() {
+    public void signOut() {
         this.memberDeleteCheck = true;
     }
 

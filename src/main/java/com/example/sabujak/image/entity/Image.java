@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "image")
 @DiscriminatorColumn
+@EntityListeners(AuditingEntityListener.class)
 public abstract class Image {
 
     @Id

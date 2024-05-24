@@ -17,10 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "members", description = "회원 API")
 //swagger
@@ -31,17 +28,31 @@ public class MemberController {
     private final MemberService memberService;
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "가입 성공", content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "404", description = "가입 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "회원 정보 조회", description = "자신의 회원 정보를 조회")
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
-    //swagger
+
     @GetMapping("/members")
-    public ResponseEntity<Response<MemberResponseDto>> getMyInfo(@AuthenticationPrincipal AuthRequestDto.Access access) {
+    public ResponseEntity<Response<MemberResponseDto.AllInformation>> getMyInfo(@AuthenticationPrincipal AuthRequestDto.Access access) {
 
         return ResponseEntity.ok(Response.success(memberService.getMyInfo(access.getEmail())));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "검증 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "검증 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "비밀번호 검증", description = "비밀번호 변경을 위한 기존 비밀번호 검증")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @PostMapping("/members/password/verify")
+    public ResponseEntity<Response<Void>> verifyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                          @RequestBody MemberRequestDto.VerifyPassword verifyPassword) {
+        memberService.verifyPassword(access.getEmail(), verifyPassword.password());
+        return ResponseEntity.ok(Response.success(null));
     }
 
     @ApiResponses(value = {
@@ -51,11 +62,23 @@ public class MemberController {
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
-    //swagger
     @PatchMapping("/members/password")
-    public ResponseEntity<Response<MemberResponseDto>> changMyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                                       @RequestBody MemberRequestDto.ChangePassword passwordDto) {
-        memberService.changeMyPassword(access.getEmail(), passwordDto);
+    public ResponseEntity<Response<Void>> changMyPassword(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                          @RequestBody MemberRequestDto.ChangePassword changePassword) {
+        memberService.changeMyPassword(access.getEmail(), changePassword.newPassword());
+        return ResponseEntity.ok(Response.success(null));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "탈퇴 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "탈퇴 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @DeleteMapping("/members")
+    public ResponseEntity<Response<Void>> signOut(@AuthenticationPrincipal AuthRequestDto.Access access) {
+        memberService.signOut(access.getEmail());
         return ResponseEntity.ok(Response.success(null));
     }
 }

@@ -21,23 +21,37 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public MemberResponseDto getMyInfo(String email) {
-        final Member member = memberRepository.findByMemberEmail(email)
+    public MemberResponseDto.AllInformation getMyInfo(String email) {
+        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        return MemberResponseDto.of(member);
+        return MemberResponseDto.AllInformation.of(member);
 
     }
 
     @Transactional
-    public void changeMyPassword(String email, MemberRequestDto.ChangePassword passwordDto) {
+    public void signOut(String email) {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        if(!bCryptPasswordEncoder.matches(passwordDto.currentPassword(), member.getMemberPassword())) {
+        member.signOut();
+    }
+
+    public void verifyPassword(String email, String password) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        if(!bCryptPasswordEncoder.matches(password, member.getMemberPassword())) {
             throw new AuthException(INVALID_CURRENT_PASSWORD);
         }
-        member.changeMemberPassword(bCryptPasswordEncoder.encode(passwordDto.newPassword()));
+    }
+
+    @Transactional
+    public void changeMyPassword(String email, String newPassword) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        member.changeMemberPassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
     public Member findMember(String email) {

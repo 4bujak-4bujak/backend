@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -30,7 +31,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
         ErrorCode errorCode;
-        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException) {
+        if (exception instanceof BadCredentialsException || exception instanceof InternalAuthenticationServiceException
+                || exception instanceof DisabledException) {
             errorCode = INVALID_EMAIL_OR_PASSWORD;
         } else {
             errorCode = UNKOWN_ERROR;
