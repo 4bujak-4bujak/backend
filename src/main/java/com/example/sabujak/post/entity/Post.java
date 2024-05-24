@@ -1,7 +1,6 @@
 package com.example.sabujak.post.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
-import com.example.sabujak.image.entity.PostImage;
 import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -21,7 +20,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @Entity
 @NoArgsConstructor(access = PROTECTED)
-@ToString
+@ToString(exclude = {"member", "comments", "images"})
 public class Post extends BaseEntity {
 
     @Id
@@ -40,21 +39,21 @@ public class Post extends BaseEntity {
     private int likeCount = 0;
     private int commentCount = 0;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     @OneToMany(
             mappedBy = "post", fetch = LAZY,
             cascade = ALL, orphanRemoval = true
     )
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "post", fetch = LAZY,
             cascade = ALL, orphanRemoval = true
     )
     private List<PostImage> images = new ArrayList<>();
-
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @Builder
     private Post(
@@ -81,14 +80,14 @@ public class Post extends BaseEntity {
         this.likeCount++;
     }
 
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
     public void decreaseLikeCount() {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
-    }
-
-    public void increaseCommentCount() {
-        this.commentCount++;
     }
 
     public void decreaseCommentCount() {
