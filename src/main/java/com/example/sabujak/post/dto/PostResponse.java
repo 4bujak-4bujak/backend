@@ -26,7 +26,7 @@ public record PostResponse(
 ) {
     public static PostResponse of(Post post, Member member, boolean isWriter, boolean isLiked) {
         List<String> images = post.getImages().stream().map(Image::getImageUrl).toList();
-        WriterResponse writer = com.example.sabujak.post.dto.WriterResponse.of(member);
+        WriterResponse writer = WriterResponse.of(member);
         return new PostResponse(
                 post.getId(),
                 post.getCategory(),
