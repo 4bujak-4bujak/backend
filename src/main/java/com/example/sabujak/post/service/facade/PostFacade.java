@@ -1,10 +1,5 @@
 package com.example.sabujak.post.service.facade;
 
-import com.example.sabujak.image.dto.response.ImageResponseDto;
-import com.example.sabujak.image.entity.Image;
-import com.example.sabujak.image.entity.ImageType;
-import com.example.sabujak.image.entity.PostImage;
-import com.example.sabujak.image.service.ImageService;
 import com.example.sabujak.post.dto.*;
 import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
@@ -13,6 +8,7 @@ import com.example.sabujak.post.entity.*;
 import com.example.sabujak.post.service.CommentService;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
+import com.example.sabujak.post.service.PostImageService;
 import com.example.sabujak.post.service.PostLikeService;
 import com.example.sabujak.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +28,9 @@ public class PostFacade {
 
     private final MemberService memberService;
     private final PostService postService;
+    private final PostImageService postImageService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
-    private final ImageService imageService;
-
 
     @Transactional(readOnly = true)
     public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
@@ -53,7 +48,7 @@ public class PostFacade {
     public PostResponse getPost(Long postId, String viewerEmail) {
         log.info("Getting Post. Post ID: [{}] Viewer Email: [{}]", postId, viewerEmail);
 
-        Post post = postService.findPostWithMember(postId);
+        Post post = postService.findPostWithMemberAndImages(postId);
         postService.increaseViewCount(post);
         log.info("Increased Post View Count. View Count: [{}]", post.getViewCount());
 
@@ -61,17 +56,18 @@ public class PostFacade {
     }
 
     @Transactional
-    public SavePostResponse savePost(SavePostRequest savePostRequest, String writerEmail, MultipartFile[] images) {
+    public SavePostResponse savePost(SavePostRequest savePostRequest, MultipartFile[] images, String writerEmail) {
         Member writer = memberService.findMember(writerEmail);
         Post post = savePostRequest.toEntity(writer);
         log.info("Saving Post. Writer Email: [{}] Post: [{}]", writerEmail, post);
 
         postService.savePost(post);
-        log.info("Saved Post. Post ID: [{}]", post.getId());
-
-        saveImagesToPost(post, images);
-
-        log.info("Saved images.");
+        if (images == null || images.length == 0) {
+            log.info("Saved Post Without Images. Post ID: [{}]", post.getId());
+        } else {
+            postImageService.saveImages(post, images);
+            log.info("Saved Post And Images. Post ID: [{}]", post.getId());
+        }
 
         return SavePostResponse.of(post);
     }
@@ -186,9 +182,5 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
-    }
-
-    private void saveImagesToPost(Post post, MultipartFile[] images) {
-        imageService.saveImages(images, post);
     }
 }
