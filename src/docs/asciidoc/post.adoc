@@ -43,11 +43,8 @@ include::{snippets}/post_controller_test/post_get_fail/http-response.adoc[]
 
 === 2. 게시글 작성
 
-==== HTTP request fields
-include::{snippets}/post_controller_test/post_register_success/request-fields.adoc[]
-
-==== HTTP request
-include::{snippets}/post_controller_test/post_register_success/http-request.adoc[]
+==== HTTP request parts
+include::{snippets}/post_controller_test/post_register_success/request-parts.adoc[]
 
 ==== HTTP response fields
 include::{snippets}/post_controller_test/post_register_success/response-fields.adoc[]

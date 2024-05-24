@@ -6,11 +6,9 @@ import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
-import com.example.sabujak.post.entity.Comment;
-import com.example.sabujak.post.entity.PostLike;
-import com.example.sabujak.post.entity.PostLikeId;
-import com.example.sabujak.post.entity.Post;
+import com.example.sabujak.post.entity.*;
 import com.example.sabujak.post.repository.CommentRepository;
+import com.example.sabujak.post.repository.PostImageRepository;
 import com.example.sabujak.post.repository.PostLikeRepository;
 import com.example.sabujak.post.repository.PostRepository;
 import io.restassured.RestAssured;
@@ -20,9 +18,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+import java.io.IOException;
+
 import static com.example.sabujak.common.utils.CommentUtils.createComment;
 import static com.example.sabujak.common.utils.CommentUtils.createSaveCommentRequest;
 import static com.example.sabujak.common.utils.MemberUtils.createInvaildMember;
+import static com.example.sabujak.common.utils.PostImageUtils.createPostImage;
 import static com.example.sabujak.common.utils.PostLikeUtils.createPostLike;
 import static com.example.sabujak.common.utils.PostLikeUtils.createPostLikeId;
 import static com.example.sabujak.common.utils.PostUtils.*;
@@ -31,13 +33,16 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.JsonFieldType.NULL;
 import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
 import static org.springframework.restdocs.payload.JsonFieldType.BOOLEAN;
+import static org.springframework.restdocs.payload.JsonFieldType.ARRAY;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
+import static org.springframework.restdocs.snippet.Attributes.key;
 
 @DisplayName("PostController_테스트")
 public class PostControllerTest extends TestInitializer {
@@ -49,6 +54,9 @@ public class PostControllerTest extends TestInitializer {
     private PostRepository postRepository;
 
     @Autowired
+    private PostImageRepository postImageRepository;
+
+    @Autowired
     private PostLikeRepository postLikeRepository;
 
     @Autowired
@@ -58,7 +66,8 @@ public class PostControllerTest extends TestInitializer {
     @DisplayName("전체_게시글_조회_성공")
     void all_post_get_success() {
         for(int i = 0; i < 10; i ++) {
-            savePost(member);
+            Post post = savePost(member);
+            savePostImages(post);
         }
         Long cursorId = 6L;
         String url = "/posts?category={category}&cursorId={cursorId}";
@@ -90,10 +99,13 @@ public class PostControllerTest extends TestInitializer {
                                 fieldWithPath("data.content[0].viewCount").type(NUMBER).description("조회수"),
                                 fieldWithPath("data.content[0].likeCount").type(NUMBER).description("좋아요 수"),
                                 fieldWithPath("data.content[0].commentCount").type(NUMBER).description("댓글 수"),
+                                fieldWithPath("data.content[0].images[]").type(ARRAY).description("게시글 이미지 목록"),
+                                fieldWithPath("data.content[0].writer.profile").type(STRING).description("작성자 프로필 이미지 경로"),
                                 fieldWithPath("data.content[0].writer.job").type(STRING).description("작성자 관심 직무"),
                                 fieldWithPath("data.content[0].writer.nickname").type(STRING).description("작성자 닉네임"),
                                 fieldWithPath("data.content[0].isWriter").type(BOOLEAN).description("작성자 여부"),
                                 fieldWithPath("data.content[0].isLiked").type(BOOLEAN).description("좋아요 여부"),
+
                                 fieldWithPath("data.hasNext").type(BOOLEAN).description("다음 페이지 존재 여부"),
 
                                 fieldWithPath("message").type(NULL).description("응답 메시지")
@@ -111,7 +123,9 @@ public class PostControllerTest extends TestInitializer {
     @Test
     @DisplayName("게시글_조회_성공")
     void post_get_success() {
-        Long postId = savePost(member).getId();
+        Post post = savePost(member);
+        savePostImages(post);
+        Long postId = post.getId();
         String url = "/posts/{postId}";
 
         // given
@@ -140,6 +154,8 @@ public class PostControllerTest extends TestInitializer {
                                 fieldWithPath("data.viewCount").type(NUMBER).description("조회수"),
                                 fieldWithPath("data.likeCount").type(NUMBER).description("좋아요 수"),
                                 fieldWithPath("data.commentCount").type(NUMBER).description("댓글 수"),
+                                fieldWithPath("data.images[]").type(ARRAY).description("게시글 이미지 목록"),
+                                fieldWithPath("data.writer.profile").type(STRING).description("작성자 프로필 이미지 경로"),
                                 fieldWithPath("data.writer.job").type(STRING).description("작성자 관심 직무"),
                                 fieldWithPath("data.writer.nickname").type(STRING).description("작성자 닉네임"),
                                 fieldWithPath("data.isWriter").type(BOOLEAN).description("작성자 여부"),
@@ -194,26 +210,29 @@ public class PostControllerTest extends TestInitializer {
 
     @Test
     @DisplayName("게시글_등록_성공")
-    void post_register_success() {
+    void post_register_success() throws IOException {
         SavePostRequest request = createSavePostRequest();
         String url = "/posts";
 
         // given
         RequestSpecification specification = RestAssured
                 .given(spec).log().all()
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request);
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .multiPart("savePostRequest", request, APPLICATION_JSON_VALUE);
 
         // when
         Response response = specification
                 .header("Authorization", "Bearer " + accessToken)
                 .filter(document(
                         DEFAULT_IDENTIFIER,
-                        requestFields(
-                                fieldWithPath("category").type(STRING).description("게시글 카테고리"),
-                                fieldWithPath("tag").type(STRING).description("게시글 태그"),
-                                fieldWithPath("title").type(STRING).description("게시글 제목"),
-                                fieldWithPath("content").type(STRING).description("게시글 내용")
+                        requestParts(
+                                partWithName("savePostRequest").description("게시글 저장 요청 데이터")
+                                        .attributes(
+                                                key("category").value("게시글 카테고리"),
+                                                key("tag").value("게시글 태그"),
+                                                key("title").value("게시글 제목"),
+                                                key("content").value("게시글 내용")
+                                        )
                         ),
                         responseFields(
                                 fieldWithPath("status").type(STRING).description("응답 상태"),
@@ -446,6 +465,7 @@ public class PostControllerTest extends TestInitializer {
                                 fieldWithPath("data.content[0].commentId").type(NUMBER).description("댓글 아이디"),
                                 fieldWithPath("data.content[0].content").type(STRING).description("댓글 내용"),
                                 fieldWithPath("data.content[0].createdDate").type(STRING).description("댓글 생성일"),
+                                fieldWithPath("data.content[0].writer.profile").type(STRING).description("작성자 프로필 이미지"),
                                 fieldWithPath("data.content[0].writer.job").type(STRING).description("작성자 관심 직무"),
                                 fieldWithPath("data.content[0].writer.nickname").type(STRING).description("작성자 닉네임"),
                                 fieldWithPath("data.content[0].isWriter").type(BOOLEAN).description("작성자 여부"),
@@ -592,6 +612,14 @@ public class PostControllerTest extends TestInitializer {
         Post post = createPost();
         post.setMember(member);
         return postRepository.save(post);
+    }
+
+    private void savePostImages(Post post) {
+        for(int i = 0; i < 10; i ++) {
+            PostImage postImage = createPostImage(post);
+            postImage.setPost(post);
+            postImageRepository.save(postImage);
+        }
     }
 
     private void savePostLike(Long postId, String memberEmail) {
