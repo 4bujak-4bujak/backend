@@ -1,18 +1,19 @@
-package com.example.sabujak.common.image;
+package com.example.sabujak.image.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Inheritance(strategy = InheritanceType.JOINED)
+import static jakarta.persistence.InheritanceType.JOINED;
+import static lombok.AccessLevel.PROTECTED;
+
+@Getter @Setter
+@NoArgsConstructor(access = PROTECTED)
+@Inheritance(strategy = JOINED)
 @Entity
 @Table(name = "image")
 @DiscriminatorColumn

@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Collections;
 
 import static com.example.sabujak.security.constants.SecurityConstants.AUTH_WHITELIST;
+import static com.example.sabujak.security.constants.SecurityConstants.PERMIT_ALL_GET_ENDPOINTS;
 
 @Configuration
 @EnableWebSecurity
@@ -58,6 +59,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers(HttpMethod.GET, PERMIT_ALL_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/members").permitAll()
                         .requestMatchers("/admins/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()

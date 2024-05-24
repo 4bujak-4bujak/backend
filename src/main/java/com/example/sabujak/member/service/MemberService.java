@@ -53,4 +53,9 @@ public class MemberService {
 
         member.changeMemberPassword(bCryptPasswordEncoder.encode(newPassword));
     }
+
+    public Member findMember(String email) {
+        return memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+    }
 }

@@ -1,12 +1,13 @@
-package com.example.sabujak.common.image;
+package com.example.sabujak.image.entity;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
 @Entity
 @DiscriminatorValue("M")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
