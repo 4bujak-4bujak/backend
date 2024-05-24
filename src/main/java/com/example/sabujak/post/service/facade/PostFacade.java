@@ -1,9 +1,5 @@
 package com.example.sabujak.post.service.facade;
 
-import com.example.sabujak.image.dto.response.ImageResponseDto;
-import com.example.sabujak.image.entity.Image;
-import com.example.sabujak.image.entity.ImageType;
-import com.example.sabujak.image.entity.PostImage;
 import com.example.sabujak.image.service.ImageService;
 import com.example.sabujak.post.dto.*;
 import com.example.sabujak.post.dto.SaveCommentRequest;
@@ -15,12 +11,14 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
 import com.example.sabujak.post.service.PostLikeService;
 import com.example.sabujak.post.service.PostService;
+import io.jsonwebtoken.lang.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.testcontainers.shaded.org.bouncycastle.util.Arrays;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,9 +68,10 @@ public class PostFacade {
 
         log.info("Saved Post. Post ID: [{}]", post.getId());
 
-        saveImagesToPost(post, images);
-
-        log.info("Saved images.");
+        if (!Arrays.isNullOrEmpty(images)) { // 이미지가 비어있다면 업로드 X
+            saveImagesToPost(post, images);
+            log.info("Saved images.");
+        }
 
         return SavePostResponse.of(post);
     }
