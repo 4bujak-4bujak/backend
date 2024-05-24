@@ -35,11 +35,6 @@ public class PostService {
         return new CustomSlice<>(posts, hasNext);
     }
 
-    public Post findByIdWithPessimisticLock(Long postId) {
-        return postRepository.findByIdWithPessimisticLock(postId)
-                .orElseThrow(() -> new PostException(POST_NOT_FOUND));
-    }
-
     public Post findPost(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(POST_NOT_FOUND));
@@ -47,6 +42,11 @@ public class PostService {
 
     public Post findPostWithMember(Long postId) {
         return postRepository.findWithMemberById(postId)
+                .orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    }
+
+    public Post findPostWithMemberAndImages(Long postId) {
+        return postRepository.findWithMemberAndImagesById(postId)
                 .orElseThrow(() -> new PostException(POST_NOT_FOUND));
     }
 
@@ -66,12 +66,12 @@ public class PostService {
         post.increaseLikeCount();
     }
 
-    public void decreaseLikeCount(Post post) {
-        post.decreaseLikeCount();
-    }
-
     public void increaseCommentCount(Post post) {
         post.increaseCommentCount();
+    }
+
+    public void decreaseLikeCount(Post post) {
+        post.decreaseLikeCount();
     }
 
     public void decreaseCommentCount(Post post) {
