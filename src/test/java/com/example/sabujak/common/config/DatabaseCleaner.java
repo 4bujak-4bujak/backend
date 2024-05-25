@@ -3,18 +3,16 @@ package com.example.sabujak.common.config;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class DatabaseCleaner {
-
-    private static final String SHOW_TABLES_QUERY = "SHOW TABLES";
-    private static final String FOREIGN_KEY_CHECK_FORMAT = "SET FOREIGN_KEY_CHECKS %d";
-    private static final String TRUNCATE_FORMAT = "TRUNCATE TABLE %s";
 
     private final List<String> tableNames = new ArrayList<>();
 
@@ -22,25 +20,33 @@ public class DatabaseCleaner {
     private EntityManager entityManager;
 
     @PostConstruct
-    @SuppressWarnings("unchecked")
-    public void findDatabaseTableNames() {
-        List<Object[]> tableInfos = entityManager.createNativeQuery(SHOW_TABLES_QUERY).getResultList();
-        tableInfos.forEach(
-                tableInfo -> tableNames.add((String) tableInfo[0])
-        );
+    private void findDatabaseTableNames() {
+        Query showTables = entityManager.createNativeQuery("SHOW TABLES");
+        if (Objects.isNull(showTables)) {
+            return;
+        }
+
+        List<Object[]> tableInfos = showTables.getResultList();
+        for (Object[] tableInfo : tableInfos) {
+            String tableName = (String) tableInfo[0];
+            tableNames.add(tableName);
+        }
+    }
+
+    private void truncate() {
+        entityManager.createNativeQuery(String.format("SET FOREIGN_KEY_CHECKS %d", 0))
+                .executeUpdate();
+        for (String tableName : tableNames) {
+            entityManager.createNativeQuery(String.format("TRUNCATE TABLE %s", tableName))
+                    .executeUpdate();
+        }
+        entityManager.createNativeQuery(String.format("SET FOREIGN_KEY_CHECKS %d", 1))
+                .executeUpdate();
     }
 
     @Transactional
     public void clear() {
         entityManager.clear();
         truncate();
-    }
-
-    private void truncate() {
-        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, 0)).executeUpdate();
-        tableNames.forEach(tableName ->
-                entityManager.createNativeQuery(String.format(TRUNCATE_FORMAT, tableName)).executeUpdate()
-        );
-        entityManager.createNativeQuery(String.format(FOREIGN_KEY_CHECK_FORMAT, 1)).executeUpdate();
     }
 }
