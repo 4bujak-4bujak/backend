@@ -3,6 +3,7 @@ package com.example.sabujak.space.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,6 +19,15 @@ public class MeetingRoom extends Space {
     @Positive
     private int meetingRoomCapacity;
 
+    @Column(name = "projector_exists")
+    @NotNull
+    private boolean projectorExists;
 
-    //이제 여기에 비품들 들어감
+    @Column(name = "can_video_conference")
+    @NotNull
+    private boolean canVideoConference;
+
+    @Column(name = "isPrivate")
+    @NotNull
+    private boolean isPrivate;
 }
