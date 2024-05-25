@@ -29,7 +29,7 @@ public class MemberReservation {
     @Column(name = "member_reservation_status")
     private ReservationStatus memberReservationStatus;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "member_reservation_type")
     private MemberReservationType memberReservationType;
 }
