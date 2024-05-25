@@ -1,5 +1,6 @@
 package com.example.sabujak.post.controller;
 
+import com.example.sabujak.common.config.Documentation;
 import com.example.sabujak.common.config.TestInitializer;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
@@ -20,12 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static com.example.sabujak.common.utils.CommentUtils.createComment;
 import static com.example.sabujak.common.utils.CommentUtils.createSaveCommentRequest;
-import static com.example.sabujak.common.utils.MemberUtils.createInvaildMember;
-import static com.example.sabujak.common.utils.PostImageUtils.createPostImage;
-import static com.example.sabujak.common.utils.PostLikeUtils.createPostLike;
-import static com.example.sabujak.common.utils.PostLikeUtils.createPostLikeId;
 import static com.example.sabujak.common.utils.PostUtils.*;
 import static com.example.sabujak.post.entity.Category.OWNER;
 import static org.hamcrest.Matchers.is;
@@ -44,7 +40,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 import static org.springframework.restdocs.snippet.Attributes.key;
 
 @DisplayName("PostController_테스트")
-public class PostControllerTest extends TestInitializer {
+public class PostControllerTest extends Documentation {
 
 //    @Autowired
 //    private MemberRepository memberRepository;
