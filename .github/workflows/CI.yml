@@ -46,6 +46,11 @@ jobs:
         touch ./src/main/resources/application.properties
         echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
 
+    - name: make logback-spring.xml
+      run: |
+        touch ./src/main/resources/logback-spring.xml
+        echo "${{ secrets.LOGBACK }}" > ./src/main/resources/logback-spring.xml
+
     - name: Run chmod to make gradlew executable 
       run: chmod +x ./gradlew
 
