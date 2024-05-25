@@ -23,7 +23,7 @@ public class MemberResponseDto {
                                  String memberPhone,
                                  @Schema(description = "이미지 url", example = "image.com")
                                  String imageUrl) {
-        public static MemberResponseDto.AllInformation of(Member member) {
+        public static MemberResponseDto.AllInformation from(Member member) {
             return new MemberResponseDto.AllInformation(
                     member.getMemberEmail(),
                     member.getMemberName(),
@@ -41,7 +41,7 @@ public class MemberResponseDto {
                                  String memberName,
                                  @Schema(description = "회사", example = "네이버")
                                  String companyName) {
-        public static MemberResponseDto.NameAndCompany of(Member member) {
+        public static MemberResponseDto.NameAndCompany from(Member member) {
             return new MemberResponseDto.NameAndCompany(
                     member.getMemberName(),
                     member.getCompany().getCompanyName()

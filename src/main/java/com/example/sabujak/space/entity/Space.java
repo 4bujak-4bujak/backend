@@ -1,17 +1,23 @@
 package com.example.sabujak.space.entity;
 
 import com.example.sabujak.branch.entity.Branch;
+import com.example.sabujak.reservation.entity.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "space")
-public class Space {
+@DiscriminatorColumn
+public abstract class Space {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +29,6 @@ public class Space {
     private String spaceName;
 
     @NotNull
-    @Column(name = "space_capacity")
-    private int spaceCapacity;
-
-    @NotNull
     @Column(name = "space_floor")
     private int spaceFloor;
 
@@ -34,6 +36,7 @@ public class Space {
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
-
+    @OneToMany(mappedBy = "space")
+    private List<Reservation> reservations = new ArrayList<>();
 
 }

@@ -3,12 +3,15 @@ package com.example.sabujak.member.entity;
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.image.entity.MemberImage;
 import com.example.sabujak.company.entity.Company;
+import com.example.sabujak.reservation.entity.MemberReservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -64,6 +67,9 @@ public class Member extends BaseEntity {
     @JoinColumn(name = "company_id")
     @Setter
     private Company company;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberReservation> memberReservations = new ArrayList<>();
 
     @Builder
     private Member(String memberEmail, String memberPassword, String memberName, String memberPhone, Job memberJob, boolean memberSmsAgree) {
