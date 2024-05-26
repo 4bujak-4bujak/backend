@@ -55,6 +55,9 @@ public class Post extends BaseEntity {
     )
     private List<PostImage> images = new ArrayList<>();
 
+    @Version
+    private Integer version;
+
     @Builder
     private Post(
             Category category,
