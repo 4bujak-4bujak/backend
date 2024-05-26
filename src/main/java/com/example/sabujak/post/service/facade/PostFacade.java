@@ -44,7 +44,7 @@ public class PostFacade {
         return new CustomSlice<>(postResponses, posts.hasNext());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PostResponse getPost(Long postId, String viewerEmail) {
         log.info("Getting Post. Post ID: [{}] Viewer Email: [{}]", postId, viewerEmail);
 
