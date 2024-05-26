@@ -24,7 +24,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             value = "select p " +
                     "from Post p " +
                     "join fetch p.member m " +
-                    "join fetch p.images i " +
+                    "left join fetch p.images i " +
                     "where p.id = :postId"
     )
     Optional<Post> findWithMemberAndImagesById(Long postId);
