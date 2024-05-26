@@ -33,11 +33,26 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             value = "select p " +
                     "from Post p " +
                     "join fetch p.member m " +
-                    "where (:category is null or p.category = :category) and " +
+                    "left join fetch p.images i " +
+                    "where p.category = :category and " +
                     "(:cursorId is null or p.id < :cursorId)"
     )
-    List<Post> findAllWithMembersByCategoryAndId(
+    List<Post> findAllWithMembersAndImagesByCategoryAndId(
             @Param("category") Category category,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    @Query(
+            value = "select p " +
+                    "from Post p " +
+                    "join fetch p.member m " +
+                    "left join fetch p.images i " +
+                    "where p.category in :categories and " +
+                    "(:cursorId is null or p.id < :cursorId)"
+    )
+    List<Post> findAllWithMembersAndImagesByCategoriesAndId(
+            @Param("categories") List<Category> categories,
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );
