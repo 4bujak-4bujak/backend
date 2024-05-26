@@ -23,8 +23,19 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    public CustomSlice<Post> findPosts(Category category, Long cursorId, Pageable pageable) {
-        List<Post> posts = postRepository.findAllWithMembersByCategoryAndId(category, cursorId, pageable);
+    public CustomSlice<Post> findPostsByCategory(Category child, Long cursorId, Pageable pageable) {
+        log.info("Getting Posts With Child Category. Child Category: [{}]", child);
+        List<Post> posts = postRepository.findAllWithMembersAndImagesByCategoryAndId(child, cursorId, pageable);
+        return createPostSlice(posts);
+    }
+
+    public CustomSlice<Post> findPostsByCategories(Category parent, Long cursorId, Pageable pageable) {
+        log.info("Getting Posts With Parent Category. Parent Category: [{}]", parent);
+        List<Post> posts = postRepository.findAllWithMembersAndImagesByCategoriesAndId(parent.getChild(), cursorId, pageable);
+        return createPostSlice(posts);
+    }
+
+    public CustomSlice<Post> createPostSlice(List<Post> posts) {
         boolean hasNext = posts.size() > ORIGIN_POST_PAGE_SIZE;
         log.info("Get [{}] Posts. One More Retrieved: [{}]", posts.size(), hasNext);
         if (hasNext) {
