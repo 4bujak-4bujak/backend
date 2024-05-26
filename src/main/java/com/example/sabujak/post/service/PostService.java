@@ -62,6 +62,11 @@ public class PostService {
                 .orElseThrow(() -> new PostException(POST_NOT_FOUND));
     }
 
+    public Post findPostWithOptimisticLock(Long postId) {
+        return postRepository.findWithOptimisticLockById(postId)
+                .orElseThrow(() -> new PostException(POST_NOT_FOUND));
+    }
+
     public void savePost(Post post) {
         postRepository.save(post);
     }
