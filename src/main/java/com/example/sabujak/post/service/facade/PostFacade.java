@@ -5,6 +5,7 @@ import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.*;
+import com.example.sabujak.post.exception.PostException;
 import com.example.sabujak.post.service.CommentService;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
@@ -13,13 +14,19 @@ import com.example.sabujak.post.service.PostLikeService;
 import com.example.sabujak.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.example.sabujak.post.exception.PostErrorCode.POST_LIKE_RETRY_FAILED;
 
 @Slf4j
 @Component
@@ -89,12 +96,17 @@ public class PostFacade {
         log.info("Deleted Post. Post: [{}]", post);
     }
 
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 100)
+    )
     @Transactional
     public void savePostLike(SavePostLikeRequest savePostLikeRequest, String email) {
         Long postId = savePostLikeRequest.postId();
         log.info("Saving Post Like. Post ID: [{}], Member Email: [{}]", postId, email);
 
-        Post post = postService.findPost(postId);
+        Post post = postService.findPostWithOptimisticLock(postId);
         postService.increaseLikeCount(post);
         log.info("Increased Post Like Count. Like Count: [{}]", post.getLikeCount());
 
@@ -185,5 +197,11 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
+    }
+
+    @Recover
+    public void recoverPostLike(OptimisticLockingFailureException ex, SavePostLikeRequest savePostLikeRequest, String email) {
+        log.info("Failed to save post like after retrying. Post ID: {}, Member Email: {}", savePostLikeRequest.postId(), email);
+        throw new PostException(POST_LIKE_RETRY_FAILED);
     }
 }
