@@ -34,9 +34,12 @@ public class PostFacade {
 
     @Transactional(readOnly = true)
     public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
-        log.info("Getting Posts. Category: [{}], Cursor ID: [{}], Viewer Email: [{}]", category, cursorId, viewerEmail);
+        log.info("Getting Posts. Cursor ID: [{}], Viewer Email: [{}]", cursorId, viewerEmail);
 
-        CustomSlice<Post> posts = postService.findPosts(category, cursorId, pageable);
+        CustomSlice<Post> posts = (category.getParent() != null) ?
+                postService.findPostsByCategory(category, cursorId, pageable) :
+                postService.findPostsByCategories(category, cursorId, pageable);
+
         List<PostResponse> postResponses = posts.content().stream()
                 .map(post -> createPostResponse(post, viewerEmail))
                 .collect(Collectors.toList());
