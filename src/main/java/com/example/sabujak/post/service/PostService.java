@@ -24,14 +24,15 @@ public class PostService {
     private final PostRepository postRepository;
 
     public CustomSlice<Post> findPostsByCategory(Category child, Long cursorId, Pageable pageable) {
-        log.info("Getting Posts With Child Category. Child Category: [{}]", child);
+        log.info("Getting Posts. Child Category: [{}]", child);
         List<Post> posts = postRepository.findAllWithMembersAndImagesByCategoryAndId(child, cursorId, pageable);
         return createPostSlice(posts);
     }
 
     public CustomSlice<Post> findPostsByCategories(Category parent, Long cursorId, Pageable pageable) {
-        log.info("Getting Posts With Parent Category. Parent Category: [{}]", parent);
-        List<Post> posts = postRepository.findAllWithMembersAndImagesByCategoriesAndId(parent.getChild(), cursorId, pageable);
+        List<Category> children = parent.getChild();
+        log.info("Getting Posts. Parent Category: [{}], Children Category: [{}]", parent, children);
+        List<Post> posts = postRepository.findAllWithMembersAndImagesByCategoriesAndId(children, cursorId, pageable);
         return createPostSlice(posts);
     }
 
