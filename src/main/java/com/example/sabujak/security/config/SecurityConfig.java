@@ -22,10 +22,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
-import static com.example.sabujak.security.constants.SecurityConstants.AUTH_WHITELIST;
-import static com.example.sabujak.security.constants.SecurityConstants.PERMIT_ALL_GET_ENDPOINTS;
+import static com.example.sabujak.security.constants.SecurityConstants.*;
 
 @Configuration
 @EnableWebSecurity
@@ -91,10 +91,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Collections.singletonList("*"));
-        config.setAllowedMethods(Collections.singletonList("*"));
+        config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:3000"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE"));
         config.setAllowCredentials(true);
-        config.setAllowedHeaders(Collections.singletonList("*"));
+        config.setAllowedHeaders(Arrays.asList(ALLOWED_HEADERS));
         config.setMaxAge(3600L); //1시간
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

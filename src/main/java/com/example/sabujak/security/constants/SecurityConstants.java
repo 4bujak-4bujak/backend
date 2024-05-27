@@ -30,6 +30,12 @@ public class SecurityConstants {
             "/api-docs",
     };
 
+    public static final String[] ALLOWED_HEADERS = {
+            "Content-Type", "Authorization", "X-Requested-With", "Accept",
+            "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers",
+            "Cache-Control", "Referer", "Content-Disposition"
+    };
+
     public static final String[] PERMIT_ALL_GET_ENDPOINTS = {
             "/posts",
             "/posts/{postId}"
