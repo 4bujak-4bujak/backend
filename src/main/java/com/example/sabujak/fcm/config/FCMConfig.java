@@ -21,10 +21,10 @@ import static com.google.firebase.FirebaseApp.DEFAULT_APP_NAME;
 @Configuration
 public class FCMConfig {
 
-    @Value("${fcm.key.path}")
+    @Value("${fcm.private.key.path}")
     private String path;
 
-    @Value("${fcm.key.scope}")
+    @Value("${fcm.private.key.scope}")
     private String scope;
 
     @Bean
