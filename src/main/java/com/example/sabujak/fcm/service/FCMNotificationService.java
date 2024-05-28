@@ -22,11 +22,11 @@ public class FCMNotificationService {
     private final FCMTokenService FCMTokenService;
     private final FirebaseMessaging firebaseMessaging;
 
-    public void sendFCMNotification(String email, String content, String notificationId, String targetURL) {
+    public void sendFCMNotification(String email, String content, String notificationId, String targetUrl) {
         log.info("Sending FCM Notification. Receiver Email: [{}]", email);
         String token = getFCMToken(email);
         Notification notification = createNotification(DEFAULT_TITLE, content);
-        Map<String, String> data = createData(notificationId, targetURL);
+        Map<String, String> data = createData(notificationId, targetUrl);
         Message message = createMessage(token, notification, data);
         try {
             String response = firebaseMessaging.send(message);
@@ -49,11 +49,11 @@ public class FCMNotificationService {
                 .build();
     }
 
-    private Map<String, String> createData(String notificationId, String targetURL) {
-        log.info("Creating Data. Notification ID: [{}], Target URL: [{}]", notificationId, targetURL);
+    private Map<String, String> createData(String notificationId, String targetUrl) {
+        log.info("Creating Data. Notification ID: [{}], Target URL: [{}]", notificationId, targetUrl);
         return Map.of(
                 NOTIFICATION_ID_KEY, notificationId,
-                TARGET_URL_KEY, targetURL
+                TARGET_URL_KEY, targetUrl
         );
     }
 

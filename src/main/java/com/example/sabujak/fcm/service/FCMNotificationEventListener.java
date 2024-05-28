@@ -24,8 +24,8 @@ public class FCMNotificationEventListener {
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Async
     public void sendCommentFCMNotification(CommentCreatedEvent event) {
-        String targetURL = COMMUNITY_NOTIFICATION_URL_PREFIX + event.postId();
-        log.info("Sending FCM Notification For Comment. Target URL: [{}]", targetURL);
+        String targetUrl = COMMUNITY_NOTIFICATION_URL_PREFIX + event.postId();
+        log.info("Sending FCM Notification For Comment. Target URL: [{}]", targetUrl);
 
         String receiverEmail = event.writerEmail();
         String senderNickname = event.commenterNickName();
@@ -34,8 +34,8 @@ public class FCMNotificationEventListener {
         String content = createContent(senderNickname, COMMENT);
         log.info("Notification Content: [{}]", content);
 
-        String notificationId = notificationService.saveNotification(targetURL, content, event.writer()).toString();
-        fcmNotificationService.sendFCMNotification(receiverEmail, content, notificationId, targetURL);
+        String notificationId = notificationService.saveNotification(targetUrl, content, event.writer()).toString();
+        fcmNotificationService.sendFCMNotification(receiverEmail, content, notificationId, targetUrl);
     }
 
     private String createContent(String nickname, NotificationContent content) {
