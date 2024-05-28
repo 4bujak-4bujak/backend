@@ -55,3 +55,9 @@ cloud:
 jwt:
   secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
   issuer: issuer
+
+fcm:
+  private:
+    key:
+      path: path
+      scope: scope
