@@ -1,7 +1,6 @@
 package com.example.sabujak.member.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
-import com.example.sabujak.image.entity.MemberImage;
 import com.example.sabujak.company.entity.Company;
 import com.example.sabujak.reservation.entity.MemberReservation;
 import jakarta.persistence.*;
