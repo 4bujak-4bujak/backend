@@ -1,5 +1,6 @@
 package com.example.sabujak.notification.entity;
 
+import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -12,7 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @Entity
 @NoArgsConstructor(access = PROTECTED)
-public class Notification {
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
