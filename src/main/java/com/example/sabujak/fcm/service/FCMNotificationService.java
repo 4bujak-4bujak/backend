@@ -7,7 +7,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import static com.example.sabujak.fcm.constants.FCMConstants.*;
 import static com.example.sabujak.fcm.exception.FCMErrorCode.FCM_SENDING_MESSAGE_FAILED;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class FCMNotificationService {
 
