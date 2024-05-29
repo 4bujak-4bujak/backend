@@ -39,4 +39,9 @@ public abstract class Space {
     @OneToMany(mappedBy = "space")
     private List<Reservation> reservations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "space")
+    @OrderBy("imageId asc")
+    private List<SpaceImage> imageList = new ArrayList<>();
+
+
 }
