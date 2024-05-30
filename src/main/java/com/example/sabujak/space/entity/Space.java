@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "space")
 @DiscriminatorColumn
 public abstract class Space {
