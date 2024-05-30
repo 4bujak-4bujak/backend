@@ -55,6 +55,10 @@ public class Branch {
     @OneToMany(mappedBy = "branch")
     private List<Space> spaceList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "branch")
+    @OrderBy("imageId asc")
+    private List<BranchImage> branchImageList = new ArrayList<>();
+
     @Builder
     private Branch(String branchName, String branchAddress, Double branchLatitude, Double branchLongitude) {
         this.branchName = branchName;
