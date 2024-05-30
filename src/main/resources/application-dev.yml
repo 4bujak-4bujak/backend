@@ -53,3 +53,9 @@ cloud:
 jwt:
   secret: ${JWT_SECRET}
   issuer: ${JWT_ISSUER}
+
+fcm:
+  private:
+    key:
+      path: ${FCM_KEY_PATH}
+      scope: ${FCM_SCOPE}
