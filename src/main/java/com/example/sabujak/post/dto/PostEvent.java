@@ -2,19 +2,19 @@ package com.example.sabujak.post.dto;
 
 import com.example.sabujak.member.entity.Member;
 
-public record CommentCreatedEvent(
+public record PostEvent(
         String targetUrl,
         String notificationContent,
         String receiverEmail,
         Member receiver
 ) {
-    public static CommentCreatedEvent createCommentCreatedEvent(
+    public static PostEvent createPostEvent(
             String targetUrl,
             String notificationContent,
             String receiverEmail,
             Member receiver
     ) {
-        return new CommentCreatedEvent(
+        return new PostEvent(
                 targetUrl,
                 notificationContent,
                 receiverEmail,

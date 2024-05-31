@@ -1,18 +1,16 @@
-package com.example.sabujak.post.service.facade;
+package com.example.sabujak.post.service;
 
 import com.example.sabujak.post.dto.*;
 import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.*;
-import com.example.sabujak.post.service.CommentService;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
-import com.example.sabujak.post.service.PostImageService;
-import com.example.sabujak.post.service.PostLikeService;
-import com.example.sabujak.post.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.example.sabujak.notification.utils.NotificationContent.createCommentContent;
+import static com.example.sabujak.post.dto.PostEvent.createPostEvent;
 
 @Slf4j
 @Component
@@ -31,6 +32,9 @@ public class PostFacade {
     private final PostImageService postImageService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
+
+    private final HttpServletRequest request;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
@@ -131,17 +135,26 @@ public class PostFacade {
     }
 
     @Transactional
-    public void saveComment(Long postId, SaveCommentRequest saveCommentRequest, String writerEmail) {
-        log.info("Saving Post Comment. Post ID: [{}], Writer Email: [{}]", postId, writerEmail);
+    public void saveCommentAndPublishEvent(Long postId, SaveCommentRequest saveCommentRequest, String commenterEmail) {
+        log.info("Saving Post Comment. Post ID: [{}], Commenter Email: [{}]", postId, commenterEmail);
 
-        Post post = postService.findPost(postId);
+        Post post = postService.findPostWithMember(postId);
         postService.increaseCommentCount(post);
         log.info("Increased Post Comment Count. Comment Count: [{}]", post.getLikeCount());
 
-        Member writer = memberService.findMember(writerEmail);
-        Comment comment = saveCommentRequest.toEntity(writer, post);
+        Member commenter = memberService.findMember(commenterEmail);
+        Comment comment = saveCommentRequest.toEntity(commenter, post);
         commentService.saveComment(comment);
         log.info("Saved Comment. Comment ID: [{}]", comment.getId());
+
+        Member writer = post.getMember();
+        String writerEmail = writer.getMemberEmail();
+        log.info("Checking If Commenter Is Writer. Commenter: [{}], Writer: [{}]", commenterEmail, writerEmail);
+        if(!commenterEmail.equals(writerEmail)) {
+            log.info("Creating and Publishing Event for Writer Notification.");
+            String content = createCommentContent(post.getTitle(), commenter.getMemberName());
+            createEventAndPublish(content, writerEmail, writer);
+        }
     }
 
     @Transactional
@@ -185,5 +198,10 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
+    }
+
+    private void createEventAndPublish(String content, String receiverEmail, Member receiver) {
+        PostEvent event = createPostEvent(request.getRequestURI(), content, receiverEmail, receiver);
+        eventPublisher.publishEvent(event);
     }
 }
