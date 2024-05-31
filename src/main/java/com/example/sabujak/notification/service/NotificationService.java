@@ -18,7 +18,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Transactional(propagation = REQUIRED)
-    public Long saveNotification(String content, String targetUrl, Member member) {
+    public void saveNotification(String content, String targetUrl, Member member) {
         Notification notification = Notification.builder()
                 .content(content)
                 .targetUrl(targetUrl)
@@ -26,6 +26,5 @@ public class NotificationService {
         notification.setMember(member);
         notificationRepository.save(notification);
         log.info("Saved Notification. Notification ID: [{}]", notification.getId());
-        return notification.getId();
     }
 }
