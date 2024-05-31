@@ -9,7 +9,7 @@ public class SpaceResponseDto {
                                  String meetingRoomName,
                                  int meetingRoomFloor,
                                  int meetingRoomCapacity,
-                                 String branchImage) {
+                                 String meetingRoomImage) {
         public static MeetingRoomDto from(MeetingRoom meetingRoom) {
             return new MeetingRoomDto(
                     meetingRoom.getSpaceId(),
