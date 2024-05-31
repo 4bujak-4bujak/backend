@@ -2,7 +2,7 @@ package com.example.sabujak.fcm.service;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.notification.service.NotificationService;
-import com.example.sabujak.post.dto.CommentCreatedEvent;
+import com.example.sabujak.post.dto.PostEvent;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class FCMNotificationEventListener {
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Async
-    public void saveNotificationAndSendFCMNotificationForComment(CommentCreatedEvent event)
+    public void saveNotificationAndSendFCMNotificationForComment(PostEvent event)
             throws FirebaseMessagingException {
         String email = event.receiverEmail();
         String content = event.notificationContent();
