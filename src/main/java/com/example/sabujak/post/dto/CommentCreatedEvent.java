@@ -3,13 +3,22 @@ package com.example.sabujak.post.dto;
 import com.example.sabujak.member.entity.Member;
 
 public record CommentCreatedEvent(
-        Long postId,
-        Member writer,
-        String writerEmail,
-        String commenterNickName
+        String targetUrl,
+        String notificationContent,
+        String receiverEmail,
+        Member receiver
 ) {
-
-    public static CommentCreatedEvent createCommentCreatedEvent(Long postId, Member writer, String commenterNickName) {
-        return new CommentCreatedEvent(postId, writer, writer.getMemberEmail(), commenterNickName);
+    public static CommentCreatedEvent createCommentCreatedEvent(
+            String targetUrl,
+            String notificationContent,
+            String receiverEmail,
+            Member receiver
+    ) {
+        return new CommentCreatedEvent(
+                targetUrl,
+                notificationContent,
+                receiverEmail,
+                receiver
+        );
     }
 }
