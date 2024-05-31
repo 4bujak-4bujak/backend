@@ -1,7 +1,6 @@
 package com.example.sabujak.fcm.service;
 
 import com.example.sabujak.member.entity.Member;
-import com.example.sabujak.notification.entity.NotificationContent;
 import com.example.sabujak.notification.service.NotificationService;
 import com.example.sabujak.post.dto.CommentCreatedEvent;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -12,8 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import static com.example.sabujak.fcm.constants.FCMConstants.COMMUNITY_NOTIFICATION_URL_PREFIX;
-import static com.example.sabujak.notification.entity.NotificationContent.COMMENT;
+import static java.lang.Thread.currentThread;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -28,37 +26,31 @@ public class FCMNotificationEventListener {
     @Async
     public void saveNotificationAndSendFCMNotificationForComment(CommentCreatedEvent event)
             throws FirebaseMessagingException {
-        String targetUrl = COMMUNITY_NOTIFICATION_URL_PREFIX + event.postId();
-        log.info("Preparing FCM Notification For Comment. Target URL: [{}]", targetUrl);
+        String email = event.receiverEmail();
+        String content = event.notificationContent();
+        String targetUrl = event.targetUrl();
+        log.info(
+                "Preparing FCM Notification For Comment. " +
+                "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl
+        );
 
-        String email = event.writerEmail();
-        String nickName = event.commenterNickName();
-        log.info("Receiver Email: [{}], Sender Nickname: [{}]", email, nickName);
-
-        String content = createContent(nickName, COMMENT);
-        log.info("Notification Content: [{}]", content);
-
-        log.info("Saving Notification For Comment...");
-        Long notificationId = saveNotification(content, targetUrl, event.writer());
-
-        log.info("Sending FCM Notification For Comment...");
-        sendFCMNotification(email, createFCMMessage(email, content, notificationId, targetUrl));
+        saveNotification(content, targetUrl, event.receiver());
+        sendFCMNotification(email, createFCMMessage(email, content, targetUrl));
     }
 
-    private String createContent(String nickname, NotificationContent content) {
-        return nickname + content.getSuffix();
+    private void saveNotification(String content, String targetUrl, Member member) {
+        log.info("Start Saving Notification Before Sending FCM Notification.");
+        notificationService.saveNotification(content, targetUrl, member);
     }
 
-    private Long saveNotification(String content, String targetUrl, Member member) {
-        return notificationService.saveNotification(content, targetUrl, member);
-    }
-
-    private Message createFCMMessage(String email, String content, Long notificationId, String targetUrl) {
-        return fcmNotificationService.createFCMMessage(email, content, notificationId, targetUrl);
+    private Message createFCMMessage(String email, String content, String targetUrl) {
+        return fcmNotificationService.createFCMMessage(email, content, targetUrl);
     }
 
     private void sendFCMNotification(String email, Message message)
             throws FirebaseMessagingException {
+        log.info("Start Sending Synchronous FCM Notification. Thread: [{}]", currentThread().getName());
         fcmNotificationService.sendFCMNotification(email, message);
+        log.info("End Synchronous FCM Notification Sending. Thread: [{}]", currentThread().getName());
     }
 }

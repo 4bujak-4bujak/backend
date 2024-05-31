@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.example.sabujak.fcm.constants.FCMConstants.*;
+import static com.example.sabujak.fcm.constants.FCMConstants.DEFAULT_TITLE;
+import static com.example.sabujak.fcm.constants.FCMConstants.TARGET_URL_KEY;
 import static com.example.sabujak.fcm.exception.FCMErrorCode.*;
 import static com.google.firebase.messaging.MessagingErrorCode.*;
 
@@ -23,11 +24,11 @@ public class FCMNotificationService {
     private final FCMTokenService fcmTokenService;
     private final FirebaseMessaging firebaseMessaging;
 
-    public Message createFCMMessage(String email, String content, Long notificationId, String targetUrl) {
+    public Message createFCMMessage(String email, String content, String targetUrl) {
         return Message.builder()
                 .setToken(fcmTokenService.getFCMToken(email))
                 .setNotification(createNotification(content))
-                .putAllData(createData(notificationId, targetUrl))
+                .putAllData(createData(targetUrl))
                 .build();
     }
 
@@ -38,18 +39,16 @@ public class FCMNotificationService {
                 .build();
     }
 
-    private Map<String, String> createData(Long notificationId, String targetUrl) {
-        return Map.of(
-                NOTIFICATION_ID_KEY, notificationId.toString(),
-                TARGET_URL_KEY, targetUrl
-        );
+    private Map<String, String> createData(String targetUrl) {
+        return Map.of(TARGET_URL_KEY, targetUrl);
     }
 
     @Retryable(
             retryFor = FirebaseMessagingException.class,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
-    public void sendFCMNotification(String email, Message message) throws FirebaseMessagingException {
+    public void sendFCMNotification(String email, Message message)
+            throws FirebaseMessagingException {
         try {
             String response = firebaseMessaging.send(message);
             log.info("FCM Notification Sent Successfully. Message ID: [{}]", response);

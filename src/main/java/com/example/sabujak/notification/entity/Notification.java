@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -16,12 +17,11 @@ import static lombok.AccessLevel.PROTECTED;
 public class Notification extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     private String content;
     private String targetUrl;
-    private boolean isRead;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
@@ -31,15 +31,10 @@ public class Notification extends BaseEntity {
     private Notification(String content, String targetUrl) {
         this.content = content;
         this.targetUrl = targetUrl;
-        this.isRead = false;
     }
 
     public void setMember(Member member) {
         this.member = member;
-    }
-
-    public void setRead(Boolean isRead) {
-        this.isRead = isRead;
     }
 }
 
