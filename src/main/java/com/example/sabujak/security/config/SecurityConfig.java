@@ -59,7 +59,6 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .requestMatchers(HttpMethod.GET, PERMIT_ALL_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/members").permitAll()
                         .requestMatchers("/admins/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
