@@ -1,7 +1,9 @@
 package com.example.sabujak.space.service;
 
 import com.example.sabujak.space.dto.response.SpaceResponseDto;
+import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
+import com.example.sabujak.space.exception.meetingroom.MeetingRoomException;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.example.sabujak.space.exception.meetingroom.MeetingRoomErrorCode.MEETING_ROOM_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,5 +29,11 @@ public class SpaceService {
                 .stream()
                 .map(SpaceResponseDto.MeetingRoomDto::from)
                 .collect(Collectors.toList());
+    }
+
+    public SpaceResponseDto.MeetingRoomDetails getMeetingRoomDetails(Long meetingRoomId) {
+        MeetingRoom meetingRoom = meetingRoomRepository.findByMeetingRoomIdWithBranch(meetingRoomId)
+                .orElseThrow(() -> new MeetingRoomException(MEETING_ROOM_NOT_FOUND));
+        return SpaceResponseDto.MeetingRoomDetails.of(meetingRoom.getBranch(), meetingRoom);
     }
 }
