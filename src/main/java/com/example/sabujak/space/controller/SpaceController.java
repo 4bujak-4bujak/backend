@@ -1,7 +1,7 @@
 package com.example.sabujak.space.controller;
 
 import com.example.sabujak.common.response.Response;
-import com.example.sabujak.space.dto.response.SpaceResponseDto;
+import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.service.SpaceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,7 +43,7 @@ public class SpaceController {
             @Parameter(name = "sortDirection", description = "정렬 방식 (ASC, DESC)", example = "ASC"),
     })
     @GetMapping("/meeting-rooms")
-    public ResponseEntity<Response<List<SpaceResponseDto.MeetingRoomDto>>> getMeetingRoomList(
+    public ResponseEntity<Response<List<MeetingRoomResponseDto.MeetingRoomForList>>> getMeetingRoomList(
             @RequestParam LocalDateTime startAt,
             @RequestParam LocalDateTime endAt,
             @RequestParam String branchName,
@@ -65,7 +65,7 @@ public class SpaceController {
             @Parameter(name = "meetingRoomId", description = "미팅룸 Id", example = "1")
     })
     @GetMapping("/meeting-rooms/{meetingRoomId}")
-    public ResponseEntity<Response<SpaceResponseDto.MeetingRoomDetails>> getMeetingRoomDetails(@PathVariable Long meetingRoomId) {
+    public ResponseEntity<Response<MeetingRoomResponseDto.MeetingRoomDetails>> getMeetingRoomDetails(@PathVariable Long meetingRoomId) {
         return ResponseEntity.ok(Response.success(spaceService.getMeetingRoomDetails(meetingRoomId)));
     }
 }
