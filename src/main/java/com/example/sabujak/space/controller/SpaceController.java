@@ -1,6 +1,7 @@
 package com.example.sabujak.space.controller;
 
 import com.example.sabujak.common.response.Response;
+import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.service.SpaceService;
@@ -67,5 +68,17 @@ public class SpaceController {
     @GetMapping("/meeting-rooms/{meetingRoomId}")
     public ResponseEntity<Response<MeetingRoomResponseDto.MeetingRoomDetails>> getMeetingRoomDetails(@PathVariable Long meetingRoomId) {
         return ResponseEntity.ok(Response.success(spaceService.getMeetingRoomDetails(meetingRoomId)));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "포커스존 현재 이용 가능 좌석 수 조회", description = "해당 지점의 포커스 존 내의 현재 이용 가능 좌석 수 조회")
+    @Parameters({
+            @Parameter(name = "branchId", description = "지점 Id", example = "1")
+    })
+    @GetMapping("/focus-zone/{branchId}/available-seat-count")
+    public ResponseEntity<Response<FocusDeskResponseDto.AvailableSeatCountInformation>> getAvailableSeatCount(@PathVariable Long branchId) {
+        return ResponseEntity.ok(Response.success(spaceService.getAvailableSeatCount(branchId)));
     }
 }

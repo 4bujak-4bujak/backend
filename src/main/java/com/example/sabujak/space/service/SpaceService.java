@@ -1,9 +1,15 @@
 package com.example.sabujak.space.service;
 
+import com.example.sabujak.branch.entity.Branch;
+import com.example.sabujak.branch.exception.BranchErrorCode;
+import com.example.sabujak.branch.exception.BranchException;
+import com.example.sabujak.branch.repository.BranchRepository;
+import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.exception.meetingroom.MeetingRoomException;
+import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +26,8 @@ import static com.example.sabujak.space.exception.meetingroom.MeetingRoomErrorCo
 @Service
 public class SpaceService {
     private final MeetingRoomRepository meetingRoomRepository;
+    private final FocusDeskRepository focusDeskRepository;
+    private final BranchRepository branchRepository;
 
     public List<MeetingRoomResponseDto.MeetingRoomForList> getMeetingRoomList(LocalDateTime startAt, LocalDateTime endAt,
                                                                               String branchName, List<MeetingRoomType> roomTypes, boolean projectorExists,
@@ -35,5 +43,16 @@ public class SpaceService {
         MeetingRoom meetingRoom = meetingRoomRepository.findByMeetingRoomIdWithBranch(meetingRoomId)
                 .orElseThrow(() -> new MeetingRoomException(MEETING_ROOM_NOT_FOUND));
         return MeetingRoomResponseDto.MeetingRoomDetails.of(meetingRoom.getBranch(), meetingRoom);
+    }
+
+    public FocusDeskResponseDto.AvailableSeatCountInformation getAvailableSeatCount(Long branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
+
+        Integer totalCount = focusDeskRepository.countAllByBranch(branch);
+        Integer availableCount = focusDeskRepository.countAllByBranchAndAndCanReserve(branch, true);
+        Integer reservedCount = totalCount - availableCount;
+
+        return new FocusDeskResponseDto.AvailableSeatCountInformation(totalCount, availableCount, reservedCount);
     }
 }
