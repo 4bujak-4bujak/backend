@@ -44,9 +44,8 @@ jobs:
 
       - name: Create firebase-private-key.json
         run: |
-          touch ./src/main/resources/firebase/private-key.json
+          mkdir -p ./src/main/resources/firebase/
           echo "${{ secrets.FCM_PRIVATE_KEY }}" > ./src/main/resources/firebase/private-key.json
-        shell: bash
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
