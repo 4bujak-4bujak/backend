@@ -1,21 +1,20 @@
 package com.example.sabujak.fcm.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
 
 import static com.google.firebase.FirebaseApp.DEFAULT_APP_NAME;
 
@@ -54,14 +53,17 @@ public class FCMConfig {
             ClassPathResource resource = new ClassPathResource(path);
             InputStream credentialsStream = resource.getInputStream();
 
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(credentialsStream);
-            String jsonString = jsonNode.toString();
+            InputStreamReader reader = new InputStreamReader(credentialsStream);
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
 
-            InputStream validatedCredentialsStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
+            for (String key : jsonObject.keySet()) {
+                log.info("Key: " + key + ", Value: " + jsonObject.get(key));
+            }
+
+            credentialsStream = resource.getInputStream();
 
             return GoogleCredentials
-                    .fromStream(validatedCredentialsStream)
+                    .fromStream(credentialsStream)
                     .createScoped(scope);
         } catch (IOException e) {
             throw new RuntimeException(e);
