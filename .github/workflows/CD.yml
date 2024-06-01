@@ -42,11 +42,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create firebase-private-key.json
+      - name: Create Firebase private key
+        id: create-firebase-private-key
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "private-key.json"
+          json: ${{ secrets.FCM_PRIVATE_KEY }}
+
+      - name: Move Firebase private key to firebase directory
         run: |
           mkdir -p ./src/main/resources/firebase/
-          touch ./src/main/resources/firebase/private-key.json
-          echo "${{ secrets.FCM_PRIVATE_KEY }}" > ./src/main/resources/firebase/private-key.json
+          mv ${{ steps.create-firebase-private-key.outputs.filepath }} ./src/main/resources/firebase/private-key.json
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
