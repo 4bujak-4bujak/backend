@@ -4,8 +4,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -51,16 +49,6 @@ public class FCMConfig {
         try {
             ClassPathResource resource = new ClassPathResource(path);
             InputStream credentialsStream = resource.getInputStream();
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(credentialsStream);
-
-            jsonNode.fields().forEachRemaining(entry -> {
-                log.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
-            });
-
-            credentialsStream = resource.getInputStream();
-
             return GoogleCredentials
                     .fromStream(credentialsStream)
                     .createScoped(scope);
