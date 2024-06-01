@@ -1,14 +1,20 @@
 package com.example.sabujak.space.repository.meetingroom;
 
 import com.example.sabujak.space.entity.MeetingRoom;
+import com.example.sabujak.space.entity.MeetingRoomType;
+import com.example.sabujak.space.entity.QMeetingRoom;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.sabujak.branch.entity.QBranch.branch;
+import static com.example.sabujak.reservation.entity.QReservation.reservation;
 import static com.example.sabujak.space.entity.QMeetingRoom.meetingRoom;
 
 @RequiredArgsConstructor
@@ -17,17 +23,32 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
 
 
     @Override
-    public List<MeetingRoom> findMeetingRoomList(String branchName, int roomCapacity, boolean projectorExists, boolean canVideoConference, boolean isPrivate, String sortTarget, String sortDirection) {
+    public List<MeetingRoom> findMeetingRoomList(LocalDateTime startAt, LocalDateTime endAt, String branchName, List<MeetingRoomType> meetingRoomTypes, boolean projectorExists, boolean canVideoConference, boolean isPrivate, String sortTarget, String sortDirection) {
 
         return queryFactory.selectFrom(meetingRoom)
+                .join(meetingRoom.branch, branch)
                 .where(meetingRoom.branch.branchName.eq(branchName),
-                        meetingRoom.meetingRoomCapacity.goe(roomCapacity),
+                        meetingRoom.meetingRoomType.in(meetingRoomTypes),
                         projectorCondition(projectorExists),
                         videoConferenceCondition(canVideoConference),
-                        privateCondition(isPrivate))
+                        privateCondition(isPrivate),
+                        reservationCondition(startAt, endAt))
                 .orderBy(meetingRoomPrimarySort(sortTarget, sortDirection), meetingRoomSecondarySort(sortTarget))
                 .fetch();
     }
+
+
+    private BooleanExpression reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
+        return JPAExpressions.selectOne()
+                .from(reservation)
+                .where(reservation.space.spaceId.eq(QMeetingRoom.meetingRoom.spaceId),
+                        reservation.reservationStartDateTime.between(startAt, endAt)
+                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
+                                .or(reservation.reservationStartDateTime.before(startAt)
+                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                .notExists();
+    }
+
 
     private BooleanExpression projectorCondition(boolean projectorExists) {
         if (projectorExists) {
