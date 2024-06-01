@@ -115,7 +115,7 @@ public class PostController {
             @AuthenticationPrincipal Access access
     ) {
         String email = access.getEmail();
-        postFacade.saveCommentAndPublishEvent(postId, saveCommentRequest, email);
+        postFacade.saveComment(postId, saveCommentRequest, email);
         return ResponseEntity.ok(Response.success());
     }
 

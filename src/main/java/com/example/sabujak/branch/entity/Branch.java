@@ -9,7 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -38,8 +40,24 @@ public class Branch {
     @Column(name = "branch_longitude")
     private double branchLongitude;
 
+    @Column(name = "branch_phone_number")
+    private String branchPhoneNumber;
+
+    @Column(name = "road_from_station")
+    private String roadFromStation; //찾아 오는길
+
+    @ElementCollection
+    @CollectionTable(name = "station_names", joinColumns = @JoinColumn(name = "branch_id"))
+    @Column(name = "station_to_branch")
+    private Set<String> stationToBranch = new HashSet<>(); // 지하철 호선
+
+
     @OneToMany(mappedBy = "branch")
     private List<Space> spaceList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch")
+    @OrderBy("imageId asc")
+    private List<BranchImage> branchImageList = new ArrayList<>();
 
     @Builder
     private Branch(String branchName, String branchAddress, Double branchLatitude, Double branchLongitude) {

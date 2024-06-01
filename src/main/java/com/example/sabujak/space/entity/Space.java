@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "space")
 @DiscriminatorColumn
 public abstract class Space {
@@ -38,5 +38,10 @@ public abstract class Space {
 
     @OneToMany(mappedBy = "space")
     private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "space")
+    @OrderBy("imageId asc")
+    private List<SpaceImage> imageList = new ArrayList<>();
+
 
 }

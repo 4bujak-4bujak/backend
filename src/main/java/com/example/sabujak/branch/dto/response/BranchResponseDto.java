@@ -4,6 +4,8 @@ import com.example.sabujak.branch.entity.Branch;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Set;
+
 @Getter
 @AllArgsConstructor
 public class BranchResponseDto {
@@ -13,12 +15,20 @@ public class BranchResponseDto {
     private double branchLatitude;
     private double branchLongitude;
 
+    private String branchPhoneNumber;
+    private String roadFromStation;
+    private Set<String> stationToBranch;
+
     public static BranchResponseDto fromEntity(Branch branch) {
         return new BranchResponseDto(
                 branch.getBranchName(),
                 branch.getBranchAddress(),
                 branch.getBranchLatitude(),
-                branch.getBranchLongitude());
+                branch.getBranchLongitude(),
+                branch.getBranchPhoneNumber(),
+                branch.getRoadFromStation(),
+                branch.getStationToBranch()
+        );
     }
 
 }

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.sabujak.notification.utils.NotificationContent.createCommentContent;
-import static com.example.sabujak.post.dto.PostEvent.createPostEvent;
 
 @Slf4j
 @Component
@@ -34,7 +33,7 @@ public class PostFacade {
     private final CommentService commentService;
 
     private final HttpServletRequest request;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional(readOnly = true)
     public CustomSlice<PostResponse> getPosts(Category category, Long cursorId, Pageable pageable, String viewerEmail) {
@@ -135,7 +134,7 @@ public class PostFacade {
     }
 
     @Transactional
-    public void saveCommentAndPublishEvent(Long postId, SaveCommentRequest saveCommentRequest, String commenterEmail) {
+    public void saveComment(Long postId, SaveCommentRequest saveCommentRequest, String commenterEmail) {
         log.info("Saving Post Comment. Post ID: [{}], Commenter Email: [{}]", postId, commenterEmail);
 
         Post post = postService.findPostWithMember(postId);
@@ -153,7 +152,7 @@ public class PostFacade {
         if(!commenterEmail.equals(writerEmail)) {
             log.info("Creating and Publishing Event for Writer Notification.");
             String content = createCommentContent(post.getTitle(), commenter.getMemberName());
-            createEventAndPublish(content, writerEmail, writer);
+            publisher.publishEvent(new saveCommentEvent(request.getRequestURI(), content, writerEmail, writer));
         }
     }
 
@@ -198,10 +197,5 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
-    }
-
-    private void createEventAndPublish(String content, String receiverEmail, Member receiver) {
-        PostEvent event = createPostEvent(request.getRequestURI(), content, receiverEmail, receiver);
-        eventPublisher.publishEvent(event);
     }
 }

@@ -15,9 +15,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "members", description = "회원 API")
 //swagger
@@ -81,4 +83,19 @@ public class MemberController {
         memberService.signOut(access.getEmail());
         return ResponseEntity.ok(Response.success(null));
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "변경 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "변경 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "회원 이미지 변경", description = "회원의 프로필 이미지 변경")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @PatchMapping(value = "/members/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<Void>> changeMemberImage(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                            @RequestPart MultipartFile image) {
+        memberService.changeMemberImage(access.getEmail(), image);
+        return ResponseEntity.ok(Response.success(null));
+    }
+
 }
