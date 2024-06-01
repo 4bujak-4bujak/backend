@@ -8,16 +8,16 @@ import lombok.Getter;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SpaceResponseDto {
+public class MeetingRoomResponseDto {
 
 
-    public record MeetingRoomDto(Long meetingRoomId,
-                                 String meetingRoomName,
-                                 int meetingRoomFloor,
-                                 int meetingRoomCapacity,
-                                 String meetingRoomImage) {
-        public static MeetingRoomDto from(MeetingRoom meetingRoom) {
-            return new MeetingRoomDto(
+    public record MeetingRoomForList(Long meetingRoomId,
+                                     String meetingRoomName,
+                                     int meetingRoomFloor,
+                                     int meetingRoomCapacity,
+                                     String meetingRoomImage) {
+        public static MeetingRoomForList from(MeetingRoom meetingRoom) {
+            return new MeetingRoomForList(
                     meetingRoom.getSpaceId(),
                     meetingRoom.getSpaceName(),
                     meetingRoom.getSpaceFloor(),
