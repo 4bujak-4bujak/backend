@@ -46,11 +46,6 @@ jobs:
         touch ./src/main/resources/application.properties
         echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
 
-    - name: make logback-spring.xml
-      run: |
-        touch ./src/main/resources/logback-spring.xml
-        echo "${{ secrets.LOGBACK }}" | base64 --decode > ./src/main/resources/logback-spring.xml
-
     - name: Run chmod to make gradlew executable 
       run: chmod +x ./gradlew
 
@@ -69,7 +64,7 @@ jobs:
         ssh -f -o ExitOnForwardFailure=yes -L 3306:${{ secrets.RDS_HOST }}:3306 ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} -i ~/.ssh/id_rsa -N
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build
+      run: ./gradlew build
 
     - name: Make Zip File 
       run: zip -qq -r ./$GITHUB_SHA.zip .
@@ -86,14 +81,14 @@ jobs:
       run: aws s3 cp ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
 
     - name: Code Deploy To EC2 instance 
-      run: |
-        aws deploy create-deployment \
-          --application-name $CODE_DEPLOY_APP_NAME \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
-          --deployment-group-name $DEPLOYMENT_GROUP_NAME \
-          --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+      run: aws deploy create-deployment
+        --application-name $CODE_DEPLOY_APP_NAME
+        --deployment-config-name CodeDeployDefault.AllAtOnce
+        --deployment-group-name $DEPLOYMENT_GROUP_NAME
+        --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
 
   dependency-submission:
+
     runs-on: ubuntu-latest
     permissions:
       contents: write
