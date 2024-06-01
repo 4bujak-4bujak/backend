@@ -1,8 +1,6 @@
 package com.example.sabujak.space.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
@@ -30,4 +28,8 @@ public class MeetingRoom extends Space {
     @Column(name = "isPrivate")
     @NotNull
     private boolean isPrivate;
+
+    @Column(name = "meeting_room_type")
+    @Enumerated(EnumType.STRING)
+    private MeetingRoomType meetingRoomType;
 }
