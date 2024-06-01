@@ -4,8 +4,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +14,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static com.google.firebase.FirebaseApp.DEFAULT_APP_NAME;
 
@@ -53,12 +52,12 @@ public class FCMConfig {
             ClassPathResource resource = new ClassPathResource(path);
             InputStream credentialsStream = resource.getInputStream();
 
-            InputStreamReader reader = new InputStreamReader(credentialsStream);
-            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(credentialsStream);
 
-            for (String key : jsonObject.keySet()) {
-                log.info("Key: " + key + ", Value: " + jsonObject.get(key));
-            }
+            jsonNode.fields().forEachRemaining(entry -> {
+                log.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            });
 
             credentialsStream = resource.getInputStream();
 
