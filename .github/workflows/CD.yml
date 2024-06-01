@@ -49,11 +49,11 @@ jobs:
           name: "private-key.json"
           json: ${{ secrets.FCM_PRIVATE_KEY }}
 
-      - name: Move Firebase private key to firebase directory
+      - name: Move Firebase private key to src/main/resources directory
         run: |
-          mkdir -p ./src/main/resources/firebase/
-          mv ${{ steps.create-firebase-private-key.outputs.filepath }} ./src/main/resources/firebase/private-key.json
-
+          mkdir -p ./src/main/resources/firebase
+          mv private-key.json ./src/main/resources/firebase/private-key.json
+      
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
