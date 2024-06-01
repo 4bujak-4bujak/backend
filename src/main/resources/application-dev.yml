@@ -44,7 +44,7 @@ cloud:
       access-key: ${CREDENTIALAS_ACCESS_KEY}
       secret-key: ${CREDENTIALAS_SECRET_KEY}
     s3:
-      bucket: ${S3_BUKET_NAME}
+      bucket: ${S3_BUCKET_NAME}
     region:
       static: ap-northeast-2
     stack:
