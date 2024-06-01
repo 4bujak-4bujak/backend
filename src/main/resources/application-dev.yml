@@ -57,7 +57,7 @@ cloud:
       
 jwt:
   secret: ${JWT_SECRET}
-  issuer: ${JWT_ISSUER}
+  issuer: ${JWT_ISSUER}
 
 fcm:
   private:
