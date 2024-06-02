@@ -55,4 +55,14 @@ public class SpaceService {
 
         return new FocusDeskResponseDto.AvailableSeatCountInformation(totalCount, availableCount, reservedCount);
     }
+
+    public List<FocusDeskResponseDto.FocusDeskForList> getFocusDeskList(Long branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
+
+        return focusDeskRepository.findAllByBranch(branch)
+                .stream()
+                .map(FocusDeskResponseDto.FocusDeskForList::from)
+                .collect(Collectors.toList());
+    }
 }
