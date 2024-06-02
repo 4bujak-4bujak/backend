@@ -16,10 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "reservations", description = "예약 관련 API")
 @RestController
@@ -70,6 +67,20 @@ public class ReservationController {
     public ResponseEntity<Response<Void>> reserveFocusDesk(@AuthenticationPrincipal AuthRequestDto.Access access,
                                                            @Valid @RequestBody ReservationRequestDto.FocusDeskDto focusDeskDto) {
         reservationService.reserveFocusDesk(access.getEmail(), focusDeskDto);
+        return ResponseEntity.ok(Response.success(null));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "예약 종료 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "예약 종료 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "포커스 데스크 예약 종료", description = "포커스존 좌석 ID 받고 해당 예약자인지 검증 후 예약 종료")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @DeleteMapping("/focus-desks")
+    public ResponseEntity<Response<Void>> endUseDesk(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                     @Valid @RequestBody ReservationRequestDto.FocusDeskDto focusDeskDto) {
+        reservationService.endUseFocusDesk(access.getEmail(), focusDeskDto);
         return ResponseEntity.ok(Response.success(null));
     }
 }

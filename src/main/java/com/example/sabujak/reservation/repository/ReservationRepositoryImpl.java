@@ -33,7 +33,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 //    }
 
     @Override
-    public List<Reservation> findOverlappingFocusDeskReservation(Member member, LocalDateTime startAt) {
+    public List<Reservation> findTodayReservationOrderByTime(Member member, LocalDateTime startAt) {
         LocalDateTime endAt = startAt;
         startAt = startAt.with(LocalTime.MIDNIGHT);
         return queryFactory.selectFrom(reservation)
