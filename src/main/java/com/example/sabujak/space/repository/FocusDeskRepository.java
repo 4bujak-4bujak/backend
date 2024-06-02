@@ -9,6 +9,7 @@ import java.util.List;
 public interface FocusDeskRepository extends JpaRepository<FocusDesk, Long> {
 
     List<FocusDesk> findAllByBranch(Branch branch);
+    List<FocusDesk> findAllByCanReserve(boolean canReserve);
 
     Integer countAllByBranch(Branch branch);
     Integer countAllByBranchAndAndCanReserve(Branch branch, boolean canReserve);
