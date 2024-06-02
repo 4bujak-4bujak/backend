@@ -9,7 +9,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Getter
 @RequiredArgsConstructor
-public enum MeetingRoomErrorCode implements ErrorCode {
+public enum SpaceErrorCode implements ErrorCode {
 
     MEETING_ROOM_NOT_FOUND(BAD_REQUEST, "8-001", "존재하지 않는 미팅룸입니다");
 
