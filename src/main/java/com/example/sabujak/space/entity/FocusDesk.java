@@ -1,7 +1,10 @@
 package com.example.sabujak.space.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +15,15 @@ import lombok.NoArgsConstructor;
 @Table(name = "focus_desk")
 public class FocusDesk extends Space {
 
-    //얘는 좀더 고민하다가 나중에 FocusDeskRoom을 따로 추가?
+    @Column(name = "focus_desk_number")
+    @Positive
+    private int focusDeskNumber;
+
+    @Column(name = "can_reserve")
+    @NotNull
+    private boolean canReserve = true;
+
+    public void changeCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
 }

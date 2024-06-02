@@ -32,4 +32,18 @@ public class MemberReservation {
     @Enumerated(EnumType.STRING)
     @Column(name = "member_reservation_type")
     private MemberReservationType memberReservationType;
+
+    public static MemberReservation createMemberReservation(Reservation reservation, Member member, MemberReservationType memberReservationType) {
+        MemberReservation memberReservation = new MemberReservation();
+
+        memberReservation.reservation = reservation;
+        memberReservation.member = member;
+
+        memberReservation.memberReservationStatus = ReservationStatus.ACCEPTED;
+        memberReservation.memberReservationType = memberReservationType;
+
+        reservation.getMemberReservations().add(memberReservation);
+        member.getMemberReservations().add(memberReservation);
+        return memberReservation;
+    }
 }

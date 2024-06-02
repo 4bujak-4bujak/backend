@@ -1,6 +1,7 @@
 package com.example.sabujak.reservation.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
+import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.space.entity.Space;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,10 +28,27 @@ public class Reservation extends BaseEntity {
     @Column(name = "reservation_end_date_time")
     private LocalDateTime reservationEndDateTime;
 
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
     private List<MemberReservation> memberReservations = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "space_id")
     private Space space;
+
+    public static Reservation createReservation(LocalDateTime reservationStartDateTime, LocalDateTime reservationEndDateTime, Space space) {
+        Reservation reservation = new Reservation();
+        reservation.reservationStartDateTime = reservationStartDateTime;
+        reservation.reservationEndDateTime = reservationEndDateTime;
+        reservation.space = space;
+
+        return reservation;
+    }
+
+    public void addMemberReservation(Member member, MemberReservationType memberReservationType) {
+        MemberReservation.createMemberReservation(this, member, memberReservationType);
+    }
+
+    public void endUse(LocalDateTime endDateTime) {
+        this.reservationEndDateTime = endDateTime;
+    }
 }

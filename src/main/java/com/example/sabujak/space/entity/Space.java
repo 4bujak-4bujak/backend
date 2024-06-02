@@ -43,5 +43,6 @@ public abstract class Space {
     @OrderBy("imageId asc")
     private List<SpaceImage> imageList = new ArrayList<>();
 
-
+    @Column(insertable = false, updatable = false)
+    private String dtype;
 }
