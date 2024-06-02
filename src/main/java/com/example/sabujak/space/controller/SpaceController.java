@@ -81,4 +81,16 @@ public class SpaceController {
     public ResponseEntity<Response<FocusDeskResponseDto.AvailableSeatCountInformation>> getAvailableSeatCount(@PathVariable Long branchId) {
         return ResponseEntity.ok(Response.success(spaceService.getAvailableSeatCount(branchId)));
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "포커스존 좌석 정보 리스트", description = "해당 지점의 포커스 존 좌석 정보(예약 가능한지) 리스트")
+    @Parameters({
+            @Parameter(name = "branchId", description = "지점 Id", example = "1")
+    })
+    @GetMapping("/focus-zone/{branchId}")
+    public ResponseEntity<Response<List<FocusDeskResponseDto.FocusDeskForList>>> getFocusDeskList(@PathVariable Long branchId) {
+        return ResponseEntity.ok(Response.success(spaceService.getFocusDeskList(branchId)));
+    }
 }
