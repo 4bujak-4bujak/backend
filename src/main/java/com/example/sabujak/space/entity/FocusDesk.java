@@ -22,4 +22,8 @@ public class FocusDesk extends Space {
     @Column(name = "can_reserve")
     @NotNull
     private boolean canReserve = true;
+
+    public void changeCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
 }
