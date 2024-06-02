@@ -8,7 +8,7 @@ import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
-import com.example.sabujak.space.exception.meetingroom.MeetingRoomException;
+import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.sabujak.space.exception.meetingroom.MeetingRoomErrorCode.MEETING_ROOM_NOT_FOUND;
+import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.MEETING_ROOM_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -41,7 +41,7 @@ public class SpaceService {
 
     public MeetingRoomResponseDto.MeetingRoomDetails getMeetingRoomDetails(Long meetingRoomId) {
         MeetingRoom meetingRoom = meetingRoomRepository.findByMeetingRoomIdWithBranch(meetingRoomId)
-                .orElseThrow(() -> new MeetingRoomException(MEETING_ROOM_NOT_FOUND));
+                .orElseThrow(() -> new SpaceException(MEETING_ROOM_NOT_FOUND));
         return MeetingRoomResponseDto.MeetingRoomDetails.of(meetingRoom.getBranch(), meetingRoom);
     }
 
