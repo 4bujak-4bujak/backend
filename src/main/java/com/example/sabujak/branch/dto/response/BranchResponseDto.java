@@ -9,6 +9,7 @@ import java.util.Set;
 @Getter
 @AllArgsConstructor
 public class BranchResponseDto {
+    private Long branchId;
     private String branchName;
     private String branchAddress;
 
@@ -21,6 +22,7 @@ public class BranchResponseDto {
 
     public static BranchResponseDto fromEntity(Branch branch) {
         return new BranchResponseDto(
+                branch.getBranchId(),
                 branch.getBranchName(),
                 branch.getBranchAddress(),
                 branch.getBranchLatitude(),
