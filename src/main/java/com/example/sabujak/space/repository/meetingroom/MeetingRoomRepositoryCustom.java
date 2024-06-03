@@ -9,4 +9,7 @@ import java.util.List;
 
 public interface MeetingRoomRepositoryCustom {
     List<MeetingRoom> findMeetingRoomList(LocalDateTime startAt, LocalDateTime endAt, String branchName, List<MeetingRoomType> meetingRoomTypes, boolean projectorExists, boolean canVideoConference, boolean isPrivate, String sortTarget, String sortDirection);
+
+    Integer countTotalMeetingRoom(String branchName);
+    Integer countActiveMeetingRoom(LocalDateTime now, String branchName);
 }
