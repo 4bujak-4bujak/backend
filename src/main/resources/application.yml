@@ -52,6 +52,13 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+
 jwt:
   secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
   issuer: issuer
+
+fcm:
+  private:
+    key:
+      path: firebase/private-key.json
+      scope: scope

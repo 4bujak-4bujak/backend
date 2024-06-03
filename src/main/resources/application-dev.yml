@@ -28,6 +28,11 @@ spring:
         timeout: 5000
         write-timeout: 5000
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
 springdoc:
   swagger-ui:
     path: /api-docs
@@ -52,7 +57,7 @@ cloud:
       
 jwt:
   secret: ${JWT_SECRET}
-  issuer: ${JWT_ISSUER}
+  issuer: ${JWT_ISSUER}
 
 fcm:
   private:

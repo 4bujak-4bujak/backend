@@ -6,7 +6,7 @@ import com.example.sabujak.post.dto.SaveCommentRequest;
 import com.example.sabujak.post.dto.SavePostLikeRequest;
 import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.Category;
-import com.example.sabujak.post.service.facade.PostFacade;
+import com.example.sabujak.post.service.PostFacade;
 import com.example.sabujak.security.dto.request.AuthRequestDto.Access;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -109,7 +109,7 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/comments")
-    public ResponseEntity<Response<Void>> saveComment(
+    public ResponseEntity<Response<Void>> saveCommentAndPublishEvent(
             @PathVariable Long postId,
             @RequestBody @Validated SaveCommentRequest saveCommentRequest,
             @AuthenticationPrincipal Access access
