@@ -152,7 +152,7 @@ public class PostFacade {
         if(!commenterEmail.equals(writerEmail)) {
             log.info("Creating and Publishing Event for Writer Notification.");
             String content = createCommentContent(post.getTitle(), commenter.getMemberName());
-            publisher.publishEvent(new saveCommentEvent(request.getRequestURI(), content, writerEmail, writer));
+            publisher.publishEvent(new SaveCommentEvent(request.getRequestURI(), content, writerEmail, writer));
         }
     }
 

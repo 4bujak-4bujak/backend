@@ -2,7 +2,7 @@ package com.example.sabujak.post.dto;
 
 import com.example.sabujak.member.entity.Member;
 
-public record saveCommentEvent(
+public record SaveCommentEvent(
         String targetUrl,
         String notificationContent,
         String receiverEmail,
