@@ -39,7 +39,7 @@ public class SecurityConstants {
     public static final String[] ALLOWED_ORIGINS = {
             "http://localhost:3000", "http://172.30.1.*", "http://localhost:8080",
             "https://4busak.vercel.app","https://4busak-git-main-eunhaks-projects.vercel.app","https://4busak-hqmkp0gky-eunhaks-projects.vercel.app",
-            "https://*.vercel.app", "https://joo-api.store", "https://www.4bujak.site"
+            "https://*.vercel.app", "https://joo-api.store", "https://www.4bujak.site", "https://35ec-112-146-85-31.ngrok-free.app"
     };
 
     public static final String[] PERMIT_ALL_GET_ENDPOINTS = {
