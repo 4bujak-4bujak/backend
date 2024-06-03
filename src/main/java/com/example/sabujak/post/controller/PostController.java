@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.sabujak.post.constants.PaginationConstants.*;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RestController
@@ -100,7 +101,7 @@ public class PostController {
                     page = DEFAULT_PAGE,
                     size = DEFAULT_COMMENT_PAGE_SIZE,
                     sort = DEFAULT_SORT_FIELD,
-                    direction = DESC
+                    direction = ASC
             ) Pageable pageable,
             @AuthenticationPrincipal Access access
     ) {

@@ -28,7 +28,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                     "from Comment c " +
                     "join fetch c.member m " +
                     "where c.post.id = :postId and " +
-                    "(:cursorId is null or c.id < :cursorId)"
+                    "(:cursorId is null or c.id > :cursorId)"
     )
     List<Comment> findWithMemberByPostIdAndCursorId(
             @Param("postId") Long postId,

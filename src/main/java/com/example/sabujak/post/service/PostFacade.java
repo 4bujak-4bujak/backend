@@ -7,7 +7,6 @@ import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.*;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.sabujak.fcm.constants.FCMConstants.COMMUNITY_URL_PREFIX;
 import static com.example.sabujak.notification.utils.NotificationContent.createCommentContent;
 
 @Slf4j
@@ -32,7 +32,6 @@ public class PostFacade {
     private final PostLikeService postLikeService;
     private final CommentService commentService;
 
-    private final HttpServletRequest request;
     private final ApplicationEventPublisher publisher;
 
     @Transactional(readOnly = true)
@@ -152,7 +151,8 @@ public class PostFacade {
         if(!commenterEmail.equals(writerEmail)) {
             log.info("Creating and Publishing Event for Writer Notification.");
             String content = createCommentContent(post.getTitle(), commenter.getMemberName());
-            publisher.publishEvent(new SaveCommentEvent(request.getRequestURI(), content, writerEmail, writer));
+            String targetUrl = createTargetUrl(post.getId());
+            publisher.publishEvent(new SaveCommentEvent(targetUrl, content, writerEmail, writer));
         }
     }
 
@@ -197,5 +197,9 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
+    }
+
+    private String createTargetUrl(Long id) {
+        return COMMUNITY_URL_PREFIX + id;
     }
 }
