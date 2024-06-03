@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.example.sabujak.fcm.constants.FCMConstants.DEFAULT_TITLE;
-import static com.example.sabujak.fcm.constants.FCMConstants.TARGET_URL_KEY;
+import static com.example.sabujak.fcm.constants.FCMConstants.*;
 import static com.example.sabujak.fcm.exception.FCMErrorCode.*;
 import static com.google.firebase.messaging.MessagingErrorCode.*;
 
@@ -36,6 +35,7 @@ public class FCMNotificationService {
         return Notification.builder()
                 .setTitle(DEFAULT_TITLE)
                 .setBody(body)
+                .setImage(DEFAULT_IMAGE)
                 .build();
     }
 
