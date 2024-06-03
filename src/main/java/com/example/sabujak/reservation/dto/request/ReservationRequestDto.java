@@ -4,7 +4,6 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.MemberReservationType;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.space.entity.FocusDesk;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
@@ -33,9 +32,7 @@ public class ReservationRequestDto {
 
     public record FocusDeskDto(
             @Positive
-            Long focusDeskId,
-            @NotNull
-            LocalDateTime startAt) {
+            Long focusDeskId) {
 
         public Reservation toReservationEntity(FocusDesk focusDesk, LocalDateTime startAt, Member member) {
             LocalDateTime endAt = startAt.plusDays(1).with(LocalTime.MIDNIGHT);
