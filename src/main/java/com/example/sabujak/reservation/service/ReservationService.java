@@ -3,6 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
+import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.exception.ReservationException;
 import com.example.sabujak.reservation.repository.ReservationRepository;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
@@ -82,6 +84,9 @@ public class ReservationService {
 
     @Transactional
     public void reserveFocusDesk(String email, ReservationRequestDto.FocusDeskDto focusDeskDto) {
+
+        LocalDateTime now = LocalDateTime.now();
+
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
@@ -94,7 +99,7 @@ public class ReservationService {
         }
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
-        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, focusDeskDto.startAt());
+        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
 
         // 당일 예약한게 있는데 해당 좌석을 예약 종료하지 않았으면 기존 좌석 사용 종료
         if (!todayReservations.isEmpty()) {
@@ -103,15 +108,15 @@ public class ReservationService {
             Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
             FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
 
-            // 해당 좌석이 예약 종료된 상태가 아니면 예약 종료
-            if(!todayLatestFocusDesk.isCanReserve()){
-                todayLatestReservation.endUse(focusDeskDto.startAt());
+            // 해당 좌석을 예약 종료 하지 않았으면 사용 종료
+            if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
+                todayLatestReservation.endUse(now);
                 todayLatestFocusDesk.changeCanReserve(true);
             }
         }
 
         //새로운 좌석 예약
-        Reservation reservation = focusDeskDto.toReservationEntity(focusDesk, focusDeskDto.startAt(), member);
+        Reservation reservation = focusDeskDto.toReservationEntity(focusDesk, now, member);
         focusDesk.changeCanReserve(false);
 
         reservationRepository.save(reservation);
@@ -119,6 +124,9 @@ public class ReservationService {
 
     @Transactional
     public void endUseFocusDesk(String email, ReservationRequestDto.FocusDeskDto focusDeskDto) {
+
+        LocalDateTime now = LocalDateTime.now();
+
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
@@ -126,7 +134,7 @@ public class ReservationService {
                 .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
-        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, focusDeskDto.startAt());
+        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
 
         // 당일 예약한게 없으면 요청 좌석이 해당 회원이 예약한 좌석이 아니니까 예외처리
         if (todayReservations.isEmpty()) {
@@ -136,17 +144,47 @@ public class ReservationService {
         // 당일 예약 중 가장 최근 좌석을 찾아서 예약 종료 요청한 좌석이랑 맞는지 검증
         Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
         FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
-        if(todayLatestFocusDesk.getFocusDeskNumber() != focusDesk.getFocusDeskNumber()) {
+        if (todayLatestFocusDesk.getFocusDeskNumber() != focusDesk.getFocusDeskNumber()) {
             throw new ReservationException(NOT_RESERVED_BY_MEMBER);
         }
 
-        // 이미 예약 종료된 포커스 데스크인지 확인
-        if (focusDesk.isCanReserve()) {
+        // 이미 예약 종료를 한 내역인지 확인
+        if (todayLatestReservation.getReservationEndDateTime().isBefore(now) && focusDesk.isCanReserve()) {
             throw new ReservationException(ALREADY_ENDED_RESERVED_FOCUS_DESK);
         }
 
         //모든 검증을 통과하면 사용 종료
-        todayLatestReservation.endUse(focusDeskDto.startAt());
+        todayLatestReservation.endUse(now);
         focusDesk.changeCanReserve(true);
+    }
+
+    public ReservationResponseDto.CheckOverlap checkOverlap(String email, Long focusDeskId) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        FocusDesk focusDesk = focusDeskRepository.findById(focusDeskId)
+                .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
+
+        // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
+        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
+
+        // 당일 예약한게 없으면 사용중인 좌석이 없음
+        if (todayReservations.isEmpty()) {
+            return new ReservationResponseDto.CheckOverlap(false);
+        }
+
+        // 당일 예약 중 가장 최근 좌석을 찾아서
+        Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
+        FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
+
+        // 가장 최근 좌석을 종료하지 않았고 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
+        if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
+            return new ReservationResponseDto.CheckOverlap(true);
+        }
+
+        return new ReservationResponseDto.CheckOverlap(false);
     }
 }
