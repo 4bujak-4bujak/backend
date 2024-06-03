@@ -3,6 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
+import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.exception.ReservationException;
 import com.example.sabujak.reservation.repository.ReservationRepository;
@@ -155,5 +156,35 @@ public class ReservationService {
         //모든 검증을 통과하면 사용 종료
         todayLatestReservation.endUse(now);
         focusDesk.changeCanReserve(true);
+    }
+
+    public ReservationResponseDto.CheckOverlap checkOverlap(String email, Long focusDeskId) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        FocusDesk focusDesk = focusDeskRepository.findById(focusDeskId)
+                .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
+
+        // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
+        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
+
+        // 당일 예약한게 없으면 사용중인 좌석이 없음
+        if (todayReservations.isEmpty()) {
+            return new ReservationResponseDto.CheckOverlap(false);
+        }
+
+        // 당일 예약 중 가장 최근 좌석을 찾아서
+        Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
+        FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
+
+        // 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
+        if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
+            return new ReservationResponseDto.CheckOverlap(true);
+        }
+
+        return new ReservationResponseDto.CheckOverlap(false);
     }
 }
