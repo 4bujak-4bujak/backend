@@ -7,7 +7,6 @@ import com.example.sabujak.post.dto.SavePostRequest;
 import com.example.sabujak.post.entity.*;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
