@@ -53,8 +53,8 @@ jobs:
 
       - name: make logback-spring.xml
         run: |
-          touch ./src/main/resources/logback-dev.xml
-          echo "${{ secrets.LOGBACK }}" | base64 --decode > ./src/main/resources/logback-dev.xml
+          touch ./src/main/resources/logback-spring.xml
+          echo "${{ secrets.LOGBACK }}" | base64 --decode > ./src/main/resources/logback-spring.xml
 
       - name: Create Firebase private key
         id: create-firebase-private-key
