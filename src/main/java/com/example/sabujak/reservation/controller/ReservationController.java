@@ -2,6 +2,7 @@ package com.example.sabujak.reservation.controller;
 
 import com.example.sabujak.common.response.Response;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
+import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.service.ReservationService;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,6 +69,19 @@ public class ReservationController {
                                                            @Valid @RequestBody ReservationRequestDto.FocusDeskDto focusDeskDto) {
         reservationService.reserveFocusDesk(access.getEmail(), focusDeskDto);
         return ResponseEntity.ok(Response.success(null));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "포커스 데스크 예약 검증", description = "포커스존 예약 전 기존에 사용중이 있는 좌석 있는지 확인")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @GetMapping("/focus-desks/check-overlap/{focusDeskId}")
+    public ResponseEntity<Response<ReservationResponseDto.CheckOverlap>> checkOverlap(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                                      @PathVariable Long focusDeskId) {
+        return ResponseEntity.ok(Response.success(reservationService.checkOverlap(access.getEmail(), focusDeskId)));
     }
 
     @ApiResponses(value = {
