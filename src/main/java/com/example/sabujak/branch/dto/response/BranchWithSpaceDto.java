@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BranchWithSpaceDto {
-
+    private Long id;
     private String branchName;
     private String branchAddress;
 

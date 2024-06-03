@@ -44,7 +44,7 @@ public class BranchService {
         int branchTotalMeetingRoomCount = meetingRoomRepository.countTotalMeetingRoom(branchName);
         int branchActiveMeetingRoomCount = meetingRoomRepository.countActiveMeetingRoom(now, branchName);
 
-        return new BranchWithSpaceDto(branch.getBranchName(),branch.getBranchAddress(),branchTotalMeetingRoomCount,branchActiveMeetingRoomCount);
+        return new BranchWithSpaceDto(branch.getBranchId(), branch.getBranchName(),branch.getBranchAddress(),branchTotalMeetingRoomCount,branchActiveMeetingRoomCount);
     }
 
 
