@@ -46,10 +46,15 @@ jobs:
           touch ./src/main/resources/application.properties
           echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
 
+      - name: make application-dev.properties
+        run: |
+          touch ./src/main/resources/application-dev.properties
+          echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application-dev.properties
+
       - name: make logback-spring.xml
         run: |
-          touch ./src/main/resources/logback-spring.xml
-          echo "${{ secrets.LOGBACK }}" | base64 --decode > ./src/main/resources/logback-spring.xml
+          touch ./src/main/resources/logback-dev.xml
+          echo "${{ secrets.LOGBACK }}" | base64 --decode > ./src/main/resources/logback-dev.xml
 
       - name: Create Firebase private key
         id: create-firebase-private-key
