@@ -108,8 +108,8 @@ public class ReservationService {
             Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
             FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
 
-            // 해당 좌석이 예약 종료된 상태가 아니면 예약 종료
-            if (!todayLatestFocusDesk.isCanReserve()) {
+            // 해당 좌석을 예약 종료 하지 않았으면 사용 종료
+            if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
                 todayLatestReservation.endUse(now);
                 todayLatestFocusDesk.changeCanReserve(true);
             }
@@ -148,8 +148,8 @@ public class ReservationService {
             throw new ReservationException(NOT_RESERVED_BY_MEMBER);
         }
 
-        // 이미 예약 종료된 포커스 데스크인지 확인
-        if (focusDesk.isCanReserve()) {
+        // 이미 예약 종료를 한 내역인지 확인
+        if (todayLatestReservation.getReservationEndDateTime().isBefore(now) && focusDesk.isCanReserve()) {
             throw new ReservationException(ALREADY_ENDED_RESERVED_FOCUS_DESK);
         }
 
@@ -180,7 +180,7 @@ public class ReservationService {
         Reservation todayLatestReservation = todayReservations.get(todayReservations.size() - 1);
         FocusDesk todayLatestFocusDesk = (FocusDesk) todayLatestReservation.getSpace();
 
-        // 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
+        // 가장 최근 좌석을 종료하지 않았고 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
         if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
             return new ReservationResponseDto.CheckOverlap(true);
         }
