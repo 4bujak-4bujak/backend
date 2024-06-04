@@ -4,6 +4,7 @@ import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.space.entity.Space;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,12 +32,17 @@ public class Reservation extends BaseEntity {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
     private List<MemberReservation> memberReservations = new ArrayList<>();
 
+    @Column(name = "reservation_name")
+    @NotNull
+    private String reservationName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "space_id")
     private Space space;
 
-    public static Reservation createReservation(LocalDateTime reservationStartDateTime, LocalDateTime reservationEndDateTime, Space space) {
+    public static Reservation createReservation(String reservationName, LocalDateTime reservationStartDateTime, LocalDateTime reservationEndDateTime, Space space) {
         Reservation reservation = new Reservation();
+        reservation.reservationName = reservationName;
         reservation.reservationStartDateTime = reservationStartDateTime;
         reservation.reservationEndDateTime = reservationEndDateTime;
         reservation.space = space;

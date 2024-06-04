@@ -37,7 +37,7 @@ public class ReservationRequestDto {
         public Reservation toReservationEntity(FocusDesk focusDesk, LocalDateTime startAt, Member member) {
             LocalDateTime endAt = startAt.plusDays(1).with(LocalTime.MIDNIGHT);
 
-            Reservation reservation = Reservation.createReservation(startAt, endAt, focusDesk);
+            Reservation reservation = Reservation.createReservation("포커스존", startAt, endAt, focusDesk);
             reservation.addMemberReservation(member, MemberReservationType.REPRESENTATIVE);
 
             return reservation;
