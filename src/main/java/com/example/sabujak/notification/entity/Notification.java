@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -23,14 +24,18 @@ public class Notification extends BaseEntity {
     private String content;
     private String targetUrl;
 
+    @Enumerated(STRING)
+    private NotificationType type;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     Member member;
 
     @Builder
-    private Notification(String content, String targetUrl) {
+    private Notification(String content, String targetUrl, NotificationType type) {
         this.content = content;
         this.targetUrl = targetUrl;
+        this.type = type;
     }
 
     public void setMember(Member member) {
