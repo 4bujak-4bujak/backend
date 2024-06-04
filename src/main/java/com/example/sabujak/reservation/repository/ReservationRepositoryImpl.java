@@ -17,20 +17,20 @@ import static com.example.sabujak.space.entity.QSpace.space;
 public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
-//    @Override
-//    public boolean existsOverlappingMeetingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
-//        return queryFactory.selectOne()
-//                .from(reservation)
-//                .join(reservation.memberReservations, memberReservation)
-//                .join(reservation.space, space)
-//                .where(memberReservation.member.eq(member),
-//                        space.dtype.eq("MeetingRoom"),
-//                        reservation.reservationStartDateTime.between(startAt, endAt)
-//                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
-//                                .or(reservation.reservationStartDateTime.before(startAt)
-//                                        .and(reservation.reservationEndDateTime.after(endAt))))
-//                .fetchFirst() != null;
-//    }
+    @Override
+    public boolean existsOverlappingMeetingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        space.dtype.eq("MeetingRoom"),
+                        reservation.reservationStartDateTime.between(startAt, endAt)
+                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
+                                .or(reservation.reservationStartDateTime.before(startAt)
+                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                .fetchFirst() != null;
+    }
 
     @Override
     public List<Reservation> findTodayReservationOrderByTime(Member member, LocalDateTime startAt) {
@@ -44,5 +44,19 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .orderBy(reservation.reservationId.asc())
                 .fetch();
+    }
+
+    @Override
+    public Integer countTodayReservation(Member member, LocalDateTime now) {
+        LocalDateTime startAt = now.with(LocalTime.MIDNIGHT);
+        LocalDateTime endAt = now.with(LocalTime.MAX);
+
+        return Math.toIntExact(queryFactory.select(reservation.count())
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        reservation.reservationStartDateTime.between(startAt, endAt))
+                .fetchFirst());
     }
 }

@@ -2,6 +2,7 @@ package com.example.sabujak.reservation.controller;
 
 import com.example.sabujak.common.response.Response;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
+import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.service.ReservationService;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
@@ -27,7 +28,20 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-//    @ApiResponses(value = {
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "당일 예약 총 수", description = "오늘 n개의 예약 기능 에서 n 반환")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @GetMapping("/today/count")
+    public ResponseEntity<Response<ReservationHistoryResponse.TodayReservationCount>> getTodayReservationCount(@AuthenticationPrincipal AuthRequestDto.Access access) {
+        return ResponseEntity.ok(Response.success(reservationService.getTodayReservationCount(access.getEmail())));
+    }
+
+    //    @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
 //            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
 //    @Operation(summary = "예약 과정중 초대 가능 멤버 조회", description = "예약 과정에서 같은 회사에 다니고 특정 검증을 거쳐 참석자로 초대될 수 있는 사람 조회")
@@ -43,19 +57,19 @@ public class ReservationController {
 //        return ResponseEntity.ok(Response.success(reservationService.findMembers(access.getEmail(), searchTerm)));
 //    }
 //
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
-//            @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-//    @Operation(summary = "미팅룸 예약", description = "미팅룸 예약 관련 모든 정보들을 받고 최종 예약")
-//    @Parameters({
-//            @Parameter(name = "access", hidden = true)
-//    })
-//    @PostMapping("/meeting-rooms")
-//    public ResponseEntity<Response<Void>> reserveMeetingRoom(@AuthenticationPrincipal AuthRequestDto.Access access,
-//                                                             @Valid @RequestBody ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
-//        reservationService.reserveMeetingRoom(access.getEmail(), meetingRoomDto);
-//        return ResponseEntity.ok(Response.success(null));
-//    }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "미팅룸 예약", description = "미팅룸 예약 관련 모든 정보들을 받고 최종 예약")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @PostMapping("/meeting-rooms")
+    public ResponseEntity<Response<Void>> reserveMeetingRoom(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                             @Valid @RequestBody ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
+        reservationService.reserveMeetingRoom(access.getEmail(), meetingRoomDto);
+        return ResponseEntity.ok(Response.success(null));
+    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),

@@ -3,12 +3,14 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
+import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.exception.ReservationException;
 import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.entity.FocusDesk;
+import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
@@ -22,6 +24,7 @@ import java.util.List;
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.FOCUS_DESK_NOT_FOUND;
+import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.MEETING_ROOM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class ReservationService {
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
 
-//    public List<ReservationResponseDto.FindMember> findMembers(String email, String searchTerm) {
+    //    public List<ReservationResponseDto.FindMember> findMembers(String email, String searchTerm) {
 //        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
 //                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 //
@@ -41,46 +44,46 @@ public class ReservationService {
 //                .collect(Collectors.toList());
 //    }
 //
-//    @Transactional
-//    public void reserveMeetingRoom(String email, ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
-//        final Member representative = memberRepository.findByMemberEmail(email)
-//                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-//
-//        final MeetingRoom meetingRoom = meetingRoomRepository.findById(meetingRoomDto.meetingRoomId())
-//                .orElseThrow(() -> new SpaceException(MEETING_ROOM_NOT_FOUND));
-//
-//        final List<Member> participants = memberRepository.findByMemberIdIn(meetingRoomDto.memberIds());
-//
-//        //대표자 미팅룸 예약 검증
-//        if (verifyOverlappingMeetingRoom(representative, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
-//            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
-//        }
-//        //참여자 미팅룸 예약 검증
-//        else if (verifyOverlappingMeetingRoom(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
-//            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
-//        }
-//
-//        Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, meetingRoomDto.startAt(), meetingRoomDto.endAt(), representative, participants);
-//
-//
-//        reservationRepository.save(reservation);
-//    }
-//
-//    private boolean verifyOverlappingMeetingRoom(Member representative, LocalDateTime startAt, LocalDateTime endAt) {
-//        if (reservationRepository.existsOverlappingMeetingRoomReservation(representative, startAt, endAt)) {
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    private boolean verifyOverlappingMeetingRoom(List<Member> participants, LocalDateTime startAt, LocalDateTime endAt) {
-//        for (Member participant : participants) {
-//            if (reservationRepository.existsOverlappingMeetingRoomReservation(participant, startAt, endAt)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    @Transactional
+    public void reserveMeetingRoom(String email, ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
+        final Member representative = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        final MeetingRoom meetingRoom = meetingRoomRepository.findById(meetingRoomDto.meetingRoomId())
+                .orElseThrow(() -> new SpaceException(MEETING_ROOM_NOT_FOUND));
+
+        final List<Member> participants = memberRepository.findByMemberIdIn(meetingRoomDto.memberIds());
+
+        //대표자 미팅룸 예약 검증
+        if (verifyOverlappingMeetingRoom(representative, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
+            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
+        }
+        //참여자 미팅룸 예약 검증
+        else if (verifyOverlappingMeetingRoom(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
+            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
+        }
+
+        Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, representative, participants);
+
+
+        reservationRepository.save(reservation);
+    }
+
+    private boolean verifyOverlappingMeetingRoom(Member representative, LocalDateTime startAt, LocalDateTime endAt) {
+        if (reservationRepository.existsOverlappingMeetingRoomReservation(representative, startAt, endAt)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean verifyOverlappingMeetingRoom(List<Member> participants, LocalDateTime startAt, LocalDateTime endAt) {
+        for (Member participant : participants) {
+            if (reservationRepository.existsOverlappingMeetingRoomReservation(participant, startAt, endAt)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Transactional
     public void reserveFocusDesk(String email, ReservationRequestDto.FocusDeskDto focusDeskDto) {
@@ -186,5 +189,17 @@ public class ReservationService {
         }
 
         return new ReservationResponseDto.CheckOverlap(false);
+    }
+
+    public ReservationHistoryResponse.TodayReservationCount getTodayReservationCount(String email) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        Integer todayReservationCount = reservationRepository.countTodayReservation(member, now);
+
+        return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
     }
 }

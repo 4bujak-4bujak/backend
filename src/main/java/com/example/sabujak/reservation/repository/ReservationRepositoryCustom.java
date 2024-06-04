@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface ReservationRepositoryCustom {
 
-//    boolean existsOverlappingMeetingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
+    boolean existsOverlappingMeetingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
 
     List<Reservation> findTodayReservationOrderByTime(Member member, LocalDateTime startAt);
+
+    Integer countTodayReservation(Member member, LocalDateTime now);
 }
