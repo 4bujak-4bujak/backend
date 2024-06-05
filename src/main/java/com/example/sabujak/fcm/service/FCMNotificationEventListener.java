@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import static com.example.sabujak.fcm.constants.FCMConstants.DEFAULT_TITLE;
 import static com.example.sabujak.notification.entity.NotificationType.COMMUNITY;
 import static java.lang.Thread.currentThread;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
@@ -36,13 +37,13 @@ public class FCMNotificationEventListener {
                 "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl
         );
 
-        saveNotification(content, targetUrl, COMMUNITY, event.receiver());
+        saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.receiver());
         sendFCMNotification(email, createFCMMessage(email, content, targetUrl));
     }
 
-    private void saveNotification(String content, String targetUrl, NotificationType type, Member member) {
+    private void saveNotification(String title, String content, String targetUrl, NotificationType type, Member member) {
         log.info("Start Saving Notification Before Sending FCM Notification.");
-        notificationService.saveNotification(content, targetUrl, type, member);
+        notificationService.saveNotification(title, content, targetUrl, type, member);
     }
 
     private Message createFCMMessage(String email, String content, String targetUrl) {
