@@ -49,9 +49,9 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     }
 
     @Override
-    public List<Reservation> findTodayReservations(Member member, LocalDateTime now) {
+    public List<Reservation> findReservationsWithDuration(Member member, LocalDateTime now, int duration) {
         LocalDateTime startAt = now.with(LocalTime.MIDNIGHT);
-        LocalDateTime endAt = now.with(LocalTime.MAX);
+        LocalDateTime endAt = now.plusDays(duration).with(LocalTime.MAX);
 
         return queryFactory.selectFrom(reservation)
                 .join(reservation.memberReservations, memberReservation)

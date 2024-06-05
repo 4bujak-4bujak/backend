@@ -12,6 +12,6 @@ public interface ReservationRepositoryCustom {
 
     List<Reservation> findTodayFocusDeskReservationOrderByTime(Member member, LocalDateTime startAt);
 
-    List<Reservation> findTodayReservations(Member member, LocalDateTime now);
+    List<Reservation> findReservationsWithDuration(Member member, LocalDateTime now, int duration);
     Integer countTodayReservation(Member member, LocalDateTime now);
 }
