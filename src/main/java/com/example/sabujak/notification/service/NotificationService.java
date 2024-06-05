@@ -40,8 +40,9 @@ public class NotificationService {
     }
 
     @Transactional(propagation = REQUIRED)
-    public void saveNotification(String content, String targetUrl, NotificationType type, Member member) {
+    public void saveNotification(String title, String content, String targetUrl, NotificationType type, Member member) {
         Notification notification = Notification.builder()
+                .title(title)
                 .content(content)
                 .targetUrl(targetUrl)
                 .type(type)
