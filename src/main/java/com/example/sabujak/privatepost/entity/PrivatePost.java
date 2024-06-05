@@ -16,12 +16,13 @@ public class PrivatePost extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "private_post_id")
     private Long id;
 
-    @Column(nullable = false, length = 20) //최대 20자
+    @Column(nullable = false, length = 20, name = "private_post_title") //최대 20자
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "private_post_content")
     private String content;
 
     @Setter
