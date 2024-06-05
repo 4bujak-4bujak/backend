@@ -2,6 +2,7 @@ package com.example.sabujak.member.entity;
 
 import com.example.sabujak.common.entity.BaseEntity;
 import com.example.sabujak.company.entity.Company;
+import com.example.sabujak.privatepost.entity.PrivatePost;
 import com.example.sabujak.reservation.entity.MemberReservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -69,6 +70,9 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private List<MemberReservation> memberReservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<PrivatePost> privatePosts = new ArrayList<>();
 
     @Builder
     private Member(String memberEmail, String memberPassword, String memberName, String memberPhone, Job memberJob, boolean memberSmsAgree) {
