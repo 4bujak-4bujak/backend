@@ -59,8 +59,8 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
         return JPAExpressions.selectOne()
                 .from(reservation)
                 .where(reservation.space.spaceId.eq(QMeetingRoom.meetingRoom.spaceId),
-                        reservation.reservationStartDateTime.between(startAt, endAt)
-                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
+                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
+                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
                                         .and(reservation.reservationEndDateTime.after(endAt))))
                 .notExists();
