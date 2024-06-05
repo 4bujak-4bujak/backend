@@ -26,8 +26,23 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
                         space.dtype.eq("MeetingRoom"),
-                        reservation.reservationStartDateTime.between(startAt, endAt)
-                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
+                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
+                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                                .or(reservation.reservationStartDateTime.before(startAt)
+                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        space.dtype.eq("RechargingRoom"),
+                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
+                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
                                         .and(reservation.reservationEndDateTime.after(endAt))))
                 .fetchFirst() != null;
