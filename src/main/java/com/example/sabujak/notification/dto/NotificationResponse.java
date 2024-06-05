@@ -5,6 +5,7 @@ import com.example.sabujak.notification.entity.Notification;
 import java.time.LocalDateTime;
 
 public record NotificationResponse(
+        Long notificationId,
         String title,
         String content,
         String targetUrl,
@@ -13,6 +14,7 @@ public record NotificationResponse(
 ) {
     public static NotificationResponse of(Notification notification) {
         return new NotificationResponse(
+                notification.getId(),
                 notification.getTitle(),
                 notification.getContent(),
                 notification.getTargetUrl(),
