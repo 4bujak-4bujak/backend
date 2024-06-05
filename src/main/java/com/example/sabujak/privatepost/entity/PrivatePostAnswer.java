@@ -16,9 +16,10 @@ public class PrivatePostAnswer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "private_post_answer_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "private_post_answer_content")
     private String content;
 
     @Setter
