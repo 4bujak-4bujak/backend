@@ -211,7 +211,7 @@ public class ReservationService {
         return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
     }
 
-    public List<ReservationHistoryResponse.ReservationForList> getReservations(String email, int duration) {
+    public List<ReservationHistoryResponse.ReservationForList> getReservations(String email, int durationStart, int durationEnd) {
         List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
 
         LocalDateTime now = LocalDateTime.now();
@@ -219,7 +219,7 @@ public class ReservationService {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        List<Reservation> todayReservations = reservationRepository.findReservationsWithDuration(member, now, duration);
+        List<Reservation> todayReservations = reservationRepository.findReservationsWithDuration(member, now, durationStart, durationEnd);
         List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(todayReservations);
 
         Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()

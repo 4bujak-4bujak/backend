@@ -40,7 +40,7 @@ public class ReservationController {
     })
     @GetMapping("/today")
     public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getTodayReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
-        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 0)));
+        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 0, 0)));
     }
 
     @ApiResponses(value = {
@@ -64,7 +64,7 @@ public class ReservationController {
     })
     @GetMapping
     public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
-        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 30)));
+        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 1, 30)));
     }
 
 
