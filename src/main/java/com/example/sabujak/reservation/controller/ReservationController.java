@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "reservations", description = "예약 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +34,18 @@ public class ReservationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "당일 예약 내역 리스트 조회", description = "시작날짜가 오늘인 모든 예약 내역 리스트 조회")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @GetMapping("/today")
+    public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getTodayReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
+        return ResponseEntity.ok(Response.success(reservationService.getTodayReservations(access.getEmail())));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "당일 예약 총 수", description = "오늘 n개의 예약 기능 에서 n 반환")
     @Parameters({
             @Parameter(name = "access", hidden = true)
@@ -40,6 +54,7 @@ public class ReservationController {
     public ResponseEntity<Response<ReservationHistoryResponse.TodayReservationCount>> getTodayReservationCount(@AuthenticationPrincipal AuthRequestDto.Access access) {
         return ResponseEntity.ok(Response.success(reservationService.getTodayReservationCount(access.getEmail())));
     }
+
 
     //    @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),

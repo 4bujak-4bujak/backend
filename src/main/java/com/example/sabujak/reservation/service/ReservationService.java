@@ -5,8 +5,11 @@ import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
+import com.example.sabujak.reservation.entity.MemberReservation;
+import com.example.sabujak.reservation.entity.MemberReservationType;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.exception.ReservationException;
+import com.example.sabujak.reservation.repository.MemberReservationRepository;
 import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.entity.FocusDesk;
@@ -19,7 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
@@ -34,6 +41,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
+    private final MemberReservationRepository memberReservationRepository;
 
     //    public List<ReservationResponseDto.FindMember> findMembers(String email, String searchTerm) {
 //        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
@@ -102,7 +110,7 @@ public class ReservationService {
         }
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
-        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
+        List<Reservation> todayReservations = reservationRepository.findTodayFocusDeskReservationOrderByTime(member, now);
 
         // 당일 예약한게 있는데 해당 좌석을 예약 종료하지 않았으면 기존 좌석 사용 종료
         if (!todayReservations.isEmpty()) {
@@ -137,7 +145,7 @@ public class ReservationService {
                 .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
-        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
+        List<Reservation> todayReservations = reservationRepository.findTodayFocusDeskReservationOrderByTime(member, now);
 
         // 당일 예약한게 없으면 요청 좌석이 해당 회원이 예약한 좌석이 아니니까 예외처리
         if (todayReservations.isEmpty()) {
@@ -172,7 +180,7 @@ public class ReservationService {
                 .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
-        List<Reservation> todayReservations = reservationRepository.findTodayReservationOrderByTime(member, now);
+        List<Reservation> todayReservations = reservationRepository.findTodayFocusDeskReservationOrderByTime(member, now);
 
         // 당일 예약한게 없으면 사용중인 좌석이 없음
         if (todayReservations.isEmpty()) {
@@ -201,5 +209,39 @@ public class ReservationService {
         Integer todayReservationCount = reservationRepository.countTodayReservation(member, now);
 
         return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
+    }
+
+    public List<ReservationHistoryResponse.ReservationForList> getTodayReservations(String email) {
+        List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        List<Reservation> todayReservations = reservationRepository.findTodayReservations(member, now);
+        List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(todayReservations);
+
+        Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()
+                .collect(Collectors.groupingBy(MemberReservation::getReservation));
+
+        for (Reservation reservation : todayReservations) {
+            List<MemberReservation> memberReservationsInReservation = memberReservationMap.get(reservation);
+
+            Optional<MemberReservationType> memberType = memberReservationsInReservation.stream()
+                    .filter(memberReservation -> memberReservation.getMember().getMemberId().equals(member.getMemberId()))
+                    .map(MemberReservation::getMemberReservationType)
+                    .findFirst();
+
+            reservationForLists.add(ReservationHistoryResponse.ReservationForList.of(
+                    reservation,
+                    reservation.getSpace(),
+                    memberReservationsInReservation.stream()
+                            .map(MemberReservation::getMember)
+                            .collect(Collectors.toList()),
+                    memberType.orElse(null)));
+        }
+
+        return reservationForLists;
     }
 }

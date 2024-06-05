@@ -10,7 +10,8 @@ public interface ReservationRepositoryCustom {
 
     boolean existsOverlappingMeetingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
 
-    List<Reservation> findTodayReservationOrderByTime(Member member, LocalDateTime startAt);
+    List<Reservation> findTodayFocusDeskReservationOrderByTime(Member member, LocalDateTime startAt);
 
+    List<Reservation> findTodayReservations(Member member, LocalDateTime now);
     Integer countTodayReservation(Member member, LocalDateTime now);
 }
