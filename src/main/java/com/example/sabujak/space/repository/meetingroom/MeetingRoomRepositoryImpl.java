@@ -37,6 +37,23 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public Integer countTotalMeetingRoom(String branchName) {
+        return Math.toIntExact(queryFactory.select(meetingRoom.count())
+                .from(meetingRoom)
+                .where(meetingRoom.branch.branchName.eq(branchName))
+                .fetchFirst());
+
+    }
+
+    @Override
+    public Integer countActiveMeetingRoom(LocalDateTime now, String branchName) {
+        return Math.toIntExact(queryFactory.select(meetingRoom.count())
+                .from(meetingRoom)
+                .where(meetingRoom.branch.branchName.eq(branchName),
+                        reservationConditionV2(now))
+                .fetchFirst());
+    }
 
     private BooleanExpression reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
         return JPAExpressions.selectOne()
@@ -47,6 +64,15 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
                                 .or(reservation.reservationStartDateTime.before(startAt)
                                         .and(reservation.reservationEndDateTime.after(endAt))))
                 .notExists();
+    }
+
+    private BooleanExpression reservationConditionV2(LocalDateTime now) { // 현재 기준 사용중인 회의실 개수 반환
+        return JPAExpressions.selectOne()
+                .from(reservation)
+                .where(reservation.space.spaceId.eq(meetingRoom.spaceId),
+                        reservation.reservationStartDateTime.after(now),
+                        reservation.reservationEndDateTime.before(now))
+                .exists();
     }
 
 
