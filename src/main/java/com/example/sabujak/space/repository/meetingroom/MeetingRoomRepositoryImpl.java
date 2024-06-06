@@ -1,5 +1,6 @@
 package com.example.sabujak.space.repository.meetingroom;
 
+import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.querydsl.core.types.Order;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.sabujak.branch.entity.QBranch.branch;
+import static com.example.sabujak.reservation.entity.QMemberReservation.memberReservation;
 import static com.example.sabujak.reservation.entity.QReservation.reservation;
 import static com.example.sabujak.space.entity.QMeetingRoom.meetingRoom;
 
@@ -57,7 +59,9 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
     private BooleanExpression reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
         return JPAExpressions.selectOne()
                 .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
                 .where(reservation.space.spaceId.eq(meetingRoom.spaceId),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
                                 .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
@@ -68,7 +72,9 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
     private BooleanExpression reservationConditionV2(LocalDateTime now) { // 현재 기준 사용중인 회의실 개수 반환
         return JPAExpressions.selectOne()
                 .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
                 .where(reservation.space.spaceId.eq(meetingRoom.spaceId),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.after(now),
                         reservation.reservationEndDateTime.before(now))
                 .exists();

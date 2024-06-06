@@ -2,6 +2,7 @@ package com.example.sabujak.reservation.repository;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
+import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("MeetingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
@@ -38,6 +40,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.in(members),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("MeetingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
@@ -51,6 +54,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("RechargingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
@@ -63,6 +67,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation).fetchJoin()
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("RechargingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetch();
@@ -75,6 +80,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation).fetchJoin()
                 .join(reservation.space, space)
                 .where(memberReservation.member.in(members),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("RechargingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetch();
@@ -113,6 +119,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.space, space).fetchJoin()
                 .join(space.branch, branch).fetchJoin()
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .orderBy(reservation.reservationStartDateTime.asc())
                 .fetch();
@@ -128,6 +135,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetchFirst());
     }
