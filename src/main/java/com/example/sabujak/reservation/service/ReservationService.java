@@ -3,6 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.SendReservationNotificationEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
@@ -21,6 +22,7 @@ import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomInvitationContent;
 import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomReservationContent;
+import static com.example.sabujak.reservation.entity.ReservationStatus.ACCEPTED;
 import static com.example.sabujak.reservation.entity.ReservationStatus.CANCELED;
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
@@ -99,7 +102,6 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
 
-        log.info("Creating and Publishing Event for Meeting Room Reservation Notification.");
         ReserveMeetingRoomEvent event = createReserveMeetingRoomEvent(reservation, meetingRoom, participants);
         publisher.publishEvent(event);
     }
@@ -321,19 +323,41 @@ public class ReservationService {
     private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants) {
         Long reservationId = reservation.getReservationId();
         LocalDateTime reservationDate = reservation.getReservationStartDateTime();
-        log.info("Creating ReserveMeetingRoomEvent. " +
-                "Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
+        log.info("Create Event For Publication. Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
 
         String branchName = meetingRoom.getBranch().getBranchName();
         String spaceName = meetingRoom.getSpaceName();
-        log.info("Meeting Room Details. " +
-                "Branch Name: [{}], Space Name: [{}]", branchName, spaceName);
+        log.info("Branch Name: [{}], Space Name: [{}]", branchName, spaceName);
 
         String invitationContent = createMeetingRoomInvitationContent(reservationDate);
         String reservationContent = createMeetingRoomReservationContent(reservationDate, branchName, spaceName);
-        log.info("Generated Content. " +
-                "Invitation Content: [{}], Reservation Content: [{}]", invitationContent, reservationContent);
+        log.info("Invitation Content: [{}], Reservation Content: [{}]", invitationContent, reservationContent);
 
         return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, reservationContent, participants);
+    }
+
+    @Async
+    public void sendReservationNotification(Long reservationId, String targetUrl, String content) {
+        log.info("Create And Publish Event For Sending Reservation Notification.");
+        Reservation reservation = findReservationWithMemberReservationsAndMember(reservationId);
+        List<Member> receivers = getAcceptedMembers(reservation);
+        if (receivers.isEmpty()) {
+            log.info("No Accepted Members Found For Reservation. Canceling Send Notification Task.");
+            return;
+        }
+        log.info("Accepted Members For Reservation Found. Sending Notification To [{}] Members.", receivers.size());
+        publisher.publishEvent(new SendReservationNotificationEvent(targetUrl, content, receivers));
+    }
+
+    private Reservation findReservationWithMemberReservationsAndMember(Long reservationId) {
+        return reservationRepository.findWithMemberReservationsAndMemberById(reservationId)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+    }
+
+    private List<Member> getAcceptedMembers(Reservation reservation) {
+        return reservation.getMemberReservations().stream()
+                .filter(memberReservation -> memberReservation.getMemberReservationStatus().equals(ACCEPTED))
+                .map(MemberReservation::getMember)
+                .toList();
     }
 }
