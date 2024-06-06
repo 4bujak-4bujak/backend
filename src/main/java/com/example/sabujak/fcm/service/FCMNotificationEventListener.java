@@ -4,17 +4,20 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.notification.entity.NotificationType;
 import com.example.sabujak.notification.service.NotificationService;
 import com.example.sabujak.post.dto.SaveCommentEvent;
-import com.google.firebase.messaging.FirebaseMessagingException;
+import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import static com.example.sabujak.fcm.constants.FCMConstants.DEFAULT_TITLE;
+import static com.example.sabujak.fcm.constants.FCMConstants.*;
 import static com.example.sabujak.notification.entity.NotificationType.COMMUNITY;
+import static com.example.sabujak.notification.entity.NotificationType.RESERVATION;
 import static java.lang.Thread.currentThread;
+import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -27,18 +30,33 @@ public class FCMNotificationEventListener {
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Async
-    public void saveNotificationAndSendFCMNotificationForComment(SaveCommentEvent event)
-            throws FirebaseMessagingException {
+    public void saveAndSendFCMNotificationForComment(SaveCommentEvent event) {
         String email = event.receiverEmail();
         String content = event.notificationContent();
         String targetUrl = event.targetUrl();
-        log.info(
-                "Preparing FCM Notification For Comment. " +
-                "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl
-        );
+        log.info("Preparing FCM Notification For Comment. " +
+                 "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
 
         saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.receiver());
-        sendFCMNotification(email, createFCMMessage(email, content, targetUrl));
+        sendFCMNotification(email, createFCMMessage(DEFAULT_TITLE, email, content, targetUrl));
+    }
+
+    @TransactionalEventListener(phase = AFTER_COMMIT)
+    @Order(value = HIGHEST_PRECEDENCE)
+    @Async
+    public void saveAndSendFCMNotificationForMeetingRoomInvitation(ReserveMeetingRoomEvent event) {
+        String content = event.invitationContent();
+        String targetUrl = event.targetUrl();
+        log.info("Preparing FCM Notification For Meeting Room Invitation. " +
+                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
+
+        for (Member participant : event.participants()) {
+            String email = participant.getMemberEmail();
+            log.info("Participant Email: [{}]", email);
+
+            saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
+            sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_INVITATION_TITLE, email, content, targetUrl));
+        }
     }
 
     private void saveNotification(String title, String content, String targetUrl, NotificationType type, Member member) {
@@ -46,14 +64,19 @@ public class FCMNotificationEventListener {
         notificationService.saveNotification(title, content, targetUrl, type, member);
     }
 
-    private Message createFCMMessage(String email, String content, String targetUrl) {
-        return fcmNotificationService.createFCMMessage(email, content, targetUrl);
+    private Message createFCMMessage(String title, String email, String content, String targetUrl) {
+        return fcmNotificationService.createFCMMessage(title, email, content, targetUrl);
     }
 
-    private void sendFCMNotification(String email, Message message)
-            throws FirebaseMessagingException {
-        log.info("Start Sending Synchronous FCM Notification. Thread: [{}]", currentThread().getName());
+    private void sendFCMNotification(String email, Message message) {
         fcmNotificationService.sendFCMNotification(email, message);
-        log.info("End Synchronous FCM Notification Sending. Thread: [{}]", currentThread().getName());
+    }
+
+    private void sendFCMNotificationAsync(String email, Message message) {
+        log.info("Start Sending Asynchronous FCM Notification. " +
+                "Current Thread Name: [{}]", currentThread().getName());
+        fcmNotificationService.sendFCMNotificationAsync(email, message);
+        log.info("End Asynchronous FCM Notification Sending. " +
+                "Current Thread Name: [{}]", currentThread().getName());
     }
 }
