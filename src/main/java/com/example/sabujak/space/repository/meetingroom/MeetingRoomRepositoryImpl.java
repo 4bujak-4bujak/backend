@@ -75,8 +75,8 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .where(reservation.space.spaceId.eq(meetingRoom.spaceId),
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
-                        reservation.reservationStartDateTime.after(now),
-                        reservation.reservationEndDateTime.before(now))
+                        reservation.reservationStartDateTime.before(now),
+                        reservation.reservationEndDateTime.after(now))
                 .exists();
     }
 
