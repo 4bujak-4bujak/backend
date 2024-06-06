@@ -32,6 +32,19 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     }
 
     @Override
+    public boolean existsOverlappingMeetingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.in(members),
+                        space.dtype.eq("MeetingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetchFirst() != null;
+    }
+
+
+    @Override
     public boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
         return queryFactory.selectOne()
                 .from(reservation)
@@ -41,6 +54,30 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                         space.dtype.eq("RechargingRoom"),
                         reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
+    }
+
+    @Override
+    public List<Reservation> findOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                //리차징룸은 어차피 예약 다:1 회원 이라 fetchJoin 해도 무방
+                .join(reservation.memberReservations, memberReservation).fetchJoin()
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        space.dtype.eq("RechargingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetch();
+    }
+
+    @Override
+    public List<Reservation> findOverlappingRechargingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                //리차징룸은 어차피 예약 다:1 회원 이라 fetchJoin 해도 무방
+                .join(reservation.memberReservations, memberReservation).fetchJoin()
+                .join(reservation.space, space)
+                .where(memberReservation.member.in(members),
+                        space.dtype.eq("RechargingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetch();
     }
 
     private BooleanBuilder reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {

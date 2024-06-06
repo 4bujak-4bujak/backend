@@ -46,4 +46,8 @@ public class MemberReservation {
         member.getMemberReservations().add(memberReservation);
         return memberReservation;
     }
+
+    public void cancelReservation() {
+        this.memberReservationStatus = ReservationStatus.CANCELED;
+    }
 }

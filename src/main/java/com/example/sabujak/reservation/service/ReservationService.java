@@ -60,6 +60,7 @@ public class ReservationService {
 
     @Transactional
     public void reserveMeetingRoom(String email, ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
+        LocalDateTime now = LocalDateTime.now();
         final Member representative = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
@@ -77,8 +78,15 @@ public class ReservationService {
             throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
         }
 
-        Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, representative, participants);
+        //대표자 리차징룸 중복 예약 처리
+        List<Reservation> representativeOverlappingRechargingRoomReservations = reservationRepository.findOverlappingRechargingRoomReservation(representative, meetingRoomDto.startAt(), meetingRoomDto.endAt());
+        handleOverlappingRechargingRoomReservations(representativeOverlappingRechargingRoomReservations, now);
 
+        //참여자 리차징룸 중복 예약 처리
+        List<Reservation> participantsOverlappingRechargingRoomReservations = reservationRepository.findOverlappingRechargingRoomReservationInMembers(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt());
+        handleOverlappingRechargingRoomReservations(participantsOverlappingRechargingRoomReservations, now);
+
+        Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, representative, participants);
 
         reservationRepository.save(reservation);
     }
@@ -91,12 +99,23 @@ public class ReservationService {
     }
 
     private boolean verifyOverlappingMeetingRoom(List<Member> participants, LocalDateTime startAt, LocalDateTime endAt) {
-        for (Member participant : participants) {
-            if (reservationRepository.existsOverlappingMeetingRoomReservation(participant, startAt, endAt)) {
-                return true;
-            }
+        if (reservationRepository.existsOverlappingMeetingRoomReservationInMembers(participants, startAt, endAt)) {
+            return true;
         }
         return false;
+    }
+
+    private void handleOverlappingRechargingRoomReservations(List<Reservation> overlappingRechargingRoomReservations, LocalDateTime now) {
+        for (Reservation reservation : overlappingRechargingRoomReservations) {
+            //예약 시간이 겹치는데 이미 시작한거면 종료 처리
+            if (reservation.getReservationStartDateTime().isBefore(now)) {
+                reservation.endUse(now);
+            }
+            //겹치는데 시작 전이면 예약 취소 처리
+            else {
+                reservation.getMemberReservations().forEach(MemberReservation::cancelReservation);
+            }
+        }
     }
 
     @Transactional
