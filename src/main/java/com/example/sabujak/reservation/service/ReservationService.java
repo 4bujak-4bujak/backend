@@ -2,6 +2,7 @@ package com.example.sabujak.reservation.service;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
+import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
@@ -18,6 +19,8 @@ import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +28,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomInvitationContent;
+import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomReservationContent;
 import static com.example.sabujak.reservation.entity.ReservationStatus.CANCELED;
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.FOCUS_DESK_NOT_FOUND;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.MEETING_ROOM_NOT_FOUND;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,6 +46,8 @@ public class ReservationService {
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
     private final MemberReservationRepository memberReservationRepository;
+
+    private final ApplicationEventPublisher publisher;
 
     public ReservationResponseDto.FindMemberList findMembers(String email, String searchTerm, LocalDateTime startAt, LocalDateTime endAt) {
         final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
@@ -90,6 +98,10 @@ public class ReservationService {
         Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, representative, participants);
 
         reservationRepository.save(reservation);
+
+        log.info("Creating and Publishing Event for Meeting Room Reservation Notification.");
+        ReserveMeetingRoomEvent event = createReserveMeetingRoomEvent(reservation, meetingRoom, participants);
+        publisher.publishEvent(event);
     }
 
     private boolean verifyOverlappingMeetingRoom(Member representative, LocalDateTime startAt, LocalDateTime endAt) {
@@ -304,5 +316,29 @@ public class ReservationService {
         } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.PARTICIPANT)) {
             myMemberReservation.cancelReservation();
         }
+    }
+
+    private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(
+            Reservation reservation,
+            MeetingRoom meetingRoom,
+            List<Member> participants
+    ) {
+        Long reservationId = reservation.getReservationId();
+        LocalDateTime reservationDate = reservation.getReservationStartDateTime();
+
+        String branchName = meetingRoom.getBranch().getBranchName();
+        String spaceName = meetingRoom.getSpaceName();
+
+        String invitationContent = createMeetingRoomInvitationContent(reservationDate);
+        String reservationContent = createMeetingRoomReservationContent(reservationDate, branchName, spaceName);
+
+        return new ReserveMeetingRoomEvent(
+                reservationId,
+                reservationDate,
+                "",
+                invitationContent,
+                reservationContent,
+                participants
+        );
     }
 }
