@@ -102,8 +102,7 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
 
-        ReserveMeetingRoomEvent event = createReserveMeetingRoomEvent(reservation, meetingRoom, participants);
-        publisher.publishEvent(event);
+        publisher.publishEvent(createReserveMeetingRoomEvent(reservation, meetingRoom, participants));
     }
 
     private boolean verifyOverlappingMeetingRoom(Member representative, LocalDateTime startAt, LocalDateTime endAt) {

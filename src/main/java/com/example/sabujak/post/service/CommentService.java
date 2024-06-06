@@ -23,7 +23,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     public CustomSlice<Comment> findComments(Long postId, Long cursorId, Pageable pageable) {
-        List<Comment> comments = commentRepository.findWithMemberByPostIdAndCursorId(postId, cursorId,pageable);
+        List<Comment> comments = commentRepository.findWithMemberByPostIdAndCursorId(postId, cursorId, pageable);
         boolean hasNext = comments.size() > ORIGIN_COMMENT_PAGE_SIZE;
         log.info("Get [{}] Comments. One More Retrieved: [{}]", comments.size(), hasNext);
         if(hasNext) {

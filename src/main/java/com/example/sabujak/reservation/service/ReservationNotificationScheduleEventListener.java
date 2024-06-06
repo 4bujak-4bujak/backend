@@ -29,7 +29,7 @@ public class ReservationNotificationScheduleEventListener {
     public void addMeetingRoomReservationNotificationSchedule(ReserveMeetingRoomEvent event) {
         Long reservationId = event.reservationId();
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);
-        log.info("Add Schedule Notification for Meeting Room Reservation. " +
+        log.info("Add Schedule Notification For Meeting Room Reservation. " +
                  "Reservation ID: [{}], Notification Time: [{}]", reservationId, notificationTime);
         String targetUrl = event.targetUrl();
         String content = event.reservationContent();
