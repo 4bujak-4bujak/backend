@@ -5,9 +5,11 @@ import com.example.sabujak.notification.entity.NotificationType;
 import com.example.sabujak.notification.service.NotificationService;
 import com.example.sabujak.post.dto.SaveCommentEvent;
 import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.SendReservationNotificationEvent;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -56,6 +58,22 @@ public class FCMNotificationEventListener {
 
             saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
             sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_INVITATION_TITLE, email, content, targetUrl));
+        }
+    }
+
+    @EventListener
+    public void saveAndSendFCMNotificationForMeetingRoomReservation(SendReservationNotificationEvent event) {
+        String content = event.content();
+        String targetUrl = event.targetUrl();
+        log.info("Preparing FCM Notification For Meeting Room Reservation. " +
+                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
+
+        for (Member receiver : event.receivers()) {
+            String email = receiver.getMemberEmail();
+            log.info("Receiver Email: [{}]", email);
+
+            saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, receiver);
+            sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_RESERVATION_TITLE, email, content, targetUrl));
         }
     }
 
