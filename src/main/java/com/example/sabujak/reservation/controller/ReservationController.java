@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Tag(name = "reservations", description = "예약 관련 API")
@@ -30,6 +31,24 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "예약 과정중 초대 가능 멤버 조회", description = "예약 과정에서 같은 회사에 다니고 특정 검증을 거쳐 참석자로 초대될 수 있는 사람 조회")
+    @Parameters({
+            @Parameter(name = "access", hidden = true),
+            @Parameter(name = "startAt", description = "시작 시간", example = "2024-05-28T09:00:00"),
+            @Parameter(name = "endAt", description = "종료 시간", example = "2024-05-28T18:00:00"),
+            @Parameter(name = "searchTerm", description = "검색어에 맞는 이메일, 이름을 찾음", example = "주우민", required = false)
+    })
+
+    @GetMapping("/members")
+    public ResponseEntity<Response<ReservationResponseDto.FindMemberList>> findMembers(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                                       @RequestParam LocalDateTime startAt,
+                                                                                       @RequestParam LocalDateTime endAt,
+                                                                                       @RequestParam(required = false) String searchTerm) {
+        return ResponseEntity.ok(Response.success(reservationService.findMembers(access.getEmail(), searchTerm, startAt, endAt)));
+    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
@@ -67,23 +86,6 @@ public class ReservationController {
         return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 1, 30)));
     }
 
-
-    //    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
-//            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-//    @Operation(summary = "예약 과정중 초대 가능 멤버 조회", description = "예약 과정에서 같은 회사에 다니고 특정 검증을 거쳐 참석자로 초대될 수 있는 사람 조회")
-//    @Parameters({
-//            @Parameter(name = "access", hidden = true),
-//            @Parameter(name = "searchTerm", description = "검색어에 맞는 이메일, 이름을 찾음", example = "주우민", required = false)
-//    })
-//
-//    @GetMapping("/members")
-//    public ResponseEntity<Response<List<ReservationResponseDto.FindMember>>> findMembers(@AuthenticationPrincipal AuthRequestDto.Access access,
-//                                                                                         @RequestParam(required = false) String searchTerm) {
-//
-//        return ResponseEntity.ok(Response.success(reservationService.findMembers(access.getEmail(), searchTerm)));
-//    }
-//
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})

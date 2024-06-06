@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
@@ -43,15 +40,24 @@ public class ReservationService {
     private final FocusDeskRepository focusDeskRepository;
     private final MemberReservationRepository memberReservationRepository;
 
-    //    public List<ReservationResponseDto.FindMember> findMembers(String email, String searchTerm) {
-//        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
-//                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-//
-//        return memberRepository.findMemberCanInvite(member.getCompany(), member.getMemberId(), searchTerm).stream()
-//                .map(ReservationResponseDto.FindMember::from)
-//                .collect(Collectors.toList());
-//    }
-//
+    public ReservationResponseDto.FindMemberList findMembers(String email, String searchTerm, LocalDateTime startAt, LocalDateTime endAt) {
+        final Member member = memberRepository.findWithCompanyAndImageByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        List<Member> searchedMembers = memberRepository.searchMembers(member.getCompany(), member.getMemberId(), searchTerm);
+        Set<Member> searchedMembersCantInvite = new HashSet<>(searchedMembers);
+        List<Member> searchedMembersCanInvite = memberRepository.searchMembersCanInviteInMembers(searchedMembers, startAt, endAt);
+        searchedMembersCanInvite.forEach(searchedMembersCantInvite::remove);
+
+        return new ReservationResponseDto.FindMemberList(
+                searchedMembersCanInvite.stream()
+                        .map(ReservationResponseDto.FindMember::from)
+                        .collect(Collectors.toList()),
+                searchedMembersCantInvite.stream()
+                        .map(ReservationResponseDto.FindMember::from)
+                        .collect(Collectors.toSet()));
+    }
+
     @Transactional
     public void reserveMeetingRoom(String email, ReservationRequestDto.MeetingRoomDto meetingRoomDto) {
         final Member representative = memberRepository.findByMemberEmail(email)
