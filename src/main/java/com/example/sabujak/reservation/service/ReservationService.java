@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.sabujak.reservation.entity.ReservationStatus.CANCELED;
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.FOCUS_DESK_NOT_FOUND;
@@ -268,5 +269,40 @@ public class ReservationService {
         }
 
         return reservationForLists;
+    }
+
+    @Transactional
+    public void cancelMeetingRoom(String email, ReservationRequestDto.MeetingRoomReservationCancel cancelDto) {
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        Reservation reservation = reservationRepository.findById(cancelDto.reservationId())
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+
+        if (reservation.getReservationEndDateTime().isBefore(now)) {
+            throw new ReservationException(ALREADY_ENDED_RESERVATION);
+        }
+
+        List<MemberReservation> memberReservations = reservation.getMemberReservations();
+        MemberReservation myMemberReservation = null;
+
+        for (MemberReservation memberReservation : memberReservations) {
+            if (memberReservation.getMember().getMemberId() == member.getMemberId()) {
+                myMemberReservation = memberReservation;
+                break;
+            }
+        }
+
+        if (myMemberReservation == null) {
+            throw new ReservationException(NOT_RESERVED_BY_MEMBER);
+        } else if (myMemberReservation.getMemberReservationStatus().equals(CANCELED)) {
+        throw new ReservationException(ALREADY_CANCELED_RESERVATION);
+        } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.REPRESENTATIVE)) {
+            memberReservations.forEach(MemberReservation::cancelReservation);
+        } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.PARTICIPANT)) {
+            myMemberReservation.cancelReservation();
+        }
     }
 }
