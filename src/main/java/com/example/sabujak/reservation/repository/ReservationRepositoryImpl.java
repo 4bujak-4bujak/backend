@@ -2,6 +2,8 @@ package com.example.sabujak.reservation.repository;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
+import com.example.sabujak.reservation.entity.ReservationStatus;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -25,12 +27,71 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("MeetingRoom"),
-                        reservation.reservationStartDateTime.between(startAt, endAt)
-                                .or(reservation.reservationEndDateTime.between(startAt, endAt))
-                                .or(reservation.reservationStartDateTime.before(startAt)
-                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                        reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsOverlappingMeetingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.in(members),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("MeetingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetchFirst() != null;
+    }
+
+
+    @Override
+    public boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public List<Reservation> findOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                //리차징룸은 어차피 예약 다:1 회원 이라 fetchJoin 해도 무방
+                .join(reservation.memberReservations, memberReservation).fetchJoin()
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetch();
+    }
+
+    @Override
+    public List<Reservation> findOverlappingRechargingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                //리차징룸은 어차피 예약 다:1 회원 이라 fetchJoin 해도 무방
+                .join(reservation.memberReservations, memberReservation).fetchJoin()
+                .join(reservation.space, space)
+                .where(memberReservation.member.in(members),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
+                        reservationCondition(startAt, endAt))
+                .fetch();
+    }
+
+    private BooleanBuilder reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
+        return new BooleanBuilder()
+                .and(reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
+                        .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                        .or(reservation.reservationStartDateTime.before(startAt)
+                                .and(reservation.reservationEndDateTime.after(endAt))));
     }
 
     @Override
@@ -58,6 +119,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.space, space).fetchJoin()
                 .join(space.branch, branch).fetchJoin()
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .orderBy(reservation.reservationStartDateTime.asc())
                 .fetch();
@@ -73,6 +135,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetchFirst());
     }

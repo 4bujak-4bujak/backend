@@ -5,10 +5,28 @@ import com.example.sabujak.space.entity.MeetingRoom;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class MeetingRoomResponseDto {
+
+    @Getter
+    public static class MeetingRoomList {
+        public enum ToastType {
+            OVERLAPPING_MEETING_ROOM_EXISTS,
+            OVERLAPPING_RECHARGING_ROOM_EXISTS
+        }
+
+        private List<MeetingRoomForList> meetingRoomForListList = new ArrayList<>();
+        private ToastType toastType;
+
+        public MeetingRoomList(List<MeetingRoomForList> meetingRoomForListList, ToastType toastType) {
+            this.meetingRoomForListList = meetingRoomForListList;
+            this.toastType = toastType;
+        }
+    }
 
 
     public record MeetingRoomForList(Long meetingRoomId,

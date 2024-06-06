@@ -35,6 +35,11 @@ public class ReservationRequestDto {
         }
     }
 
+    public record MeetingRoomReservationCancel(
+            @Positive
+            Long reservationId) {
+    }
+
     public record FocusDeskDto(
             @Positive
             Long focusDeskId) {

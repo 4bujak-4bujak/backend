@@ -1,6 +1,7 @@
 package com.example.sabujak.space.controller;
 
 import com.example.sabujak.common.response.Response;
+import com.example.sabujak.security.dto.request.AuthRequestDto;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoomType;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -33,6 +35,7 @@ public class SpaceController {
             @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "미팅룸 리스트 조회", description = "지점, 날짜, 비품 필터, 정렬기준에 따른 미팅룸 리스트 조회")
     @Parameters({
+            @Parameter(name = "access", hidden = true),
             @Parameter(name = "startAt", description = "시작 시간", example = "2024-05-28T09:00:00"),
             @Parameter(name = "endAt", description = "종료 시간", example = "2024-05-28T18:00:00"),
             @Parameter(name = "branchName", description = "지점명", example = "구로점"),
@@ -44,7 +47,8 @@ public class SpaceController {
             @Parameter(name = "sortDirection", description = "정렬 방식 (ASC, DESC)", example = "ASC"),
     })
     @GetMapping("/meeting-rooms")
-    public ResponseEntity<Response<List<MeetingRoomResponseDto.MeetingRoomForList>>> getMeetingRoomList(
+    public ResponseEntity<Response<MeetingRoomResponseDto.MeetingRoomList>> getMeetingRoomList(
+            @AuthenticationPrincipal AuthRequestDto.Access access,
             @RequestParam LocalDateTime startAt,
             @RequestParam LocalDateTime endAt,
             @RequestParam String branchName,
@@ -54,7 +58,7 @@ public class SpaceController {
             @RequestParam boolean isPrivate,
             @RequestParam(required = false, defaultValue = "roomCapacity") String sortTarget,
             @RequestParam(required = false, defaultValue = "ASC") String sortDirection) {
-        return ResponseEntity.ok(Response.success(spaceService.getMeetingRoomList(startAt, endAt,
+        return ResponseEntity.ok(Response.success(spaceService.getMeetingRoomList(access.getEmail(), startAt, endAt,
                 branchName, meetingRoomTypes, projectorExists, canVideoConference, isPrivate, sortTarget, sortDirection)));
     }
 
