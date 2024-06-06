@@ -318,27 +318,22 @@ public class ReservationService {
         }
     }
 
-    private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(
-            Reservation reservation,
-            MeetingRoom meetingRoom,
-            List<Member> participants
-    ) {
+    private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants) {
         Long reservationId = reservation.getReservationId();
         LocalDateTime reservationDate = reservation.getReservationStartDateTime();
+        log.info("Creating ReserveMeetingRoomEvent. " +
+                "Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
 
         String branchName = meetingRoom.getBranch().getBranchName();
         String spaceName = meetingRoom.getSpaceName();
+        log.info("Meeting Room Details. " +
+                "Branch Name: [{}], Space Name: [{}]", branchName, spaceName);
 
         String invitationContent = createMeetingRoomInvitationContent(reservationDate);
         String reservationContent = createMeetingRoomReservationContent(reservationDate, branchName, spaceName);
+        log.info("Generated Content. " +
+                "Invitation Content: [{}], Reservation Content: [{}]", invitationContent, reservationContent);
 
-        return new ReserveMeetingRoomEvent(
-                reservationId,
-                reservationDate,
-                "",
-                invitationContent,
-                reservationContent,
-                participants
-        );
+        return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, reservationContent, participants);
     }
 }
