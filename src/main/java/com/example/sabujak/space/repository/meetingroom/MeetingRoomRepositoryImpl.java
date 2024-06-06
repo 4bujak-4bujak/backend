@@ -2,7 +2,6 @@ package com.example.sabujak.space.repository.meetingroom;
 
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
-import com.example.sabujak.space.entity.QMeetingRoom;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -58,7 +57,7 @@ public class MeetingRoomRepositoryImpl implements MeetingRoomRepositoryCustom {
     private BooleanExpression reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
         return JPAExpressions.selectOne()
                 .from(reservation)
-                .where(reservation.space.spaceId.eq(QMeetingRoom.meetingRoom.spaceId),
+                .where(reservation.space.spaceId.eq(meetingRoom.spaceId),
                         reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
                                 .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)

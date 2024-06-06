@@ -2,6 +2,7 @@ package com.example.sabujak.reservation.repository;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -26,10 +27,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
                         space.dtype.eq("MeetingRoom"),
-                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
-                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
-                                .or(reservation.reservationStartDateTime.before(startAt)
-                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                        reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
     }
 
@@ -41,11 +39,16 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
                         space.dtype.eq("RechargingRoom"),
-                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
-                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
-                                .or(reservation.reservationStartDateTime.before(startAt)
-                                        .and(reservation.reservationEndDateTime.after(endAt))))
+                        reservationCondition(startAt, endAt))
                 .fetchFirst() != null;
+    }
+
+    private BooleanBuilder reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
+        return new BooleanBuilder()
+                .and(reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
+                        .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                        .or(reservation.reservationStartDateTime.before(startAt)
+                                .and(reservation.reservationEndDateTime.after(endAt))));
     }
 
     @Override
