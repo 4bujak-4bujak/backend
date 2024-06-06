@@ -40,8 +40,8 @@ public class ReservationHistoryResponse {
                 reservationForList.spaceName += " " + ((FocusDesk) space).getFocusDeskNumber();
             }
 
-            reservationForList.startAt = reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("HH:mm"));
-            reservationForList.endAt = reservation.getReservationEndDateTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+            reservationForList.startAt = reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            reservationForList.endAt = reservation.getReservationEndDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             String spaceType = space.getDtype().toUpperCase();
             reservationForList.spaceType = SpaceType.valueOf(spaceType);

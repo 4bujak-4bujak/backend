@@ -53,13 +53,13 @@ public class ReservationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "당일 예약 내역 리스트 조회", description = "시작날짜가 오늘인 모든 예약 내역 리스트 조회")
+    @Operation(summary = "당일 예약 내역 리스트 조회", description = "현재시간 기준 이용중이거나 오늘 시작하는 예약 조회")
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
     @GetMapping("/today")
     public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getTodayReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
-        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 0, 0)));
+        return ResponseEntity.ok(Response.success(reservationService.getTodayReservations(access.getEmail())));
     }
 
     @ApiResponses(value = {
@@ -77,13 +77,13 @@ public class ReservationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "30일 내 예약 내역 리스트 조회", description = "시작날짜가 오늘부터 최대 30일 이내 모든 예약 내역 리스트 조회")
+    @Operation(summary = "30일 내 예약 내역 리스트 조회", description = "오늘 제외 최대 30일 이내 모든 예약 내역 리스트 조회")
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
     @GetMapping
     public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
-        return ResponseEntity.ok(Response.success(reservationService.getReservations(access.getEmail(), 1, 30)));
+        return ResponseEntity.ok(Response.success(reservationService.getReservationsFor30Days(access.getEmail())));
     }
 
     @ApiResponses(value = {
