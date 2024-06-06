@@ -38,7 +38,6 @@ public class FCMNotificationEventListener {
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Comment. " +
                  "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
-
         saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.receiver());
         sendFCMNotification(email, createFCMMessage(DEFAULT_TITLE, email, content, targetUrl));
     }
@@ -51,11 +50,9 @@ public class FCMNotificationEventListener {
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Meeting Room Invitation. " +
                  "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
-
         for (Member participant : event.participants()) {
             String email = participant.getMemberEmail();
             log.info("Participant Email: [{}]", email);
-
             saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
             sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_INVITATION_TITLE, email, content, targetUrl));
         }
@@ -67,11 +64,9 @@ public class FCMNotificationEventListener {
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Meeting Room Reservation. " +
                  "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
-
         for (Member receiver : event.receivers()) {
             String email = receiver.getMemberEmail();
             log.info("Receiver Email: [{}]", email);
-
             saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, receiver);
             sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_RESERVATION_TITLE, email, content, targetUrl));
         }
