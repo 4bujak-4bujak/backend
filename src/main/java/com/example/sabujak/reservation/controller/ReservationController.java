@@ -124,7 +124,7 @@ public class ReservationController {
     })
     @DeleteMapping("/meeting-rooms/{reservationId}")
     public ResponseEntity<Response<Void>> cancelMeetingRoomReservation(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                                       @RequestBody Long reservationId) {
+                                                                       @PathVariable Long reservationId) {
         reservationService.cancelMeetingRoom(access.getEmail(), reservationId);
         return ResponseEntity.ok(Response.success(null));
     }
@@ -165,7 +165,7 @@ public class ReservationController {
     })
     @DeleteMapping("/focus-desks/{focusDeskId}")
     public ResponseEntity<Response<Void>> endUseDesk(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                     @RequestBody Long focusDeskId) {
+                                                     @PathVariable Long focusDeskId) {
         reservationService.endUseFocusDesk(access.getEmail(), focusDeskId);
         return ResponseEntity.ok(Response.success(null));
     }
