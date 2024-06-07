@@ -12,7 +12,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -25,7 +24,7 @@ public class ReservationNotificationScheduleEventListener {
     private final ReservationService reservationService;
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
-    @Order(value = HIGHEST_PRECEDENCE + 2)
+    @Order(3)
     public void addMeetingRoomEntryNotificationSchedule(ReserveMeetingRoomEvent event) {
         Long reservationId = event.reservationId();
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);

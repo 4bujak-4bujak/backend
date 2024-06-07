@@ -21,7 +21,6 @@ import static com.example.sabujak.fcm.constants.FCMConstants.*;
 import static com.example.sabujak.notification.entity.NotificationType.COMMUNITY;
 import static com.example.sabujak.notification.entity.NotificationType.RESERVATION;
 import static java.lang.Thread.currentThread;
-import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -35,33 +34,37 @@ public class FCMNotificationEventListener {
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Async
     public void saveAndSendFCMNotificationForComment(SaveCommentEvent event) {
-        String email = event.receiverEmail();
+        String email = event.writerEmail();
         String content = event.notificationContent();
         String targetUrl = event.targetUrl();
-        log.info("Preparing FCM Notification For Comment. " +
-                "Notification Recipient Email: [{}], Content: [{}], Target URL: [{}]", email, content, targetUrl);
-        saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.recipient());
+        log.info("Start Preparing FCM Notification For Comment. " +
+                "Writer Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
+        saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.writer());
         sendFCMNotification(email, createFCMMessage(email, DEFAULT_TITLE, content, targetUrl));
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
-    @Order(value = HIGHEST_PRECEDENCE)
+    @Order(1)
     @Async
     public void saveAndSendFCMNotificationForMeetingRoomInvitation(ReserveMeetingRoomEvent event) {
+        List<Member> participants = event.participants();
+        if (participants.isEmpty()) {
+            return;
+        }
         String content = event.invitationContent();
         String targetUrl = event.targetUrl();
-        log.info("Preparing FCM Notification For Meeting Room Invitation. " +
+        log.info("Start Preparing FCM Notification For Meeting Room Invitation. " +
                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
-        for (Member participant : event.participants()) {
+        for (Member participant : participants) {
             String email = participant.getMemberEmail();
-            log.info("Notification Recipient Email: [{}]", email);
+            log.info("Notification Target Participant Email: [{}]", email);
             saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
             sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_INVITATION_TITLE, content, targetUrl));
         }
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
-    @Order(value = HIGHEST_PRECEDENCE + 1)
+    @Order(2)
     @Async
     public void saveAndSendFCMNotificationForRechargingRoomCancellation(ReserveMeetingRoomEvent event) {
         List<Member> cancelers = event.cancelers();
@@ -70,11 +73,11 @@ public class FCMNotificationEventListener {
         }
         String content = event.cancellationContent();
         String targetUrl = event.targetUrl();
-        log.info("Preparing FCM Notification For Recharging Room Cancellation " +
+        log.info("Start Preparing FCM Notification For Recharging Room Cancellation. " +
                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
         for (Member canceler : cancelers) {
             String email = canceler.getMemberEmail();
-            log.info("Notification Canceler Email: [{}]", email);
+            log.info("Notification Target Canceler Email: [{}]", email);
             saveNotification(RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl, RESERVATION, canceler);
             sendFCMNotificationAsync(email, createFCMMessage(email, RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl));
         }
@@ -84,12 +87,12 @@ public class FCMNotificationEventListener {
     public void saveAndSendFCMNotificationForMeetingRoomEntry(FindMeetingRoomEntryNotificationMembersEvent event) {
         String content = event.content();
         String targetUrl = event.targetUrl();
-        log.info("Preparing FCM Notification For Meeting Room Entry. " +
+        log.info("Start Preparing FCM Notification For Meeting Room Entry. " +
                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
-        for (Member recipient : event.recipients()) {
-            String email = recipient.getMemberEmail();
-            log.info("Notification Recipient Email: [{}]", email);
-            saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, recipient);
+        for (Member member : event.members()) {
+            String email = member.getMemberEmail();
+            log.info("Notification Target Member Email: [{}]", email);
+            saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, member);
             sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_RESERVATION_TITLE, content, targetUrl));
         }
     }
