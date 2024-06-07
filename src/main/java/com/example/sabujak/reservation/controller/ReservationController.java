@@ -87,6 +87,21 @@ public class ReservationController {
     }
 
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "예약 상세 조회", description = "선택한 예약 상세 조회")
+    @Parameters({
+            @Parameter(name = "access", hidden = true),
+            @Parameter(name = "reservationId", description = "예약 Id", example = "1")
+    })
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<Response<ReservationHistoryResponse.ReservationDetails>> getReservationDetails(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                                                         @PathVariable Long reservationId) {
+        return ResponseEntity.ok(Response.success(reservationService.getReservationDetails(access.getEmail(), reservationId)));
+    }
+
+
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "미팅룸 예약", description = "미팅룸 예약 관련 모든 정보들을 받고 최종 예약")

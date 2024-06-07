@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
-
     @Query("select mr from MemberReservation mr join fetch mr.member m join fetch m.image where mr.reservation in :reservations and mr.memberReservationStatus = 'ACCEPTED'")
     List<MemberReservation> findMemberReservationsByReservations(List<Reservation> reservations);
+
+    @Query("select mr from MemberReservation mr join fetch mr.member m join fetch m.image where mr.reservation = :reservation and mr.memberReservationStatus = 'ACCEPTED'")
+    List<MemberReservation> findByReservation(Reservation reservation);
 }

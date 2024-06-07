@@ -4,6 +4,7 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
+import com.example.sabujak.reservation.dto.response.ReservationProgress;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.MemberReservation;
 import com.example.sabujak.reservation.entity.MemberReservationType;
@@ -279,13 +280,13 @@ public class ReservationService {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        List<Reservation> todayReservations = reservationRepository.findReservationsWithDuration(member, now, 1, 30);
-        List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(todayReservations);
+        List<Reservation> reservations = reservationRepository.findReservationsWithDuration(member, now, 1, 30);
+        List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(reservations);
 
         Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()
                 .collect(Collectors.groupingBy(MemberReservation::getReservation));
 
-        for (Reservation reservation : todayReservations) {
+        for (Reservation reservation : reservations) {
             List<MemberReservation> memberReservationsInReservation = memberReservationMap.get(reservation);
 
             Optional<MemberReservationType> memberType = memberReservationsInReservation.stream()
@@ -303,6 +304,63 @@ public class ReservationService {
         }
 
         return reservationForLists;
+    }
+
+    public ReservationHistoryResponse.ReservationDetails getReservationDetails(String email, Long reservationId) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        Reservation reservation = reservationRepository.findByIdWithSpaceAndBranch(reservationId)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+
+        List<MemberReservation> memberReservations = memberReservationRepository.findByReservation(reservation);
+
+        Member representative = null;
+        List<Member> participants = new ArrayList<>();
+
+        boolean checkMyReservation = false;
+
+        for (MemberReservation memberReservation : memberReservations) {
+            if (memberReservation.getMemberReservationType().equals(MemberReservationType.REPRESENTATIVE)) {
+                representative = memberReservation.getMember();
+            } else {
+                participants.add(memberReservation.getMember());
+            }
+
+            if (memberReservation.getMember().getMemberId() == member.getMemberId()) {
+                checkMyReservation = true;
+            }
+        }
+
+        if (!checkMyReservation) {
+            throw new ReservationException(NOT_RESERVED_BY_MEMBER);
+        }
+
+        MemberReservationType myMemberType = MemberReservationType.PARTICIPANT;
+        if (representative.getMemberId() == member.getMemberId()) {
+            myMemberType = MemberReservationType.REPRESENTATIVE;
+        }
+
+        ReservationProgress reservationProgress = null;
+
+        if (reservation.getReservationStartDateTime().isAfter(now)) {
+            reservationProgress = ReservationProgress.BEFORE_USE;
+        } else if (reservation.getReservationStartDateTime().isBefore(now) && reservation.getReservationEndDateTime().isAfter(now)) {
+            reservationProgress = ReservationProgress.IN_USE;
+        } else {
+            reservationProgress = ReservationProgress.AFTER_USE;
+        }
+
+        return ReservationHistoryResponse.ReservationDetails.of(
+                reservation,
+                reservation.getSpace(),
+                representative,
+                participants,
+                myMemberType,
+                reservationProgress);
     }
 
     @Transactional
