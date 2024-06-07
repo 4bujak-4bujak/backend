@@ -7,6 +7,6 @@ import java.util.List;
 public record FindMeetingRoomEntryNotificationMembersEvent(
         String targetUrl,
         String content,
-        List<Member> recipients
+        List<Member> members
 ) {
 }
