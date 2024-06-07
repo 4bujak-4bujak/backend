@@ -66,6 +66,7 @@ public class ReservationHistoryResponse {
         private String startAt;
         private String endAt;
         private String branchName;
+        private Long spaceId;
         private String spaceName;
         private int spaceFloor;
         private String branchAddress;
@@ -83,6 +84,7 @@ public class ReservationHistoryResponse {
             reservationDetails.endAt = reservation.getReservationEndDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             reservationDetails.branchName = space.getBranch().getBranchName();
 
+            reservationDetails.spaceId = space.getSpaceId();
             reservationDetails.spaceName = space.getSpaceName();
             if (space instanceof FocusDesk) {
                 reservationDetails.spaceName += " " + ((FocusDesk) space).getFocusDeskNumber();
