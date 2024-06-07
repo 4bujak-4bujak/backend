@@ -10,7 +10,9 @@ public record ReserveMeetingRoomEvent(
         LocalDateTime reservationDate,
         String targetUrl,
         String invitationContent,
+        String cancellationContent,
         String reservationContent,
-        List<Member> participants
+        List<Member> participants,
+        List<Member> cancelers
 ) {
 }
