@@ -122,10 +122,10 @@ public class ReservationController {
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
-    @DeleteMapping("/meeting-rooms")
+    @DeleteMapping("/meeting-rooms/{reservationId}")
     public ResponseEntity<Response<Void>> cancelMeetingRoomReservation(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                                       @Valid @RequestBody ReservationRequestDto.MeetingRoomReservationCancel cancelDto) {
-        reservationService.cancelMeetingRoom(access.getEmail(), cancelDto);
+                                                                       @RequestBody Long reservationId) {
+        reservationService.cancelMeetingRoom(access.getEmail(), reservationId);
         return ResponseEntity.ok(Response.success(null));
     }
 
@@ -163,10 +163,10 @@ public class ReservationController {
     @Parameters({
             @Parameter(name = "access", hidden = true)
     })
-    @DeleteMapping("/focus-desks")
+    @DeleteMapping("/focus-desks/{focusDeskId}")
     public ResponseEntity<Response<Void>> endUseDesk(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                     @Valid @RequestBody ReservationRequestDto.FocusDeskDto focusDeskDto) {
-        reservationService.endUseFocusDesk(access.getEmail(), focusDeskDto);
+                                                     @RequestBody Long focusDeskId) {
+        reservationService.endUseFocusDesk(access.getEmail(), focusDeskId);
         return ResponseEntity.ok(Response.success(null));
     }
 }
