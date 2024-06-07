@@ -99,8 +99,8 @@ public class FCMNotificationEventListener {
         notificationService.saveNotification(title, content, targetUrl, type, member);
     }
 
-    private Message createFCMMessage(String title, String email, String content, String targetUrl) {
-        return fcmNotificationService.createFCMMessage(title, email, content, targetUrl);
+    private Message createFCMMessage(String email, String title, String content, String targetUrl) {
+        return fcmNotificationService.createFCMMessage(email, title, content, targetUrl);
     }
 
     private void sendFCMNotification(String email, Message message) {
