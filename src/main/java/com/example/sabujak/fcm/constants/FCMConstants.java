@@ -13,6 +13,7 @@ public class FCMConstants {
     // Notification Title
     public static final String DEFAULT_TITLE = "offispace";
     public static final String MEETING_ROOM_INVITATION_TITLE = "참여자 등록";
+    public static final String RECHARGING_ROOM_CANCELLATION_TITLE = "리차징룸 예약 취소";
     public static final String MEETING_ROOM_RESERVATION_TITLE = "미팅룸 예약 30분 전";
 
     // Notification Image
