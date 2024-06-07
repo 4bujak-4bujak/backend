@@ -4,6 +4,7 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -123,6 +124,31 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .orderBy(reservation.reservationStartDateTime.asc())
                 .fetch();
+    }
+
+    @Override
+    public List<Reservation> findReservationsToday(Member member, LocalDateTime now) {
+
+        return queryFactory.selectFrom(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space).fetchJoin()
+                .join(space.branch, branch).fetchJoin()
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        (nowUsing(now)
+                                .or(startAfterNowAndBeforeTodayMax(now))))
+                .orderBy(reservation.reservationStartDateTime.asc())
+                .fetch();
+    }
+
+    private BooleanExpression nowUsing(LocalDateTime now) {
+        return reservation.reservationStartDateTime.before(now.plusSeconds(1))
+                .and(reservation.reservationEndDateTime.after(now));
+    }
+
+    private BooleanExpression startAfterNowAndBeforeTodayMax(LocalDateTime now) {
+        return reservation.reservationStartDateTime.after(now)
+                .and(reservation.reservationStartDateTime.before(now.with(LocalTime.MAX)));
     }
 
     @Override

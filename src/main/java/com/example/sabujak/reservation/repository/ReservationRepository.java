@@ -9,6 +9,9 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
 
+    @Query("select r from Reservation r join fetch r.space s join fetch s.branch where r.reservationId = :reservationId")
+    Optional<Reservation> findByIdWithSpaceAndBranch(@Param("reservationId") Long reservationId);
+
     @Query(
             value = "select r " +
                     "from Reservation r " +
