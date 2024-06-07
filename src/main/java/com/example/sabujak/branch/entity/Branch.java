@@ -1,5 +1,6 @@
 package com.example.sabujak.branch.entity;
 
+import com.example.sabujak.privatepost.entity.PrivatePost;
 import com.example.sabujak.space.entity.Space;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,9 @@ public class Branch {
 
     @Column(name = "road_from_station")
     private String roadFromStation; //찾아 오는길
+
+    @OneToMany(mappedBy = "branch")
+    private List<PrivatePost> privatePosts = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "station_names", joinColumns = @JoinColumn(name = "branch_id"))

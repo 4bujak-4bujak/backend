@@ -43,8 +43,6 @@ public class SecurityConstants {
     };
 
     public static final String[] PERMIT_ALL_GET_ENDPOINTS = {
-            "/posts",
-            "/posts/{postId}",
-            "/posts/{postId}/comments"
+            "/actuator/health"
     };
 }

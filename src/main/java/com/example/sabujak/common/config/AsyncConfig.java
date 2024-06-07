@@ -11,12 +11,24 @@ import java.util.concurrent.Executor;
 @Configuration
 public class AsyncConfig {
 
-    @Bean
+    @Bean(name = "taskExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
+        executor.setThreadNamePrefix("Offispace-Thread: ");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "callBackTaskExecutor")
+    public Executor callBackTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.setThreadNamePrefix("Offispace-Call-Back-Thread: ");
         executor.initialize();
         return executor;
     }

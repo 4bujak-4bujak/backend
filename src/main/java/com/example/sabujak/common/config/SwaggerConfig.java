@@ -31,7 +31,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
 
         Server localServer = new Server().description("로컬 서버").url("http://localhost:8080");
-        Server deployedServer = new Server().description("배포된 서버").url("https://joo-api.store");
+        Server developServer = new Server().description("develop 서버").url("https://joo-api.store");
+        Server productionServer = new Server().description("production 서버").url("https://www.4bujak.site");
 
         Info info = new Info()
                 .title("Offispace API 명세서")
@@ -56,7 +57,8 @@ public class SwaggerConfig {
         return new OpenAPI()
                 // Security 인증 컴포넌트 설정
                 .components(new Components().addSecuritySchemes(JWT, bearerAuth))
-                .addServersItem(deployedServer)
+                .addServersItem(productionServer)
+                .addServersItem(developServer)
                 .addServersItem(localServer)
                 // API 마다 Security 인증 컴포넌트 설정
                 .addSecurityItem(addSecurityItem)
