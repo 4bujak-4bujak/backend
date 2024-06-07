@@ -6,6 +6,7 @@ import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
 import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
+import com.example.sabujak.reservation.dto.response.ReservationProgress;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.MemberReservation;
 import com.example.sabujak.reservation.entity.MemberReservationType;
@@ -251,7 +252,7 @@ public class ReservationService {
         return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
     }
 
-    public List<ReservationHistoryResponse.ReservationForList> getReservations(String email, int durationStart, int durationEnd) {
+    public List<ReservationHistoryResponse.ReservationForList> getTodayReservations(String email) {
         List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
 
         LocalDateTime now = LocalDateTime.now();
@@ -259,7 +260,7 @@ public class ReservationService {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        List<Reservation> todayReservations = reservationRepository.findReservationsWithDuration(member, now, durationStart, durationEnd);
+        List<Reservation> todayReservations = reservationRepository.findReservationsToday(member, now);
         List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(todayReservations);
 
         Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()
@@ -283,6 +284,97 @@ public class ReservationService {
         }
 
         return reservationForLists;
+    }
+
+    public List<ReservationHistoryResponse.ReservationForList> getReservationsFor30Days(String email) {
+        List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        List<Reservation> reservations = reservationRepository.findReservationsWithDuration(member, now, 1, 30);
+        List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(reservations);
+
+        Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()
+                .collect(Collectors.groupingBy(MemberReservation::getReservation));
+
+        for (Reservation reservation : reservations) {
+            List<MemberReservation> memberReservationsInReservation = memberReservationMap.get(reservation);
+
+            Optional<MemberReservationType> memberType = memberReservationsInReservation.stream()
+                    .filter(memberReservation -> memberReservation.getMember().getMemberId().equals(member.getMemberId()))
+                    .map(MemberReservation::getMemberReservationType)
+                    .findFirst();
+
+            reservationForLists.add(ReservationHistoryResponse.ReservationForList.of(
+                    reservation,
+                    reservation.getSpace(),
+                    memberReservationsInReservation.stream()
+                            .map(MemberReservation::getMember)
+                            .collect(Collectors.toList()),
+                    memberType.orElse(null)));
+        }
+
+        return reservationForLists;
+    }
+
+    public ReservationHistoryResponse.ReservationDetails getReservationDetails(String email, Long reservationId) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        Reservation reservation = reservationRepository.findByIdWithSpaceAndBranch(reservationId)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+
+        List<MemberReservation> memberReservations = memberReservationRepository.findByReservation(reservation);
+
+        Member representative = null;
+        List<Member> participants = new ArrayList<>();
+
+        boolean checkMyReservation = false;
+
+        for (MemberReservation memberReservation : memberReservations) {
+            if (memberReservation.getMemberReservationType().equals(MemberReservationType.REPRESENTATIVE)) {
+                representative = memberReservation.getMember();
+            } else {
+                participants.add(memberReservation.getMember());
+            }
+
+            if (memberReservation.getMember().getMemberId() == member.getMemberId()) {
+                checkMyReservation = true;
+            }
+        }
+
+        if (!checkMyReservation) {
+            throw new ReservationException(NOT_RESERVED_BY_MEMBER);
+        }
+
+        MemberReservationType myMemberType = MemberReservationType.PARTICIPANT;
+        if (representative.getMemberId() == member.getMemberId()) {
+            myMemberType = MemberReservationType.REPRESENTATIVE;
+        }
+
+        ReservationProgress reservationProgress = null;
+
+        if (reservation.getReservationStartDateTime().isAfter(now)) {
+            reservationProgress = ReservationProgress.BEFORE_USE;
+        } else if (reservation.getReservationStartDateTime().isBefore(now) && reservation.getReservationEndDateTime().isAfter(now)) {
+            reservationProgress = ReservationProgress.IN_USE;
+        } else {
+            reservationProgress = ReservationProgress.AFTER_USE;
+        }
+
+        return ReservationHistoryResponse.ReservationDetails.of(
+                reservation,
+                reservation.getSpace(),
+                representative,
+                participants,
+                myMemberType,
+                reservationProgress);
     }
 
     @Transactional
@@ -312,7 +404,7 @@ public class ReservationService {
         if (myMemberReservation == null) {
             throw new ReservationException(NOT_RESERVED_BY_MEMBER);
         } else if (myMemberReservation.getMemberReservationStatus().equals(CANCELED)) {
-        throw new ReservationException(ALREADY_CANCELED_RESERVATION);
+            throw new ReservationException(ALREADY_CANCELED_RESERVATION);
         } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.REPRESENTATIVE)) {
             memberReservations.forEach(MemberReservation::cancelReservation);
         } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.PARTICIPANT)) {

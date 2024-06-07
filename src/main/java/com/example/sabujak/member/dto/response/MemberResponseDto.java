@@ -2,6 +2,7 @@ package com.example.sabujak.member.dto.response;
 
 import com.example.sabujak.member.entity.Job;
 import com.example.sabujak.member.entity.Member;
+import com.example.sabujak.reservation.entity.MemberReservationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class MemberResponseDto {
@@ -45,6 +46,22 @@ public class MemberResponseDto {
             return new MemberResponseDto.NameAndCompany(
                     member.getMemberName(),
                     member.getCompany().getCompanyName()
+            );
+        }
+    }
+
+    public record MemberListForReservation(Long memberId,
+                                           String memberName,
+                                           String memberEmail,
+                                           String imageUrl,
+                                           MemberReservationType memberType) {
+        public static MemberResponseDto.MemberListForReservation of(Member member, MemberReservationType memberType) {
+            return new MemberResponseDto.MemberListForReservation(
+                    member.getMemberId(),
+                    member.getMemberName(),
+                    member.getMemberEmail(),
+                    member.getImage().getImageUrl(),
+                    memberType
             );
         }
     }
