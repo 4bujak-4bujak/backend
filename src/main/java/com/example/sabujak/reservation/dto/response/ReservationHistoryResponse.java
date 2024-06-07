@@ -78,7 +78,12 @@ public class ReservationHistoryResponse {
         public static ReservationDetails of(Reservation reservation, Space space, Member representative, List<Member> participants, MemberReservationType myMemberType, ReservationProgress reservationProgress) {
             ReservationDetails reservationDetails = new ReservationDetails();
             reservationDetails.reservationId = reservation.getReservationId();
-            reservationDetails.reservationName = reservation.getReservationName();
+
+            reservationDetails.spaceName = space.getSpaceName();
+            if (space instanceof FocusDesk) {
+                reservationDetails.spaceName += " " + ((FocusDesk) space).getFocusDeskNumber();
+            }
+
             reservationDetails.startAt = reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             reservationDetails.endAt = reservation.getReservationEndDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             reservationDetails.branchName = space.getBranch().getBranchName();
