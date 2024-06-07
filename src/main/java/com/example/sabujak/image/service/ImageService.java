@@ -35,7 +35,7 @@ public class ImageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    private final List<String> allowExtensionList = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
+    private final List<String> allowExtensionList = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".svg");
 
     public String saveImage(MultipartFile imageFile) {
         // 이미지 가 빈 파일 일 경우
