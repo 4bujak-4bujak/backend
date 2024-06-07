@@ -5,7 +5,7 @@ import com.example.sabujak.notification.entity.NotificationType;
 import com.example.sabujak.notification.service.NotificationService;
 import com.example.sabujak.post.dto.SaveCommentEvent;
 import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
-import com.example.sabujak.reservation.dto.SendReservationNotificationEvent;
+import com.example.sabujak.reservation.dto.FindMembersForNotification30MinutesBeforeReservationEvent;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class FCMNotificationEventListener {
         String content = event.notificationContent();
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Comment. " +
-                 "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
+                "Receiver Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
         saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.receiver());
         sendFCMNotification(email, createFCMMessage(DEFAULT_TITLE, email, content, targetUrl));
     }
@@ -49,7 +49,7 @@ public class FCMNotificationEventListener {
         String content = event.invitationContent();
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Meeting Room Invitation. " +
-                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
+                "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
         for (Member participant : event.participants()) {
             String email = participant.getMemberEmail();
             log.info("Participant Email: [{}]", email);
@@ -59,11 +59,11 @@ public class FCMNotificationEventListener {
     }
 
     @EventListener
-    public void saveAndSendFCMNotificationForMeetingRoomReservation(SendReservationNotificationEvent event) {
+    public void saveAndSendFCMNotificationForMeetingRoomReservation(FindMembersForNotification30MinutesBeforeReservationEvent event) {
         String content = event.content();
         String targetUrl = event.targetUrl();
         log.info("Preparing FCM Notification For Meeting Room Reservation. " +
-                 "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
+                "Notification Content: [{}], Target URL: [{}]", content, targetUrl);
         for (Member receiver : event.receivers()) {
             String email = receiver.getMemberEmail();
             log.info("Receiver Email: [{}]", email);
