@@ -30,11 +30,11 @@ public class ReservationNotificationScheduleEventListener {
         Long reservationId = event.reservationId();
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);
         log.info("Add Schedule Notification For Meeting Room Reservation. " +
-                 "Reservation ID: [{}], Notification Time: [{}]", reservationId, notificationTime);
+                "Reservation ID: [{}], Notification Time: [{}]", reservationId, notificationTime);
         String targetUrl = event.targetUrl();
         String content = event.reservationContent();
         taskScheduler.schedule(
-                () -> reservationService.sendReservationNotification(reservationId, targetUrl, content),
+                () -> reservationService.findMembersForNotification30MinutesBeforeReservation(reservationId, targetUrl, content),
                 toInstant(notificationTime)
         );
     }
