@@ -4,7 +4,7 @@ import com.example.sabujak.member.entity.Member;
 
 import java.util.List;
 
-public record SendReservationNotificationEvent(
+public record FindMembersForNotification30MinutesBeforeReservationEvent(
         String targetUrl,
         String content,
         List<Member> receivers
