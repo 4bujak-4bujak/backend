@@ -1,4 +1,5 @@
 package com.example.sabujak.branch.service;
+import com.example.sabujak.branch.dto.response.BranchDistanceResponseDto;
 import com.example.sabujak.branch.dto.response.BranchResponseDto;
 import com.example.sabujak.branch.dto.response.BranchWithSpaceDto;
 import com.example.sabujak.branch.entity.Branch;
@@ -22,6 +23,7 @@ import static com.example.sabujak.branch.exception.BranchErrorCode.ENTITY_NOT_FO
 @Transactional(readOnly = true)
 public class BranchService {
 
+    private static final int MAX_SEARCH_COUNT = 2;
     private final BranchRepository branchRepository;
     private final MeetingRoomRepository meetingRoomRepository;
 
@@ -46,6 +48,41 @@ public class BranchService {
 
         return new BranchWithSpaceDto(branch.getBranchId(), branch.getBranchName(),branch.getBranchAddress(),branchTotalMeetingRoomCount,branchActiveMeetingRoomCount);
     }
+
+    public List<BranchDistanceResponseDto> getNearBranchByPosition(double latitude, double longitude) {
+        log.info("[BranchService getNearBranch] latitude: {}, longitude: {}", latitude, longitude);
+
+        return branchRepository.findAll().stream().sorted((a, b) -> {
+                            double calA = calculateDistance(latitude, longitude, a.getBranchLatitude(), a.getBranchLongitude());
+                            double calB = calculateDistance(latitude, longitude, b.getBranchLatitude(), b.getBranchLongitude());
+                            if (calA < calB)
+                                return -1;
+                            else if (calA > calB)
+                                return 1;
+                            return 0;
+                        }
+                ).map(branch -> new BranchDistanceResponseDto(
+                        branch.getBranchId(),
+                        branch.getBranchName(),
+                        calculateDistance(latitude, longitude, branch.getBranchLatitude(), branch.getBranchLongitude())))
+                .limit(MAX_SEARCH_COUNT).toList();
+
+    }
+
+
+    // Haversine formula -> 두 좌표간 거리 계산
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        lat1 = Math.toRadians(lat1);
+        lon1 = Math.toRadians(lon1);
+        lat2 = Math.toRadians(lat2);
+        lon2 = Math.toRadians(lon2);
+
+        double earthRadius = 6371; //Kilometers
+        return earthRadius * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));
+    }
+
+
+
 
 
 
