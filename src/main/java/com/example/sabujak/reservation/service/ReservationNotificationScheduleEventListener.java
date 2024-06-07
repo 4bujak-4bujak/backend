@@ -26,15 +26,15 @@ public class ReservationNotificationScheduleEventListener {
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Order(value = LOWEST_PRECEDENCE)
-    public void addMeetingRoomReservationNotificationSchedule(ReserveMeetingRoomEvent event) {
+    public void addMeetingRoomEntryNotificationSchedule(ReserveMeetingRoomEvent event) {
         Long reservationId = event.reservationId();
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);
-        log.info("Add Schedule Notification For Meeting Room Reservation. " +
+        log.info("Add Schedule Notification For Entering The Meeting Room. " +
                 "Reservation ID: [{}], Notification Time: [{}]", reservationId, notificationTime);
         String targetUrl = event.targetUrl();
         String content = event.reservationContent();
         taskScheduler.schedule(
-                () -> reservationService.findMembersForNotification30MinutesBeforeReservation(reservationId, targetUrl, content),
+                () -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, targetUrl, content),
                 toInstant(notificationTime)
         );
     }
