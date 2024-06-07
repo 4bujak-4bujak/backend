@@ -6,6 +6,6 @@ public record SaveCommentEvent(
         String targetUrl,
         String notificationContent,
         String receiverEmail,
-        Member receiver
+        Member recipient
 ) {
 }

@@ -3,7 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
-import com.example.sabujak.reservation.dto.FindMembersForNotification30MinutesBeforeReservationEvent;
+import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
@@ -21,6 +21,7 @@ import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.processing.Find;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -336,16 +337,16 @@ public class ReservationService {
     }
 
     @Async
-    public void findMembersForNotification30MinutesBeforeReservation(Long reservationId, String targetUrl, String content) {
-        log.info("Starting Search For Members To Send Notification 30 Minutes Before Reservation.");
+    public void findMeetingRoomEntryNotificationMembers(Long reservationId, String targetUrl, String content) {
+        log.info("Start Finding Members To Send Meeting Room Entry Notification.");
         Reservation reservation = findReservationWithMemberReservationsAndMembers(reservationId);
         List<Member> members = getAcceptedMembers(reservation);
         if (members.isEmpty()) {
             log.info("Accepted Members Not Found For Reservation. Cancel The Send Notification Task.");
             return;
         }
-        log.info("Creating And Publishing Notification Event For Reservation 30 Minutes Before.");
-        publisher.publishEvent(new FindMembersForNotification30MinutesBeforeReservationEvent(targetUrl, content, members));
+        log.info("Start Creating And Publishing Meeting Room Entry Notification Event.");
+        publisher.publishEvent(new FindMeetingRoomEntryNotificationMembersEvent(targetUrl, content, members));
     }
 
     private Reservation findReservationWithMemberReservationsAndMembers(Long reservationId) {
