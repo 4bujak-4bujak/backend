@@ -31,8 +31,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomInvitationContent;
-import static com.example.sabujak.notification.utils.NotificationContent.createMeetingRoomReservationContent;
+import static com.example.sabujak.notification.utils.NotificationContent.*;
 import static com.example.sabujak.reservation.entity.ReservationStatus.ACCEPTED;
 import static com.example.sabujak.reservation.entity.ReservationStatus.CANCELED;
 import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
@@ -91,19 +90,18 @@ public class ReservationService {
             throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
         }
 
-        //대표자 리차징룸 중복 예약 처리
-        List<Reservation> representativeOverlappingRechargingRoomReservations = reservationRepository.findOverlappingRechargingRoomReservation(representative, meetingRoomDto.startAt(), meetingRoomDto.endAt());
-        handleOverlappingRechargingRoomReservations(representativeOverlappingRechargingRoomReservations, now);
+        // 대표자 및 참여자 리차징룸 중복 예약 처리
+        List<Member> members = new ArrayList<>(participants);
+        members.add(representative);
 
-        //참여자 리차징룸 중복 예약 처리
-        List<Reservation> participantsOverlappingRechargingRoomReservations = reservationRepository.findOverlappingRechargingRoomReservationInMembers(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt());
-        handleOverlappingRechargingRoomReservations(participantsOverlappingRechargingRoomReservations, now);
+        List<Reservation> membersOverlappingRechargingRoomReservations = reservationRepository.findOverlappingRechargingRoomReservationInMembers(members, meetingRoomDto.startAt(), meetingRoomDto.endAt());
+        List<Member> cancelers = handleOverlappingRechargingRoomReservations(membersOverlappingRechargingRoomReservations, now);
 
         Reservation reservation = meetingRoomDto.toReservationEntity(meetingRoom, representative, participants);
 
         reservationRepository.save(reservation);
 
-        publisher.publishEvent(createReserveMeetingRoomEvent(reservation, meetingRoom, participants));
+        publisher.publishEvent(createReserveMeetingRoomEvent(reservation, meetingRoom, participants, cancelers));
     }
 
     private boolean verifyOverlappingMeetingRoom(Member representative, LocalDateTime startAt, LocalDateTime endAt) {
@@ -120,17 +118,22 @@ public class ReservationService {
         return false;
     }
 
-    private void handleOverlappingRechargingRoomReservations(List<Reservation> overlappingRechargingRoomReservations, LocalDateTime now) {
+    private List<Member> handleOverlappingRechargingRoomReservations(List<Reservation> overlappingRechargingRoomReservations, LocalDateTime now) {
+        List<Member> cancelers = new ArrayList<>();
         for (Reservation reservation : overlappingRechargingRoomReservations) {
-            //예약 시간이 겹치는데 이미 시작한거면 종료 처리
+            // 예약 시간이 겹치는데 이미 시작한 경우 종료 처리
             if (reservation.getReservationStartDateTime().isBefore(now)) {
                 reservation.endUse(now);
             }
-            //겹치는데 시작 전이면 예약 취소 처리
+            // 겹치는데 시작 전인 경우 예약 취소 처리
             else {
-                reservation.getMemberReservations().forEach(MemberReservation::cancelReservation);
+                reservation.getMemberReservations().forEach(memberReservation -> {
+                    memberReservation.cancelReservation();
+                    cancelers.add(memberReservation.getMember());
+                });
             }
         }
+        return cancelers;
     }
 
     @Transactional
@@ -320,20 +323,23 @@ public class ReservationService {
         }
     }
 
-    private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants) {
+    private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants, List<Member> cancelers) {
         Long reservationId = reservation.getReservationId();
         LocalDateTime reservationDate = reservation.getReservationStartDateTime();
-        log.info("Create Event For Publication. Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
+        log.info("Create Event For Publication. Reservation ID: [{}], Reservation Date: [{}]",
+                reservationId, reservationDate);
 
         String branchName = meetingRoom.getBranch().getBranchName();
         String spaceName = meetingRoom.getSpaceName();
         log.info("Branch Name: [{}], Space Name: [{}]", branchName, spaceName);
 
         String invitationContent = createMeetingRoomInvitationContent(reservationDate);
+        String cancellationContent = createRechargingRoomCancellationNotificationContent(reservationDate);
         String reservationContent = createMeetingRoomReservationContent(reservationDate, branchName, spaceName);
-        log.info("Invitation Content: [{}], Reservation Content: [{}]", invitationContent, reservationContent);
+        log.info("Invitation Content: [{}], Cancellation Content: [{}], Reservation Content: [{}]",
+                invitationContent, cancellationContent, reservationContent);
 
-        return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, reservationContent, participants);
+        return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, cancellationContent, reservationContent, participants, cancelers);
     }
 
     @Async
