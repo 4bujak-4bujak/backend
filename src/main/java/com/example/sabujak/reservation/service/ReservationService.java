@@ -2,8 +2,8 @@ package com.example.sabujak.reservation.service;
 
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
-import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
 import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
+import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationProgress;
@@ -22,7 +22,6 @@ import com.example.sabujak.space.repository.FocusDeskRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.processing.Find;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -175,14 +174,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public void endUseFocusDesk(String email, ReservationRequestDto.FocusDeskDto focusDeskDto) {
+    public void endUseFocusDesk(String email, Long spaceId) {
 
         LocalDateTime now = LocalDateTime.now();
 
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        FocusDesk focusDesk = focusDeskRepository.findById(focusDeskDto.focusDeskId())
+        FocusDesk focusDesk = focusDeskRepository.findById(spaceId)
                 .orElseThrow(() -> new SpaceException(FOCUS_DESK_NOT_FOUND));
 
         // 해당 회원이 당일 예약한 포커스 데스크를 시간순으로 가져옴
@@ -378,13 +377,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelMeetingRoom(String email, ReservationRequestDto.MeetingRoomReservationCancel cancelDto) {
+    public void cancelMeetingRoom(String email, Long reservationId) {
         LocalDateTime now = LocalDateTime.now();
 
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        Reservation reservation = reservationRepository.findById(cancelDto.reservationId())
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
 
         if (reservation.getReservationEndDateTime().isBefore(now)) {
