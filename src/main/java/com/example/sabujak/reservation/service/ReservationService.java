@@ -433,6 +433,7 @@ public class ReservationService {
         return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, cancellationContent, reservationContent, participants, cancelers);
     }
 
+    @Transactional
     @Async
     public void findMeetingRoomEntryNotificationMembers(Long reservationId, String targetUrl, String content) {
         log.info("Start Finding Members To Send Meeting Room Entry Notification.");
