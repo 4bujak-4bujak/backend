@@ -41,7 +41,7 @@ public class FCMNotificationEventListener {
         log.info("Preparing FCM Notification For Comment. " +
                 "Notification Recipient Email: [{}], Content: [{}], Target URL: [{}]", email, content, targetUrl);
         saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.recipient());
-        sendFCMNotification(email, createFCMMessage(DEFAULT_TITLE, email, content, targetUrl));
+        sendFCMNotification(email, createFCMMessage(email, DEFAULT_TITLE, content, targetUrl));
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
@@ -56,7 +56,7 @@ public class FCMNotificationEventListener {
             String email = participant.getMemberEmail();
             log.info("Notification Recipient Email: [{}]", email);
             saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
-            sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_INVITATION_TITLE, email, content, targetUrl));
+            sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_INVITATION_TITLE, content, targetUrl));
         }
     }
 
@@ -76,7 +76,7 @@ public class FCMNotificationEventListener {
             String email = canceler.getMemberEmail();
             log.info("Notification Canceler Email: [{}]", email);
             saveNotification(RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl, RESERVATION, canceler);
-            sendFCMNotificationAsync(email, createFCMMessage(RECHARGING_ROOM_CANCELLATION_TITLE, email, content, targetUrl));
+            sendFCMNotificationAsync(email, createFCMMessage(email, RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl));
         }
     }
 
