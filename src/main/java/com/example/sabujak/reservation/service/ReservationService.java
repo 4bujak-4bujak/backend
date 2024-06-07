@@ -3,7 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
-import com.example.sabujak.reservation.dto.SendReservationNotificationEvent;
+import com.example.sabujak.reservation.dto.FindMembersForNotification30MinutesBeforeReservationEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
@@ -336,24 +336,26 @@ public class ReservationService {
     }
 
     @Async
-    public void sendReservationNotification(Long reservationId, String targetUrl, String content) {
-        log.info("Create And Publish Event For Sending Reservation Notification.");
-        Reservation reservation = findReservationWithMemberReservationsAndMember(reservationId);
-        List<Member> receivers = getAcceptedMembers(reservation);
-        if (receivers.isEmpty()) {
-            log.info("No Accepted Members Found For Reservation. Canceling Send Notification Task.");
+    public void findMembersForNotification30MinutesBeforeReservation(Long reservationId, String targetUrl, String content) {
+        log.info("Starting Search For Members To Send Notification 30 Minutes Before Reservation.");
+        Reservation reservation = findReservationWithMemberReservationsAndMembers(reservationId);
+        List<Member> members = getAcceptedMembers(reservation);
+        if (members.isEmpty()) {
+            log.info("Accepted Members Not Found For Reservation. Cancel The Send Notification Task.");
             return;
         }
-        log.info("Accepted Members For Reservation Found. Sending Notification To [{}] Members.", receivers.size());
-        publisher.publishEvent(new SendReservationNotificationEvent(targetUrl, content, receivers));
+        log.info("Creating And Publishing Notification Event For Reservation 30 Minutes Before.");
+        publisher.publishEvent(new FindMembersForNotification30MinutesBeforeReservationEvent(targetUrl, content, members));
     }
 
-    private Reservation findReservationWithMemberReservationsAndMember(Long reservationId) {
-        return reservationRepository.findWithMemberReservationsAndMemberById(reservationId)
+    private Reservation findReservationWithMemberReservationsAndMembers(Long reservationId) {
+        log.info("Finding Reservation With Member Reservations And Members. Reservation ID: [{}]", reservationId);
+        return reservationRepository.findWithMemberReservationsAndMembersById(reservationId)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
     }
 
     private List<Member> getAcceptedMembers(Reservation reservation) {
+        log.info("Finding Members With Reservation Status Accepted. Reservation ID: [{}]", reservation.getReservationId());
         return reservation.getMemberReservations().stream()
                 .filter(memberReservation -> memberReservation.getMemberReservationStatus().equals(ACCEPTED))
                 .map(MemberReservation::getMember)
