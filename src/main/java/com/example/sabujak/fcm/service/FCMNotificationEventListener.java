@@ -90,7 +90,7 @@ public class FCMNotificationEventListener {
             String email = recipient.getMemberEmail();
             log.info("Notification Recipient Email: [{}]", email);
             saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, recipient);
-            sendFCMNotificationAsync(email, createFCMMessage(MEETING_ROOM_RESERVATION_TITLE, email, content, targetUrl));
+            sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_RESERVATION_TITLE, content, targetUrl));
         }
     }
 
