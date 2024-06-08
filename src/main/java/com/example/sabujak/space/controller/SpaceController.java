@@ -2,6 +2,7 @@ package com.example.sabujak.space.controller;
 
 import com.example.sabujak.common.response.Response;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
+import com.example.sabujak.space.dto.SpaceCountResponseDto;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoomType;
@@ -96,5 +97,16 @@ public class SpaceController {
     @GetMapping("/focus-zone/{branchId}")
     public ResponseEntity<Response<List<FocusDeskResponseDto.FocusDeskForList>>> getFocusDeskList(@PathVariable Long branchId) {
         return ResponseEntity.ok(Response.success(spaceService.getFocusDeskList(branchId)));
+    }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "지점 공간 개수 정보 조회", description = "지점의 공간 종류별 개수 반환")
+    @Parameters({
+            @Parameter(name = "branchId", description = "지점 Id", example = "1")
+    })
+    @GetMapping("/{branchId}/count")
+    public ResponseEntity<Response<SpaceCountResponseDto>> getCountByBranch(@PathVariable Long branchId) {
+        return ResponseEntity.ok(Response.success(spaceService.countRoomByBranch(branchId)));
     }
 }
