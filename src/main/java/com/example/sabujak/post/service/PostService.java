@@ -22,7 +22,7 @@ import static com.example.sabujak.post.exception.PostErrorCode.*;
 @RequiredArgsConstructor
 public class PostService {
 
-    private static final String POST_VIEW_PREFIX = "post_view: ";
+    private static final String POST_VIEW_PREFIX = "post_view";
     private static final String POST_VIEW_VALUE = "viewed";
     private static final long POST_VIEW_EXPIRATION = 1000L * 60 * 60 * 24;
 
