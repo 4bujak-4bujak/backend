@@ -13,6 +13,7 @@ public interface ReservationRepositoryCustom {
     boolean existsOverlappingMeetingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt);
 
     boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
+    boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt);
     List<Reservation> findOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
     List<Reservation> findOverlappingRechargingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt);
 

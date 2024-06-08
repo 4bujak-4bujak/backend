@@ -17,8 +17,10 @@ import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.entity.FocusDesk;
 import com.example.sabujak.space.entity.MeetingRoom;
+import com.example.sabujak.space.entity.RechargingRoom;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
+import com.example.sabujak.space.repository.RechargingRoomRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
+    private final RechargingRoomRepository rechargingRoomRepository;
     private final MemberReservationRepository memberReservationRepository;
 
     private final ApplicationEventPublisher publisher;
@@ -412,6 +415,31 @@ public class ReservationService {
         } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.PARTICIPANT)) {
             myMemberReservation.cancelReservation();
         }
+    }
+
+    @Transactional
+    public void reserveRechargingRoom(String email, ReservationRequestDto.RechargingRoomDto rechargingRoomDto) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        final RechargingRoom rechargingRoom = rechargingRoomRepository.findById(rechargingRoomDto.rechargingRoomId())
+                .orElseThrow(() -> new SpaceException(MEETING_ROOM_NOT_FOUND));
+
+        //리차징룸 예약 중복 검증
+        if (verifyOverlappingRechargingRoom(member, rechargingRoomDto.startAt())) {
+            throw new ReservationException(OVERLAPPING_RECHARGING_ROOM_EXISTS);
+        }
+
+        Reservation reservation = rechargingRoomDto.toReservationEntity(rechargingRoom, rechargingRoomDto.startAt(), member);
+
+        reservationRepository.save(reservation);
+    }
+
+    private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt) {
+        if (reservationRepository.existsOverlappingRechargingRoomReservation(member, startAt)) {
+            return true;
+        }
+        return false;
     }
 
     private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants, List<Member> cancelers) {

@@ -63,6 +63,19 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     }
 
     @Override
+    public boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
+                        reservation.reservationStartDateTime.eq(startAt))
+                .fetchFirst() != null;
+    }
+
+    @Override
     public List<Reservation> findOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt) {
         return queryFactory.selectFrom(reservation)
                 //리차징룸은 어차피 예약 다:1 회원 이라 fetchJoin 해도 무방

@@ -132,6 +132,20 @@ public class ReservationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "리차징룸 예약", description = "리차징룸을 30분동안 예약")
+    @Parameters({
+            @Parameter(name = "access", hidden = true)
+    })
+    @PostMapping("/recharging-rooms")
+    public ResponseEntity<Response<Void>> reserveRechargingRoom(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                @Valid @RequestBody ReservationRequestDto.RechargingRoomDto rechargingRoomDto) {
+        reservationService.reserveRechargingRoom(access.getEmail(), rechargingRoomDto);
+        return ResponseEntity.ok(Response.success(null));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "예약 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "예약 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
     @Operation(summary = "포커스 데스크 예약", description = "포커스존 예약 관련 모든 정보들을 받고 최종 예약")
     @Parameters({
             @Parameter(name = "access", hidden = true)
