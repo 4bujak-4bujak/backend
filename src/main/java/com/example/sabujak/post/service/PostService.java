@@ -106,13 +106,13 @@ public class PostService {
         }
     }
 
-    public boolean isViewed(String viewerEmail) {
-        String key = POST_VIEW_PREFIX + viewerEmail;
+    public boolean isViewed(Long postId, String viewerEmail) {
+        String key = String.format("%s:%d:%s", POST_VIEW_PREFIX, postId, viewerEmail);
         return redisService.get(key, String.class).isPresent();
     }
 
-    public void setViewed(String viewerEmail) {
-        String key = POST_VIEW_PREFIX + viewerEmail;
+    public void setViewed(Long postId, String viewerEmail) {
+        String key = String.format("%s:%d:%s", POST_VIEW_PREFIX, postId, viewerEmail);
         redisService.set(key, POST_VIEW_VALUE, POST_VIEW_EXPIRATION);
     }
 }
