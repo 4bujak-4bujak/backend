@@ -54,9 +54,9 @@ public class PostFacade {
         log.info("Getting Post. Post ID: [{}] Viewer Email: [{}]", postId, viewerEmail);
 
         Post post = postService.findPostWithMemberAndImages(postId);
-        if (!postService.isViewed(viewerEmail)) {
+        if (!postService.isViewed(postId, viewerEmail)) {
             postService.increaseViewCount(post);
-            postService.setViewed(viewerEmail);
+            postService.setViewed(postId, viewerEmail);
         }
         log.info("Increased Post View Count. View Count: [{}]", post.getViewCount());
 
