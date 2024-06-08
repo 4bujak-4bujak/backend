@@ -15,6 +15,7 @@ public class FCMConstants {
     public static final String MEETING_ROOM_INVITATION_TITLE = "참여자 등록";
     public static final String RECHARGING_ROOM_CANCELLATION_TITLE = "리차징룸 예약 취소";
     public static final String MEETING_ROOM_RESERVATION_TITLE = "미팅룸 예약 30분 전";
+    public static final String RECHARGING_ROOM_RESERVATION_TITLE = "리차징룸 예약 30분 전";
 
     // Notification Image
     public static final String DEFAULT_IMAGE = "https://sabujak-image-bucket.s3.ap-northeast-2.amazonaws.com/offispace+icon.png";

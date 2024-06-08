@@ -4,8 +4,9 @@ import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.notification.entity.NotificationType;
 import com.example.sabujak.notification.service.NotificationService;
 import com.example.sabujak.post.dto.SaveCommentEvent;
-import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
-import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
+import com.example.sabujak.reservation.dto.event.FindRechargingRoomEntryNotificationMemberEvent;
+import com.example.sabujak.reservation.dto.event.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.event.FindMeetingRoomEntryNotificationMembersEvent;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +96,17 @@ public class FCMNotificationEventListener {
             saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, member);
             sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_RESERVATION_TITLE, content, targetUrl));
         }
+    }
+
+    @EventListener
+    public void saveAndSendFCMNotificationForRechargingRoomEntry(FindRechargingRoomEntryNotificationMemberEvent event) {
+        String email = event.memberEmail();
+        String content = event.content();
+        String targetUrl = event.targetUrl();
+        log.info("Start Preparing FCM Notification For Recharging Room Entry. " +
+                "Member Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
+        saveNotification(RECHARGING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, event.member());
+        sendFCMNotification(email, createFCMMessage(email, RECHARGING_ROOM_RESERVATION_TITLE, content, targetUrl));
     }
 
     private void saveNotification(String title, String content, String targetUrl, NotificationType type, Member member) {
