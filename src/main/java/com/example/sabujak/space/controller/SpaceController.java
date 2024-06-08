@@ -4,6 +4,7 @@ import com.example.sabujak.common.response.Response;
 import com.example.sabujak.security.dto.request.AuthRequestDto;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
+import com.example.sabujak.space.dto.response.RechargingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.service.SpaceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -96,5 +97,17 @@ public class SpaceController {
     @GetMapping("/focus-zone/{branchId}")
     public ResponseEntity<Response<List<FocusDeskResponseDto.FocusDeskForList>>> getFocusDeskList(@PathVariable Long branchId) {
         return ResponseEntity.ok(Response.success(spaceService.getFocusDeskList(branchId)));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "리차징룸 리스트", description = "리차징룸 리스트를 30분 단위 5개 시간을 예약 가능 불가능을 표시하여 조회")
+    @Parameters({
+            @Parameter(name = "branchId", description = "지점 Id", example = "1")
+    })
+    @GetMapping("/recharging-room/{branchId}")
+    public ResponseEntity<Response<List<RechargingRoomResponseDto.RechargingRoomForList>>> getRechargingRoomList(@PathVariable Long branchId) {
+        return ResponseEntity.ok(Response.success(spaceService.getRechargingRoomList(branchId)));
     }
 }

@@ -3,6 +3,7 @@ package com.example.sabujak.reservation.repository;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.entity.ReservationStatus;
+import com.example.sabujak.space.entity.RechargingRoom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -164,5 +165,14 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetchFirst());
+    }
+
+    @Override
+    public List<Reservation> findAllByRechargingRoomListAndStartTimes(List<RechargingRoom> rechargingRooms, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                .join(reservation.space, space)
+                .where(space.in(rechargingRooms),
+                        reservation.reservationStartDateTime.between(startAt, endAt))
+                .fetch();
     }
 }

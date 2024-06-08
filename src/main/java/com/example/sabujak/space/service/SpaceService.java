@@ -6,21 +6,30 @@ import com.example.sabujak.branch.exception.BranchException;
 import com.example.sabujak.branch.repository.BranchRepository;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
+import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
+import com.example.sabujak.space.dto.response.RechargingRoomResponseDto;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
+import com.example.sabujak.space.entity.RechargingRoom;
+import com.example.sabujak.space.entity.Space;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
+import com.example.sabujak.space.repository.RechargingRoomRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
@@ -32,6 +41,7 @@ import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.MEE
 public class SpaceService {
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
+    private final RechargingRoomRepository rechargingRoomRepository;
     private final BranchRepository branchRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
@@ -97,5 +107,44 @@ public class SpaceService {
                 .stream()
                 .map(FocusDeskResponseDto.FocusDeskForList::from)
                 .collect(Collectors.toList());
+    }
+
+    public List<RechargingRoomResponseDto.RechargingRoomForList> getRechargingRoomList(Long branchId) {
+        List<RechargingRoomResponseDto.RechargingRoomForList> rechargingRoomList = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+        int minutes = now.getMinute();
+        if (minutes < 30) {
+            now = now.withMinute(30).withSecond(0).withNano(0);
+        } else {
+            now = now.withMinute(0).withSecond(0).withNano(0).plusHours(1);
+        }
+
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
+
+        List<RechargingRoom> rechargingRooms = rechargingRoomRepository.findAllByBranch(branch);
+        List<Reservation> reservations = reservationRepository.findAllByRechargingRoomListAndStartTimes(rechargingRooms, now, now.plusHours(2));
+        Map<Space, List<Reservation>> reservationMap = reservations.stream()
+                .collect(Collectors.groupingBy(Reservation::getSpace));
+
+        for (RechargingRoom rechargingRoom : rechargingRooms) {
+            Map<String, Boolean> reservationTimes = new HashMap<>();
+            for (int i = 0; i < 5; i++) {
+                String startTime = now.plusMinutes(30 * i).format(DateTimeFormatter.ofPattern("HH:mm"));
+                String endTime = now.plusMinutes(30 * (i + 1)).format(DateTimeFormatter.ofPattern("HH:mm"));
+
+                reservationTimes.put(startTime, true);
+            }
+
+            if (reservationMap.size() > 0) {
+                for (Reservation reservation : reservationMap.get(rechargingRoom)) {
+                    reservationTimes.put(reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("HH:mm")), false);
+                }
+            }
+
+            rechargingRoomList.add(RechargingRoomResponseDto.RechargingRoomForList.of(rechargingRoom, reservationTimes));
+        }
+        return rechargingRoomList;
     }
 }
