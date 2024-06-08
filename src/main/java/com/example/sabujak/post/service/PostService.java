@@ -24,7 +24,7 @@ public class PostService {
 
     private static final String POST_VIEW_PREFIX = "post_view: ";
     private static final String POST_VIEW_VALUE = "viewed";
-    public static final long POST_VIEW_EXPIRATION = 24L * 60 * 60;
+    private static final long POST_VIEW_EXPIRATION = 1000L * 60 * 60 * 24;
 
     private final RedisService redisService;
     private final PostRepository postRepository;
