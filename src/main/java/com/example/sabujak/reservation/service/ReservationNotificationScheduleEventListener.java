@@ -1,6 +1,10 @@
 package com.example.sabujak.reservation.service;
 
-import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
+import com.example.sabujak.member.entity.Member;
+import com.example.sabujak.reservation.dto.event.ReserveEvent;
+import com.example.sabujak.reservation.dto.event.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.event.ReserveRechargingRoomEvent;
+import com.example.sabujak.space.dto.SpaceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -12,6 +16,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+import static com.example.sabujak.space.dto.SpaceType.MEETINGROOM;
+import static com.example.sabujak.space.dto.SpaceType.RECHARGINGROOM;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -26,16 +32,32 @@ public class ReservationNotificationScheduleEventListener {
     @TransactionalEventListener(phase = AFTER_COMMIT)
     @Order(3)
     public void addMeetingRoomEntryNotificationSchedule(ReserveMeetingRoomEvent event) {
+        addSchedule(event, MEETINGROOM);
+    }
+
+    @TransactionalEventListener(phase = AFTER_COMMIT)
+    public void addRechargingRoomEntryNotificationSchedule(ReserveRechargingRoomEvent event) {
+        addSchedule(event, RECHARGINGROOM);
+    }
+
+    private void addSchedule(ReserveEvent event, SpaceType type) {
         Long reservationId = event.reservationId();
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);
-        log.info("Add Schedule Notification For Entering The Meeting Room. " +
-                "Reservation ID: [{}], Notification Time: [{}]", reservationId, notificationTime);
+        log.info("Add Schedule Notification. " +
+                "Reservation ID: [{}], Space Type: [{}], Notification Time: [{}]", reservationId, type, notificationTime);
         String targetUrl = event.targetUrl();
         String content = event.reservationContent();
-        taskScheduler.schedule(
-                () -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, targetUrl, content),
-                toInstant(notificationTime)
-        );
+        taskScheduler.schedule(() -> {
+            switch (type) {
+                case MEETINGROOM -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, targetUrl, content);
+                case RECHARGINGROOM -> {
+                    if (event instanceof ReserveRechargingRoomEvent rechargingRoomEvent) {
+                        Member member = rechargingRoomEvent.member();
+                        reservationService.findRechargingRoomEntryNotificationMember(reservationId, targetUrl, content, member);
+                    }
+                }
+            }
+        }, toInstant(notificationTime));
     }
 
     private Instant toInstant(LocalDateTime localDateTime) {

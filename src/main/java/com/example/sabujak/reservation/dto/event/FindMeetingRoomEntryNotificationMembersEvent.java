@@ -1,4 +1,4 @@
-package com.example.sabujak.reservation.dto;
+package com.example.sabujak.reservation.dto.event;
 
 import com.example.sabujak.member.entity.Member;
 
