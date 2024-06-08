@@ -5,6 +5,7 @@ import com.example.sabujak.reservation.entity.MemberReservationType;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.space.entity.FocusDesk;
 import com.example.sabujak.space.entity.MeetingRoom;
+import com.example.sabujak.space.entity.RechargingRoom;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -43,6 +44,23 @@ public class ReservationRequestDto {
             LocalDateTime endAt = startAt.plusDays(1).with(LocalTime.MIDNIGHT);
 
             Reservation reservation = Reservation.createReservation("포커스존", startAt, endAt, focusDesk);
+            reservation.addMemberReservation(member, MemberReservationType.REPRESENTATIVE);
+
+            return reservation;
+        }
+    }
+
+    public record RechargingRoomDto(
+            @Positive
+            Long rechargingRoomId,
+
+            @Future
+            LocalDateTime startAt) {
+
+        public Reservation toReservationEntity(RechargingRoom rechargingRoom, LocalDateTime startAt, Member member) {
+            LocalDateTime endAt = startAt.plusMinutes(30);
+
+            Reservation reservation = Reservation.createReservation("리차징룸", startAt, endAt, rechargingRoom);
             reservation.addMemberReservation(member, MemberReservationType.REPRESENTATIVE);
 
             return reservation;

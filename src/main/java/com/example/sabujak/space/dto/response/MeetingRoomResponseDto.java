@@ -1,6 +1,7 @@
 package com.example.sabujak.space.dto.response;
 
 import com.example.sabujak.branch.entity.Branch;
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.space.entity.MeetingRoom;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,10 +15,6 @@ public class MeetingRoomResponseDto {
 
     @Getter
     public static class MeetingRoomList {
-        public enum ToastType {
-            OVERLAPPING_MEETING_ROOM_EXISTS,
-            OVERLAPPING_RECHARGING_ROOM_EXISTS
-        }
 
         private List<MeetingRoomForList> meetingRoomForListList = new ArrayList<>();
         private ToastType toastType;
