@@ -106,7 +106,7 @@ public class SpaceController {
     @Parameters({
             @Parameter(name = "branchId", description = "지점 Id", example = "1")
     })
-    @GetMapping("/recharging-room/{branchId}")
+    @GetMapping("/recharging-rooms/{branchId}")
     public ResponseEntity<Response<List<RechargingRoomResponseDto.RechargingRoomForList>>> getRechargingRoomList(@PathVariable Long branchId) {
         return ResponseEntity.ok(Response.success(spaceService.getRechargingRoomList(branchId)));
     }
