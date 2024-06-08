@@ -3,8 +3,10 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
-import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
-import com.example.sabujak.reservation.dto.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.event.FindMeetingRoomEntryNotificationMembersEvent;
+import com.example.sabujak.reservation.dto.event.FindRechargingRoomEntryNotificationMemberEvent;
+import com.example.sabujak.reservation.dto.event.ReserveMeetingRoomEvent;
+import com.example.sabujak.reservation.dto.event.ReserveRechargingRoomEvent;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationProgress;
@@ -435,6 +437,8 @@ public class ReservationService {
         Reservation reservation = rechargingRoomDto.toReservationEntity(rechargingRoom, rechargingRoomDto.startAt(), member);
 
         reservationRepository.save(reservation);
+
+        publisher.publishEvent(createReserveRechargingRoomEvent(reservation, rechargingRoom, member));
     }
 
     private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt) {
@@ -486,8 +490,8 @@ public class ReservationService {
     private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants, List<Member> cancelers) {
         Long reservationId = reservation.getReservationId();
         LocalDateTime reservationDate = reservation.getReservationStartDateTime();
-        log.info("Create Event For Publication. Reservation ID: [{}], Reservation Date: [{}]",
-                reservationId, reservationDate);
+        log.info("Create Reserve Meeting Room Event For Publication. " +
+                "Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
 
         String branchName = meetingRoom.getBranch().getBranchName();
         String spaceName = meetingRoom.getSpaceName();
@@ -500,6 +504,19 @@ public class ReservationService {
                 invitationContent, cancellationContent, reservationContent);
 
         return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, cancellationContent, reservationContent, participants, cancelers);
+    }
+
+    private ReserveRechargingRoomEvent createReserveRechargingRoomEvent(Reservation reservation, RechargingRoom rechargingRoom, Member member) {
+        Long reservationId = reservation.getReservationId();
+        LocalDateTime reservationDate = reservation.getReservationStartDateTime();
+        log.info("Create Reserve Recharging Room Event For Publication. " +
+                "Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
+
+        String branchName = rechargingRoom.getBranch().getBranchName();
+        String reservationContent = createRechargingRoomReservationContent(reservationDate, branchName);
+        log.info("Branch Name: [{}], Reservation Content: [{}]", branchName, reservationContent);
+
+        return new ReserveRechargingRoomEvent(reservationId, reservationDate, "", reservationContent, member);
     }
 
     @Transactional(propagation = REQUIRED)
@@ -516,9 +533,28 @@ public class ReservationService {
         publisher.publishEvent(new FindMeetingRoomEntryNotificationMembersEvent(targetUrl, content, members));
     }
 
+    @Transactional(propagation = REQUIRED)
+    @Async
+    public void findRechargingRoomEntryNotificationMember(Long reservationId, String targetUrl, String content, Member member) {
+        log.info("Start Finding Members To Send Recharging Room Entry Notification.");
+        Reservation reservation = findReservationWithMemberReservations(reservationId);
+        if (!isReservationAccepted(reservation)) {
+            log.info("Reservation is Not Accepted. Cancel The Send Notification Task.");
+            return;
+        }
+        log.info("Start Creating And Publishing Recharging Room Entry Notification Event.");
+        publisher.publishEvent(new FindRechargingRoomEntryNotificationMemberEvent(targetUrl, content, member.getMemberEmail(), member));
+    }
+
     private Reservation findReservationWithMemberReservationsAndMembers(Long reservationId) {
         log.info("Finding Reservation With Member Reservations And Members. Reservation ID: [{}]", reservationId);
         return reservationRepository.findWithMemberReservationsAndMembersById(reservationId)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+    }
+
+    private Reservation findReservationWithMemberReservations(Long reservationId) {
+        log.info("Finding Reservation With Member Reservations. Reservation ID: [{}]", reservationId);
+        return reservationRepository.findWithMemberReservationsById(reservationId)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
     }
 
@@ -528,5 +564,10 @@ public class ReservationService {
                 .filter(memberReservation -> memberReservation.getMemberReservationStatus().equals(ACCEPTED))
                 .map(MemberReservation::getMember)
                 .toList();
+    }
+
+    private boolean isReservationAccepted(Reservation reservation) {
+        log.info("Check if Reservation Status is Accepted. Reservation ID: [{}]", reservation.getReservationId());
+        return reservation.getMemberReservations().get(0).getMemberReservationStatus().equals(ACCEPTED);
     }
 }
