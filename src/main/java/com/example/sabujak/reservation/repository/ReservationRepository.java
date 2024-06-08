@@ -22,4 +22,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     Optional<Reservation> findWithMemberReservationsAndMembersById(
             @Param("reservationId") Long reservationId
     );
+
+    @Query(
+            value = "select r " +
+                    "from Reservation r " +
+                    "join fetch r.memberReservations mr " +
+                    "where r.reservationId = :reservationId"
+    )
+    Optional<Reservation> findWithMemberReservationsById(
+            @Param("reservationId") Long reservationId
+    );
 }
