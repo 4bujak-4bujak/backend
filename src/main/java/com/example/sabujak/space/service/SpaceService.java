@@ -82,7 +82,7 @@ public class SpaceService {
     }
 
     private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt, LocalDateTime endAt) {
-        if (reservationRepository.existsOverlappingRechargingRoomReservationByStartAt(member, startAt, endAt)) {
+        if (reservationRepository.existsOverlappingRechargingRoomReservation(member, startAt, endAt)) {
             return true;
         }
         return false;
