@@ -1,5 +1,6 @@
 package com.example.sabujak.post.service;
 
+import com.example.sabujak.common.redis.service.RedisService;
 import com.example.sabujak.post.dto.CustomSlice;
 import com.example.sabujak.post.entity.Category;
 import com.example.sabujak.post.entity.Post;
@@ -21,6 +22,11 @@ import static com.example.sabujak.post.exception.PostErrorCode.*;
 @RequiredArgsConstructor
 public class PostService {
 
+    private static final String POST_VIEW_PREFIX = "post_view: ";
+    private static final String POST_VIEW_VALUE = "viewed";
+    public static final long POST_VIEW_EXPIRATION = 24L * 60 * 60;
+
+    private final RedisService redisService;
     private final PostRepository postRepository;
 
     public CustomSlice<Post> findPostsByCategory(Category child, Long cursorId, Pageable pageable) {
@@ -98,5 +104,15 @@ public class PostService {
         if (!isWriter(requester, writer)) {
             throw new PostException(POST_DELETE_DENIED);
         }
+    }
+
+    public boolean isViewed(String viewerEmail) {
+        String key = POST_VIEW_PREFIX + viewerEmail;
+        return redisService.get(key, String.class).isPresent();
+    }
+
+    public void setViewed(String viewerEmail) {
+        String key = POST_VIEW_PREFIX + viewerEmail;
+        redisService.set(key, POST_VIEW_VALUE, POST_VIEW_EXPIRATION);
     }
 }
