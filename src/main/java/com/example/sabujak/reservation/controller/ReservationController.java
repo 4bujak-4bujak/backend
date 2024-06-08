@@ -178,9 +178,9 @@ public class ReservationController {
             @Parameter(name = "access", hidden = true)
     })
     @GetMapping("/focus-desks/check-overlap/{focusDeskId}")
-    public ResponseEntity<Response<ReservationResponseDto.CheckOverlap>> checkOverlap(@AuthenticationPrincipal AuthRequestDto.Access access,
-                                                                                      @PathVariable Long focusDeskId) {
-        return ResponseEntity.ok(Response.success(reservationService.checkOverlap(access.getEmail(), focusDeskId)));
+    public ResponseEntity<Response<ReservationResponseDto.CheckFocusDeskOverlap>> checkFocusDeskOverlap(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                                                        @PathVariable Long focusDeskId) {
+        return ResponseEntity.ok(Response.success(reservationService.checkFocusDeskOverlap(access.getEmail(), focusDeskId)));
     }
 
     @ApiResponses(value = {

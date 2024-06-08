@@ -216,7 +216,7 @@ public class ReservationService {
         focusDesk.changeCanReserve(true);
     }
 
-    public ReservationResponseDto.CheckOverlap checkOverlap(String email, Long focusDeskId) {
+    public ReservationResponseDto.CheckFocusDeskOverlap checkFocusDeskOverlap(String email, Long focusDeskId) {
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -231,7 +231,7 @@ public class ReservationService {
 
         // 당일 예약한게 없으면 사용중인 좌석이 없음
         if (todayReservations.isEmpty()) {
-            return new ReservationResponseDto.CheckOverlap(false);
+            return new ReservationResponseDto.CheckFocusDeskOverlap(false);
         }
 
         // 당일 예약 중 가장 최근 좌석을 찾아서
@@ -240,10 +240,10 @@ public class ReservationService {
 
         // 가장 최근 좌석을 종료하지 않았고 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
         if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
-            return new ReservationResponseDto.CheckOverlap(true);
+            return new ReservationResponseDto.CheckFocusDeskOverlap(true);
         }
 
-        return new ReservationResponseDto.CheckOverlap(false);
+        return new ReservationResponseDto.CheckFocusDeskOverlap(false);
     }
 
     public ReservationHistoryResponse.TodayReservationCount getTodayReservationCount(String email) {

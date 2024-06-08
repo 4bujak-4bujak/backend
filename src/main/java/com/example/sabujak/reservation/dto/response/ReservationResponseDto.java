@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class ReservationResponseDto {
 
-    public record CheckOverlap(Boolean alreadyUsing) {
+    public record CheckFocusDeskOverlap(Boolean alreadyUsing) {
     }
 
     public record CheckRechargingRoomOverlap(ToastType toastType) {
