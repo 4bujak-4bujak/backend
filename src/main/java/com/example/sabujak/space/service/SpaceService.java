@@ -9,6 +9,7 @@ import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
+import com.example.sabujak.space.dto.SpaceCountResponseDto;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.dto.response.RechargingRoomResponseDto;
@@ -19,7 +20,10 @@ import com.example.sabujak.space.entity.RechargingRoom;
 import com.example.sabujak.space.entity.Space;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
+
 import com.example.sabujak.space.repository.RechargingRoomRepository;
+import com.example.sabujak.space.repository.SpaceRepository;
+
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +50,7 @@ public class SpaceService {
     private final BranchRepository branchRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
+    private final SpaceRepository spaceRepository;
 
     public MeetingRoomResponseDto.MeetingRoomList getMeetingRoomList(String email, LocalDateTime startAt, LocalDateTime endAt,
                                                                      String branchName, List<MeetingRoomType> roomTypes, boolean projectorExists,
@@ -147,5 +152,26 @@ public class SpaceService {
             rechargingRoomList.add(RechargingRoomResponseDto.RechargingRoomForList.of(rechargingRoom, reservationTimes));
         }
         return rechargingRoomList;
+    }
+      
+    public SpaceCountResponseDto countRoomByBranch(Long branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
+        int miniCount = meetingRoomRepository.countAllByBranchAndMeetingRoomType(branch, MeetingRoomType.MINI);
+        int standardCount = meetingRoomRepository.countAllByBranchAndMeetingRoomType(branch, MeetingRoomType.STANDARD);
+        int mediumCount = meetingRoomRepository.countAllByBranchAndMeetingRoomType(branch, MeetingRoomType.MEDIUM);
+        int stateCount = meetingRoomRepository.countAllByBranchAndMeetingRoomType(branch, MeetingRoomType.STATE);
+
+        int rechargingCount = spaceRepository.countAllRechargingRoomByBranch(branchId);
+        int focusCount = focusDeskRepository.countAllByBranch(branch);
+
+        return new SpaceCountResponseDto(
+                miniCount,
+                standardCount,
+                mediumCount,
+                stateCount,
+                rechargingCount,
+                focusCount
+        );
     }
 }

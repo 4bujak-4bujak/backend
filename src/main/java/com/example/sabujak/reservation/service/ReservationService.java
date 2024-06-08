@@ -41,6 +41,7 @@ import static com.example.sabujak.reservation.exception.ReservationErrorCode.*;
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.FOCUS_DESK_NOT_FOUND;
 import static com.example.sabujak.space.exception.meetingroom.SpaceErrorCode.MEETING_ROOM_NOT_FOUND;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 @Slf4j
 @Service
@@ -484,6 +485,7 @@ public class ReservationService {
         return new ReserveMeetingRoomEvent(reservationId, reservationDate, "", invitationContent, cancellationContent, reservationContent, participants, cancelers);
     }
 
+    @Transactional(propagation = REQUIRED)
     @Async
     public void findMeetingRoomEntryNotificationMembers(Long reservationId, String targetUrl, String content) {
         log.info("Start Finding Members To Send Meeting Room Entry Notification.");

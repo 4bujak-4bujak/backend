@@ -138,7 +138,7 @@ public class PostFacade {
 
         Post post = postService.findPostWithMember(postId);
         postService.increaseCommentCount(post);
-        log.info("Increased Post Comment Count. Comment Count: [{}]", post.getLikeCount());
+        log.info("Increased Post Comment Count. Comment Count: [{}]", post.getCommentCount());
 
         Member commenter = memberService.findMember(commenterEmail);
         Comment comment = saveCommentRequest.toEntity(commenter, post);
