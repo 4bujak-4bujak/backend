@@ -12,6 +12,7 @@ import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.dto.response.RechargingRoomResponseDto;
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.entity.RechargingRoom;
@@ -52,12 +53,12 @@ public class SpaceService {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
 
-        MeetingRoomResponseDto.MeetingRoomList.ToastType toastType = null;
+        ToastType toastType = null;
 
         if (verifyOverlappingMeetingRoom(member, startAt, endAt)) {
-            toastType = MeetingRoomResponseDto.MeetingRoomList.ToastType.OVERLAPPING_MEETING_ROOM_EXISTS;
+            toastType = ToastType.OVERLAPPING_MEETING_ROOM_EXISTS;
         } else if (verifyOverlappingRechargingRoom(member, startAt, endAt)) {
-            toastType = MeetingRoomResponseDto.MeetingRoomList.ToastType.OVERLAPPING_RECHARGING_ROOM_EXISTS;
+            toastType = ToastType.OVERLAPPING_RECHARGING_ROOM_EXISTS;
         }
 
         return new MeetingRoomResponseDto.MeetingRoomList(
@@ -76,7 +77,7 @@ public class SpaceService {
     }
 
     private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt, LocalDateTime endAt) {
-        if (reservationRepository.existsOverlappingRechargingRoomReservation(member, startAt, endAt)) {
+        if (reservationRepository.existsOverlappingRechargingRoomReservationByStartAt(member, startAt, endAt)) {
             return true;
         }
         return false;
