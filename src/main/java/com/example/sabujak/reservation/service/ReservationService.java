@@ -444,6 +444,23 @@ public class ReservationService {
         return false;
     }
 
+    @Transactional
+    public void cancelRechargingRoom(String email, Long reservationId) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
+
+        if(reservation.getMemberReservations().get(0).getMember().getMemberId() != member.getMemberId()) {
+            throw new ReservationException(NOT_RESERVED_BY_MEMBER);
+        } else if (reservation.getReservationEndDateTime().isBefore(LocalDateTime.now())) {
+            throw new ReservationException(ALREADY_ENDED_RESERVATION);
+        } else {
+            reservation.getMemberReservations().forEach(MemberReservation::cancelReservation);
+        }
+    }
+
     public ReservationResponseDto.CheckRechargingRoomOverlap checkRechargingRoomOverlap(String email, LocalDateTime startAt) {
 
         final Member member = memberRepository.findByMemberEmail(email)
