@@ -87,7 +87,7 @@ public class ReservationService {
         }
         //참여자 미팅룸 예약 검증
         else if (verifyOverlappingMeetingRoom(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
-            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
+            throw new ReservationException(PARTICIPANTS_OVERLAPPING_MEETINGROOM_EXISTS);
         }
 
         // 대표자 및 참여자 리차징룸 중복 예약 처리

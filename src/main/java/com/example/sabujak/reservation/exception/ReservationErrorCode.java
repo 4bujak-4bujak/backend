@@ -18,7 +18,8 @@ public enum ReservationErrorCode implements ErrorCode {
     NOT_RESERVED_BY_MEMBER(BAD_REQUEST, "9-004", "해당 회원이 예약한 내역이 아닙니다."),
     RESERVATION_NOT_EXISTS(NOT_FOUND, "9-005", "존재하지 않는 예약입니다"),
     ALREADY_ENDED_RESERVATION(BAD_REQUEST, "9-006", "이미 종료된 예약입니다."),
-    ALREADY_CANCELED_RESERVATION(BAD_REQUEST, "9-007", "이미 취소한 예약입니다.");
+    ALREADY_CANCELED_RESERVATION(BAD_REQUEST, "9-007", "이미 취소한 예약입니다."),
+    PARTICIPANTS_OVERLAPPING_MEETINGROOM_EXISTS(BAD_REQUEST, "9-008", "참여자의 겹치는 미팅룸 예약이 존재합니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;
