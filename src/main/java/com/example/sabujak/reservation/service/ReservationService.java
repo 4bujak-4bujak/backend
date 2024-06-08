@@ -1,5 +1,6 @@
 package com.example.sabujak.reservation.service;
 
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
@@ -17,8 +18,10 @@ import com.example.sabujak.reservation.repository.ReservationRepository;
 import com.example.sabujak.security.exception.AuthException;
 import com.example.sabujak.space.entity.FocusDesk;
 import com.example.sabujak.space.entity.MeetingRoom;
+import com.example.sabujak.space.entity.RechargingRoom;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
+import com.example.sabujak.space.repository.RechargingRoomRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +52,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MeetingRoomRepository meetingRoomRepository;
     private final FocusDeskRepository focusDeskRepository;
+    private final RechargingRoomRepository rechargingRoomRepository;
     private final MemberReservationRepository memberReservationRepository;
 
     private final ApplicationEventPublisher publisher;
@@ -88,7 +92,7 @@ public class ReservationService {
         }
         //참여자 미팅룸 예약 검증
         else if (verifyOverlappingMeetingRoom(participants, meetingRoomDto.startAt(), meetingRoomDto.endAt())) {
-            throw new ReservationException(REPRESENTATIVE_OVERLAPPING_MEETINGROOM_EXISTS);
+            throw new ReservationException(PARTICIPANTS_OVERLAPPING_MEETINGROOM_EXISTS);
         }
 
         // 대표자 및 참여자 리차징룸 중복 예약 처리
@@ -213,7 +217,7 @@ public class ReservationService {
         focusDesk.changeCanReserve(true);
     }
 
-    public ReservationResponseDto.CheckOverlap checkOverlap(String email, Long focusDeskId) {
+    public ReservationResponseDto.CheckFocusDeskOverlap checkFocusDeskOverlap(String email, Long focusDeskId) {
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -228,7 +232,7 @@ public class ReservationService {
 
         // 당일 예약한게 없으면 사용중인 좌석이 없음
         if (todayReservations.isEmpty()) {
-            return new ReservationResponseDto.CheckOverlap(false);
+            return new ReservationResponseDto.CheckFocusDeskOverlap(false);
         }
 
         // 당일 예약 중 가장 최근 좌석을 찾아서
@@ -237,10 +241,10 @@ public class ReservationService {
 
         // 가장 최근 좌석을 종료하지 않았고 해당 좌석이 예약 종료된 상태가 아니면 사용중인 좌석이 있음
         if (todayLatestReservation.getReservationEndDateTime().isAfter(now) && !todayLatestFocusDesk.isCanReserve()) {
-            return new ReservationResponseDto.CheckOverlap(true);
+            return new ReservationResponseDto.CheckFocusDeskOverlap(true);
         }
 
-        return new ReservationResponseDto.CheckOverlap(false);
+        return new ReservationResponseDto.CheckFocusDeskOverlap(false);
     }
 
     public ReservationHistoryResponse.TodayReservationCount getTodayReservationCount(String email) {
@@ -413,6 +417,53 @@ public class ReservationService {
         } else if (myMemberReservation.getMemberReservationType().equals(MemberReservationType.PARTICIPANT)) {
             myMemberReservation.cancelReservation();
         }
+    }
+
+    @Transactional
+    public void reserveRechargingRoom(String email, ReservationRequestDto.RechargingRoomDto rechargingRoomDto) {
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        final RechargingRoom rechargingRoom = rechargingRoomRepository.findById(rechargingRoomDto.rechargingRoomId())
+                .orElseThrow(() -> new SpaceException(MEETING_ROOM_NOT_FOUND));
+
+        //리차징룸 예약 중복 검증
+        if (verifyOverlappingRechargingRoom(member, rechargingRoomDto.startAt())) {
+            throw new ReservationException(OVERLAPPING_RECHARGING_ROOM_EXISTS);
+        }
+
+        Reservation reservation = rechargingRoomDto.toReservationEntity(rechargingRoom, rechargingRoomDto.startAt(), member);
+
+        reservationRepository.save(reservation);
+    }
+
+    private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt) {
+        if (reservationRepository.existsOverlappingRechargingRoomReservationByStartAt(member, startAt)) {
+            return true;
+        }
+        return false;
+    }
+
+    public ReservationResponseDto.CheckRechargingRoomOverlap checkRechargingRoomOverlap(String email, LocalDateTime startAt) {
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+
+        // 해당 회원이 해당 시간에 예약한 미팅룸이 있는지 확인
+        if (verifyOverlappingMeetingRoom(member, startAt)) {
+            return new ReservationResponseDto.CheckRechargingRoomOverlap(ToastType.OVERLAPPING_MEETING_ROOM_EXISTS);
+        } else if (verifyOverlappingRechargingRoom(member, startAt)) {
+            return new ReservationResponseDto.CheckRechargingRoomOverlap(ToastType.OVERLAPPING_RECHARGING_ROOM_EXISTS);
+        }
+        return null;
+    }
+
+    private boolean verifyOverlappingMeetingRoom(Member member, LocalDateTime startAt) {
+        if (reservationRepository.existsOverlappingMeetingRoomReservationsByStartAt(member, startAt)) {
+            return true;
+        }
+        return false;
     }
 
     private ReserveMeetingRoomEvent createReserveMeetingRoomEvent(Reservation reservation, MeetingRoom meetingRoom, List<Member> participants, List<Member> cancelers) {

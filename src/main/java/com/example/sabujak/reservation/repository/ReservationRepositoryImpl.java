@@ -3,6 +3,7 @@ package com.example.sabujak.reservation.repository;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.Reservation;
 import com.example.sabujak.reservation.entity.ReservationStatus;
+import com.example.sabujak.space.entity.RechargingRoom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -164,5 +165,40 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetchFirst());
+    }
+
+    @Override
+    public List<Reservation> findAllByRechargingRoomListAndStartTimes(List<RechargingRoom> rechargingRooms, LocalDateTime startAt, LocalDateTime endAt) {
+        return queryFactory.selectFrom(reservation)
+                .join(reservation.space, space)
+                .where(space.in(rechargingRooms),
+                        reservation.reservationStartDateTime.between(startAt, endAt))
+                .fetch();
+    }
+
+    @Override
+    public boolean existsOverlappingRechargingRoomReservationByStartAt(Member member, LocalDateTime startAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
+                        reservation.reservationStartDateTime.eq(startAt))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsOverlappingMeetingRoomReservationsByStartAt(Member member, LocalDateTime startAt) {
+        return queryFactory.selectOne()
+                .from(reservation)
+                .join(reservation.memberReservations, memberReservation)
+                .join(reservation.space, space)
+                .where(memberReservation.member.eq(member),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("MeetingRoom"),
+                        reservation.reservationStartDateTime.eq(startAt))
+                .fetchFirst() != null;
     }
 }
