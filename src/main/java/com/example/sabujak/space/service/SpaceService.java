@@ -4,6 +4,7 @@ import com.example.sabujak.branch.entity.Branch;
 import com.example.sabujak.branch.exception.BranchErrorCode;
 import com.example.sabujak.branch.exception.BranchException;
 import com.example.sabujak.branch.repository.BranchRepository;
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.entity.Reservation;
@@ -13,23 +14,21 @@ import com.example.sabujak.space.dto.SpaceCountResponseDto;
 import com.example.sabujak.space.dto.response.FocusDeskResponseDto;
 import com.example.sabujak.space.dto.response.MeetingRoomResponseDto;
 import com.example.sabujak.space.dto.response.RechargingRoomResponseDto;
-import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.space.entity.MeetingRoom;
 import com.example.sabujak.space.entity.MeetingRoomType;
 import com.example.sabujak.space.entity.RechargingRoom;
 import com.example.sabujak.space.entity.Space;
 import com.example.sabujak.space.exception.meetingroom.SpaceException;
 import com.example.sabujak.space.repository.FocusDeskRepository;
-
 import com.example.sabujak.space.repository.RechargingRoomRepository;
 import com.example.sabujak.space.repository.SpaceRepository;
-
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,10 +136,14 @@ public class SpaceService {
         for (RechargingRoom rechargingRoom : rechargingRooms) {
             Map<String, Boolean> reservationTimes = new HashMap<>();
             for (int i = 0; i < 5; i++) {
-                String startTime = now.plusMinutes(30 * i).format(DateTimeFormatter.ofPattern("HH:mm"));
-                String endTime = now.plusMinutes(30 * (i + 1)).format(DateTimeFormatter.ofPattern("HH:mm"));
+                LocalDateTime startTime = now.plusMinutes(30 * i);
 
-                reservationTimes.put(startTime, true);
+                if (startTime.equals(now.plusDays(1).with(LocalTime.of(0, 0, 0)))) {
+                    break;
+                }
+
+                String startTimeStr = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+                reservationTimes.put(startTimeStr, true);
             }
 
             if (reservationMap.size() > 0) {
@@ -153,7 +156,7 @@ public class SpaceService {
         }
         return rechargingRoomList;
     }
-      
+
     public SpaceCountResponseDto countRoomByBranch(Long branchId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
