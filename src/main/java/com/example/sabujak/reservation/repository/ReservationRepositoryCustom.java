@@ -13,7 +13,6 @@ public interface ReservationRepositoryCustom {
     boolean existsOverlappingMeetingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt);
 
     boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
-    boolean existsOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt);
     List<Reservation> findOverlappingRechargingRoomReservation(Member member, LocalDateTime startAt, LocalDateTime endAt);
     List<Reservation> findOverlappingRechargingRoomReservationInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt);
 
@@ -26,4 +25,7 @@ public interface ReservationRepositoryCustom {
     Integer countTodayReservation(Member member, LocalDateTime now);
 
     List<Reservation> findAllByRechargingRoomListAndStartTimes(List<RechargingRoom> rechargingRooms, LocalDateTime startAt, LocalDateTime endAt);
+
+    boolean existsOverlappingRechargingRoomReservationByStartAt(Member member, LocalDateTime startAt);
+    boolean existsOverlappingMeetingRoomReservationsByStartAt(Member member, LocalDateTime startAt);
 }

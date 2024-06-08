@@ -1,5 +1,6 @@
 package com.example.sabujak.reservation.service;
 
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.reservation.dto.FindMeetingRoomEntryNotificationMembersEvent;
@@ -436,7 +437,29 @@ public class ReservationService {
     }
 
     private boolean verifyOverlappingRechargingRoom(Member member, LocalDateTime startAt) {
-        if (reservationRepository.existsOverlappingRechargingRoomReservation(member, startAt)) {
+        if (reservationRepository.existsOverlappingRechargingRoomReservationByStartAt(member, startAt)) {
+            return true;
+        }
+        return false;
+    }
+
+    public ReservationResponseDto.CheckRechargingRoomOverlap checkRechargingRoomOverlap(String email, LocalDateTime startAt) {
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+
+        // 해당 회원이 해당 시간에 예약한 미팅룸이 있는지 확인
+        if (verifyOverlappingMeetingRoom(member, startAt)) {
+            return new ReservationResponseDto.CheckRechargingRoomOverlap(ToastType.OVERLAPPING_MEETING_ROOM_EXISTS);
+        } else if (verifyOverlappingRechargingRoom(member, startAt)) {
+            return new ReservationResponseDto.CheckRechargingRoomOverlap(ToastType.OVERLAPPING_RECHARGING_ROOM_EXISTS);
+        }
+        return null;
+    }
+
+    private boolean verifyOverlappingMeetingRoom(Member member, LocalDateTime startAt) {
+        if (reservationRepository.existsOverlappingMeetingRoomReservationsByStartAt(member, startAt)) {
             return true;
         }
         return false;

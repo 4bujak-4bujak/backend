@@ -1,5 +1,6 @@
 package com.example.sabujak.reservation.dto.response;
 
+import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import lombok.Getter;
 
@@ -11,6 +12,9 @@ import java.util.Set;
 public class ReservationResponseDto {
 
     public record CheckOverlap(Boolean alreadyUsing) {
+    }
+
+    public record CheckRechargingRoomOverlap(ToastType toastType) {
     }
 
 
