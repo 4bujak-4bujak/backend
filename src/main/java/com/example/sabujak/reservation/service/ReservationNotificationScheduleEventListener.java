@@ -60,7 +60,6 @@ public class ReservationNotificationScheduleEventListener {
         }, toInstant(notificationTime));
     }
 
-
     private Instant toInstant(LocalDateTime localDateTime) {
         return localDateTime.atZone(clock.getZone()).toInstant();
     }
