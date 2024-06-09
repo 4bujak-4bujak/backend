@@ -4,7 +4,7 @@ import com.example.sabujak.privatepost.entity.PrivatePost;
 
 import java.time.LocalDate;
 
-public record PrivatePostResponseDto(Long id, String title, String content, String branchName,LocalDate createdDate, PrivatePostAnswerResponseDto dto) {
+public record PrivatePostResponseDto(Long id, String title, String content, String branchName,LocalDate createdDate, PrivatePostAnswerResponseDto answer) {
     public static PrivatePostResponseDto of(PrivatePost privatePost) {
         return new PrivatePostResponseDto(
                 privatePost.getId(),
