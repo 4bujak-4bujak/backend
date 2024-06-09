@@ -1,6 +1,7 @@
 package com.example.sabujak.reservation.dto.event;
 
 import com.example.sabujak.member.entity.Member;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,9 +10,8 @@ public record ReserveMeetingRoomEvent(
         LocalDateTime reservationDate,
         String targetUrl,
         String invitationContent,
-        String cancellationContent,
         String reservationContent,
         List<Member> participants,
-        List<Member> cancelers
+        List<CancelRechargeRoomNotification> cancelRechargeRoomNotifications
 ) implements ReserveEvent {
 }
