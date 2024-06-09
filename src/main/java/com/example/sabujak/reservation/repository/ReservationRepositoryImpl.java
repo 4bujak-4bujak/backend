@@ -171,7 +171,9 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     public List<Reservation> findAllByRechargingRoomListAndStartTimes(List<RechargingRoom> rechargingRooms, LocalDateTime startAt, LocalDateTime endAt) {
         return queryFactory.selectFrom(reservation)
                 .join(reservation.space, space)
+                .join(reservation.memberReservations, memberReservation)
                 .where(space.in(rechargingRooms),
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetch();
     }
