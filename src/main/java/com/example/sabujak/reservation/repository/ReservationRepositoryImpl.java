@@ -174,6 +174,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(reservation.memberReservations, memberReservation)
                 .where(space.in(rechargingRooms),
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("RechargingRoom"),
                         reservation.reservationStartDateTime.between(startAt, endAt))
                 .fetch();
     }
