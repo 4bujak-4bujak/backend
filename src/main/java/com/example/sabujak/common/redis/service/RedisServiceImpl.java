@@ -28,7 +28,7 @@ public class RedisServiceImpl implements RedisService {
         try {
             return Optional.ofNullable(objectMapper.readValue(value, type));
         } catch (IllegalArgumentException e) {
-            log.warn("value for key does not exist in redis", e);
+            log.warn("value for key does not exist in redis");
             return Optional.empty();
         } catch (JsonProcessingException e) {
             log.error("error occurred while processing JSON", e);
