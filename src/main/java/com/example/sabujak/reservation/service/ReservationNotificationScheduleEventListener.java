@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 
 import static com.example.sabujak.space.dto.SpaceType.MEETINGROOM;
 import static com.example.sabujak.space.dto.SpaceType.RECHARGINGROOM;
+import static java.lang.Thread.currentThread;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
@@ -48,6 +49,7 @@ public class ReservationNotificationScheduleEventListener {
         String targetUrl = event.targetUrl();
         String content = event.reservationContent();
         taskScheduler.schedule(() -> {
+            log.info("Executing Scheduled Task. Current Scheduling Thread Name: [{}]", currentThread().getName());
             switch (type) {
                 case MEETINGROOM -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, targetUrl, content);
                 case RECHARGINGROOM -> {

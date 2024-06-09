@@ -124,9 +124,9 @@ public class FCMNotificationEventListener {
 
     private void sendFCMNotificationAsync(String email, Message message) {
         log.info("Start Sending Asynchronous FCM Notification. " +
-                "Current Thread Name: [{}]", currentThread().getName());
+                "Current Async Thread Name: [{}]", currentThread().getName());
         fcmNotificationService.sendFCMNotificationAsync(email, message);
         log.info("End Asynchronous FCM Notification Sending. " +
-                "Current Thread Name: [{}]", currentThread().getName());
+                "Current Async Thread Name: [{}]", currentThread().getName());
     }
 }
