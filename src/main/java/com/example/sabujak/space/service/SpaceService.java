@@ -147,8 +147,11 @@ public class SpaceService {
             }
 
             if (reservationMap.size() > 0) {
-                for (Reservation reservation : reservationMap.get(rechargingRoom)) {
-                    reservationTimes.put(reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("HH:mm")), false);
+                List<Reservation> reservationsInMap = reservationMap.get(rechargingRoom);
+                if (reservationsInMap != null) {
+                    for (Reservation reservation : reservationsInMap) {
+                        reservationTimes.put(reservation.getReservationStartDateTime().format(DateTimeFormatter.ofPattern("HH:mm")), false);
+                    }
                 }
             }
 
