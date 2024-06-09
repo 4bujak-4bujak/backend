@@ -138,7 +138,7 @@ public class SpaceService {
             for (int i = 0; i < 5; i++) {
                 LocalDateTime startTime = now.plusMinutes(30 * i);
 
-                if (startTime.equals(now.plusDays(1).with(LocalTime.of(0, 0, 0)))) {
+                if (startTime.equals(now.plusDays(1).with(LocalTime.of(0, 0, 0))) || startTime.equals(now.with(LocalTime.of(0, 0, 0)))) {
                     break;
                 }
 
