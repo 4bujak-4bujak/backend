@@ -19,4 +19,6 @@ public class FCMConstants {
 
     // Notification Image
     public static final String DEFAULT_IMAGE = "https://sabujak-image-bucket.s3.ap-northeast-2.amazonaws.com/offispace+icon.png";
+    public static final String CHECK_IMAGE =  "https://sabujak-image-bucket.s3.ap-northeast-2.amazonaws.com/%EC%B2%B4%ED%81%AC.png";
+    public static final String WARING_IMAGE = "https://sabujak-image-bucket.s3.ap-northeast-2.amazonaws.com/%EC%9C%84%ED%97%98.png";
 }
