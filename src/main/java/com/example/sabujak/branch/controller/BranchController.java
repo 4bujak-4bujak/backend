@@ -64,17 +64,12 @@ public class BranchController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
             @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
-    @Operation(summary = "주변 지점 조회", description = "현재 위치 기준 가까운 위치 지점 최대 2개 반환")
-    @Parameters({
-            @Parameter(name = "latitude", description = "사용자 위도"),
-            @Parameter(name = "longitude", description = "사용자 경도")
-    })
-    @GetMapping("/distance")
-    public ResponseEntity<Response<List<BranchDistanceResponseDto>>> getNearBranchesByPosition(
-            @RequestParam double latitude,
-            @RequestParam double longitude
+    @Operation(summary = "주변 지점 조회", description = "현재 이용 지점 기준 가까운 위치 지점 최대 2개 반환")
+    @GetMapping("/{branchId}/near")
+    public ResponseEntity<Response<List<BranchDistanceResponseDto>>> getNearBranchesByCurrentBranch(
+            @PathVariable(name = "branchId") Long branchId
     ) {
-        return ResponseEntity.ok(Response.success(branchService.getNearBranchByPosition(latitude, longitude)));
+        return ResponseEntity.ok(Response.success(branchService.getNearBranchesByCurrentBranch(branchId)));
     }
 
 

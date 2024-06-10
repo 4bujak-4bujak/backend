@@ -5,6 +5,7 @@ import com.example.sabujak.branch.dto.response.BranchDistanceResponseDto;
 import com.example.sabujak.branch.dto.response.BranchResponseDto;
 import com.example.sabujak.branch.dto.response.BranchWithSpaceDto;
 import com.example.sabujak.branch.entity.Branch;
+import com.example.sabujak.branch.exception.BranchErrorCode;
 import com.example.sabujak.branch.exception.BranchException;
 import com.example.sabujak.branch.repository.BranchRepository;
 import com.example.sabujak.space.repository.SpaceRepository;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static com.example.sabujak.branch.exception.BranchErrorCode.BRANCH_NOT_FOUND;
 import static com.example.sabujak.branch.exception.BranchErrorCode.ENTITY_NOT_FOUND_BY_NAME;
+import static java.util.function.Predicate.not;
 
 @Service
 @Slf4j
@@ -54,10 +56,17 @@ public class BranchService {
         return new BranchWithSpaceDto(branch.getBranchId(), branch.getBranchName(), branch.getBranchAddress(), branchTotalMeetingRoomCount, branchActiveMeetingRoomCount);
     }
 
-    public List<BranchDistanceResponseDto> getNearBranchByPosition(double latitude, double longitude) {
-        log.info("[BranchService getNearBranch] latitude: {}, longitude: {}", latitude, longitude);
+    public List<BranchDistanceResponseDto> getNearBranchesByCurrentBranch(Long branchId) {
 
-        return branchRepository.findAll().stream().sorted((a, b) -> {
+
+        Branch currentBranch = branchRepository.findById(branchId).orElseThrow(() -> new BranchException(BranchErrorCode.BRANCH_NOT_FOUND));
+        double latitude = currentBranch.getBranchLatitude();
+        double longitude = currentBranch.getBranchLongitude();
+        log.info("[BranchService getNearBranchesByCurrentBranch] branchId: {}", currentBranch.getBranchId());
+
+        return branchRepository.findAll().stream()
+                .filter(not(branch -> branch.getBranchId().equals(branchId)))
+                        .sorted((a, b) -> {
                             double calA = calculateDistance(latitude, longitude, a.getBranchLatitude(), a.getBranchLongitude());
                             double calB = calculateDistance(latitude, longitude, b.getBranchLatitude(), b.getBranchLongitude());
                             if (calA < calB)
