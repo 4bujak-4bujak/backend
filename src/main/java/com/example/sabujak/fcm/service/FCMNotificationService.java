@@ -1,6 +1,7 @@
 package com.example.sabujak.fcm.service;
 
 import com.example.sabujak.fcm.exception.FCMException;
+import com.example.sabujak.notification.entity.NotificationType;
 import com.google.api.core.ApiFuture;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,11 @@ public class FCMNotificationService {
     private final Executor callBackTaskExecutor;
     private final ObjectProvider<FCMNotificationService> provider;
 
-    public Message createFCMMessage(String email, String title, String content, Long targetId) {
+    public Message createFCMMessage(String email, String title, String content, Long targetId, NotificationType targetType) {
         return Message.builder()
                 .setToken(fcmTokenService.getFCMToken(email))
                 .setNotification(createNotification(title, content))
-                .putAllData(createData(targetId))
+                .putAllData(createData(targetId, targetType))
                 .build();
     }
 
@@ -46,8 +47,11 @@ public class FCMNotificationService {
                 .build();
     }
 
-    private Map<String, String> createData(Long targetId) {
-        return Map.of(TARGET_ID_KEY, targetId.toString());
+    private Map<String, String> createData(Long targetId, NotificationType targetType) {
+        return Map.of(
+                TARGET_ID_KEY, targetId.toString(),
+                TARGET_TYPE_KEY, targetType.toString()
+        );
     }
 
     public void sendFCMNotificationAsync(String email, Message message) {

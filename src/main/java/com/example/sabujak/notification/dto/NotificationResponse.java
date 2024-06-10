@@ -1,6 +1,7 @@
 package com.example.sabujak.notification.dto;
 
 import com.example.sabujak.notification.entity.Notification;
+import com.example.sabujak.notification.entity.NotificationType;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ public record NotificationResponse(
         String title,
         String content,
         Long targetId,
+        NotificationType targetType,
         LocalDateTime date
 
 ) {
@@ -20,6 +22,7 @@ public record NotificationResponse(
                 notification.getTitle(),
                 notification.getContent(),
                 notification.getTargetId(),
+                notification.getType(),
                 notification.getCreatedDate()
         );
     }
