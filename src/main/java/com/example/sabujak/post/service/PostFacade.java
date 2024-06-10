@@ -155,7 +155,7 @@ public class PostFacade {
             log.info("Creating and Publishing Event for Writer Notification.");
             String content = createCommentContent(post.getTitle(), commenter.getMemberNickname());
             String targetUrl = createTargetUrl(post.getId());
-            publisher.publishEvent(new SaveCommentEvent(targetUrl, content, writerEmail, writer));
+            publisher.publishEvent(new SaveCommentEvent(targetUrl, content, commenter.getImage().getImageUrl(), writerEmail, writer));
         }
     }
 

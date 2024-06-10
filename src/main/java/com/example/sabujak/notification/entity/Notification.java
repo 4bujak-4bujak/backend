@@ -21,6 +21,7 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
+    private String image;
     private String title;
     private String content;
     private String targetUrl;
@@ -33,7 +34,8 @@ public class Notification extends BaseEntity {
     Member member;
 
     @Builder
-    private Notification(String title, String content, String targetUrl, NotificationType type) {
+    private Notification(String image, String title, String content, String targetUrl, NotificationType type) {
+        this.image = image;
         this.title = title;
         this.content = content;
         this.targetUrl = targetUrl;
