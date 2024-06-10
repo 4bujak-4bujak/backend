@@ -8,6 +8,7 @@ public class FCMConstants {
 
     // Target URL
     public static final String TARGET_ID_KEY = "targetId";
+    public static final String TARGET_TYPE_KEY = "targetType";
 
     // Notification Title
     public static final String COMMENT_TITLE = "내 글에 댓글";
