@@ -7,8 +7,7 @@ public class FCMConstants {
     public static final long FCM_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 60;
 
     // Target URL
-    public static final String TARGET_URL_KEY = "targetUrl";
-    public static final String COMMUNITY_URL_PREFIX = "/community/";
+    public static final String TARGET_ID_KEY = "targetId";
 
     // Notification Title
     public static final String DEFAULT_TITLE = "offispace";
