@@ -55,7 +55,14 @@ public class ImageService {
                                String ext,
                                String uploadingName)  {
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("image/" + ext.substring(1));
+
+        if (ext.equals(".svg"))
+            metadata.setContentType("image/svg+xml");
+
+        else
+            metadata.setContentType("image/" + ext.substring(1));
+
+
 
         try {
             amazonS3.putObject(new PutObjectRequest(
