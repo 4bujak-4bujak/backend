@@ -46,16 +46,15 @@ public class ReservationNotificationScheduleEventListener {
         LocalDateTime notificationTime = event.reservationDate().minusMinutes(30);
         log.info("Add Schedule Notification. " +
                 "Reservation ID: [{}], Space Type: [{}], Notification Time: [{}]", reservationId, type, notificationTime);
-        String targetUrl = event.targetUrl();
         String content = event.reservationContent();
         taskScheduler.schedule(() -> {
             log.info("Executing Scheduled Task. Current Scheduling Thread Name: [{}]", currentThread().getName());
             switch (type) {
-                case MEETINGROOM -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, targetUrl, content);
+                case MEETINGROOM -> reservationService.findMeetingRoomEntryNotificationMembers(reservationId, content);
                 case RECHARGINGROOM -> {
                     if (event instanceof ReserveRechargingRoomEvent rechargingRoomEvent) {
                         Member member = rechargingRoomEvent.member();
-                        reservationService.findRechargingRoomEntryNotificationMember(reservationId, targetUrl, content, member);
+                        reservationService.findRechargingRoomEntryNotificationMember(reservationId, content, member);
                     }
                 }
             }
