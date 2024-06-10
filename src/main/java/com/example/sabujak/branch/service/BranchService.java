@@ -1,4 +1,6 @@
 package com.example.sabujak.branch.service;
+
+import com.example.sabujak.branch.dto.response.AvailableSpaceCountDto;
 import com.example.sabujak.branch.dto.response.BranchDistanceResponseDto;
 import com.example.sabujak.branch.dto.response.BranchResponseDto;
 import com.example.sabujak.branch.dto.response.BranchWithSpaceDto;
@@ -6,6 +8,7 @@ import com.example.sabujak.branch.entity.Branch;
 import com.example.sabujak.branch.exception.BranchErrorCode;
 import com.example.sabujak.branch.exception.BranchException;
 import com.example.sabujak.branch.repository.BranchRepository;
+import com.example.sabujak.space.repository.SpaceRepository;
 import com.example.sabujak.space.repository.meetingroom.MeetingRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.example.sabujak.branch.exception.BranchErrorCode.BRANCH_NOT_FOUND;
 import static com.example.sabujak.branch.exception.BranchErrorCode.ENTITY_NOT_FOUND_BY_NAME;
 import static java.util.function.Predicate.not;
 
@@ -28,6 +32,7 @@ public class BranchService {
     private static final int MAX_SEARCH_COUNT = 2;
     private final BranchRepository branchRepository;
     private final MeetingRoomRepository meetingRoomRepository;
+    private final SpaceRepository spaceRepository;
 
     public BranchResponseDto findByBranchName(String branchName) {
         log.info("[BranchService findByBranchName] branchName: {}", branchName);
@@ -48,7 +53,7 @@ public class BranchService {
         int branchTotalMeetingRoomCount = meetingRoomRepository.countTotalMeetingRoom(branchName);
         int branchActiveMeetingRoomCount = meetingRoomRepository.countActiveMeetingRoom(now, branchName);
 
-        return new BranchWithSpaceDto(branch.getBranchId(), branch.getBranchName(),branch.getBranchAddress(),branchTotalMeetingRoomCount,branchActiveMeetingRoomCount);
+        return new BranchWithSpaceDto(branch.getBranchId(), branch.getBranchName(), branch.getBranchAddress(), branchTotalMeetingRoomCount, branchActiveMeetingRoomCount);
     }
 
     public List<BranchDistanceResponseDto> getNearBranchesByCurrentBranch(Long branchId) {
@@ -91,8 +96,22 @@ public class BranchService {
     }
 
 
+    public AvailableSpaceCountDto getAvailableSpaceCount(Long branchId) {
+        LocalDateTime now = LocalDateTime.now();
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchException(BRANCH_NOT_FOUND));
 
+        List<Long> allCounts = spaceRepository.countAllSpaceByBranch(branch);
+        Long focusDeskTotalCount = allCounts.get(0);
+        Long meetingRoomTotalCount = allCounts.get(1);
+        Long rechargingRoomTotalCount = allCounts.get(2);
 
+        Long focusDeskUsingCount = spaceRepository.countUsingSpaceByBranchAndDtype(branch, now, "FocusDesk");
+        Long meetingRoomUsingCount = spaceRepository.countUsingSpaceByBranchAndDtype(branch, now, "MeetingRoom");
+        Long rechargingRoomUsingCount = spaceRepository.countUsingSpaceByBranchAndDtype(branch, now, "RechargingRoom");
 
-
+        return new AvailableSpaceCountDto(Math.toIntExact(meetingRoomTotalCount), Math.toIntExact(meetingRoomTotalCount - meetingRoomUsingCount),
+                Math.toIntExact(rechargingRoomTotalCount), Math.toIntExact(rechargingRoomTotalCount - rechargingRoomUsingCount),
+                Math.toIntExact(focusDeskTotalCount), Math.toIntExact(focusDeskTotalCount - focusDeskUsingCount));
+    }
 }

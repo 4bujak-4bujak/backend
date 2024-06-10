@@ -33,6 +33,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -253,18 +254,6 @@ public class ReservationService {
         return new ReservationResponseDto.CheckFocusDeskOverlap(false);
     }
 
-    public ReservationHistoryResponse.TodayReservationCount getTodayReservationCount(String email) {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        final Member member = memberRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-
-        Integer todayReservationCount = reservationRepository.countTodayReservation(member, now);
-
-        return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
-    }
-
     public List<ReservationHistoryResponse.ReservationForList> getTodayReservations(String email) {
         List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
 
@@ -280,6 +269,40 @@ public class ReservationService {
                 .collect(Collectors.groupingBy(MemberReservation::getReservation));
 
         for (Reservation reservation : todayReservations) {
+            List<MemberReservation> memberReservationsInReservation = memberReservationMap.get(reservation);
+
+            Optional<MemberReservationType> memberType = memberReservationsInReservation.stream()
+                    .filter(memberReservation -> memberReservation.getMember().getMemberId().equals(member.getMemberId()))
+                    .map(MemberReservation::getMemberReservationType)
+                    .findFirst();
+
+            reservationForLists.add(ReservationHistoryResponse.ReservationForList.of(
+                    reservation,
+                    reservation.getSpace(),
+                    memberReservationsInReservation.stream()
+                            .map(MemberReservation::getMember)
+                            .collect(Collectors.toList()),
+                    memberType.orElse(null)));
+        }
+
+        return reservationForLists;
+    }
+
+    public List<ReservationHistoryResponse.ReservationForList> getReservationsOfDay(String email, LocalDate localDate) {
+        List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
+
+        LocalDateTime targetDay = localDate.atStartOfDay();
+
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+
+        List<Reservation> reservations = reservationRepository.findReservationsWithDuration(member, targetDay, 0, 0);
+        List<MemberReservation> memberReservations = memberReservationRepository.findMemberReservationsByReservations(reservations);
+
+        Map<Reservation, List<MemberReservation>> memberReservationMap = memberReservations.stream()
+                .collect(Collectors.groupingBy(MemberReservation::getReservation));
+
+        for (Reservation reservation : reservations) {
             List<MemberReservation> memberReservationsInReservation = memberReservationMap.get(reservation);
 
             Optional<MemberReservationType> memberType = memberReservationsInReservation.stream()
