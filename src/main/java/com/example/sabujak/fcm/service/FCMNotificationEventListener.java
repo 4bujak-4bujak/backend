@@ -42,7 +42,7 @@ public class FCMNotificationEventListener {
         log.info("Start Preparing FCM Notification For Comment. " +
                 "Writer Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
 
-        saveNotification(DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.writer());
+        saveNotification(event.commenterImage(), DEFAULT_TITLE, content, targetUrl, COMMUNITY, event.writer());
         sendFCMNotification(email, createFCMMessage(email, DEFAULT_TITLE, content, targetUrl));
     }
 
@@ -64,7 +64,7 @@ public class FCMNotificationEventListener {
             String email = participant.getMemberEmail();
             log.info("Notification Target Participant Email: [{}]", email);
 
-            saveNotification(MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
+            saveNotification(CHECK_IMAGE, MEETING_ROOM_INVITATION_TITLE, content, targetUrl, RESERVATION, participant);
             sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_INVITATION_TITLE, content, targetUrl));
         }
     }
@@ -87,7 +87,7 @@ public class FCMNotificationEventListener {
             String content = cancelRechargeRoomNotification.cancellationContent();
             log.info("Notification Content: [{}], Notification Target Canceler Email: [{}]", content, email);
 
-            saveNotification(RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl, RESERVATION, canceler);
+            saveNotification(CHECK_IMAGE, RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl, RESERVATION, canceler);
             sendFCMNotificationAsync(email, createFCMMessage(email, RECHARGING_ROOM_CANCELLATION_TITLE, content, targetUrl));
         }
     }
@@ -103,7 +103,7 @@ public class FCMNotificationEventListener {
             String email = member.getMemberEmail();
             log.info("Notification Target Member Email: [{}]", email);
 
-            saveNotification(MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, member);
+            saveNotification(WARING_IMAGE, MEETING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, member);
             sendFCMNotificationAsync(email, createFCMMessage(email, MEETING_ROOM_RESERVATION_TITLE, content, targetUrl));
         }
     }
@@ -116,13 +116,13 @@ public class FCMNotificationEventListener {
         log.info("Start Preparing FCM Notification For Recharging Room Entry. " +
                 "Member Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetUrl);
 
-        saveNotification(RECHARGING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, event.member());
+        saveNotification(WARING_IMAGE, RECHARGING_ROOM_RESERVATION_TITLE, content, targetUrl, RESERVATION, event.member());
         sendFCMNotification(email, createFCMMessage(email, RECHARGING_ROOM_RESERVATION_TITLE, content, targetUrl));
     }
 
-    private void saveNotification(String title, String content, String targetUrl, NotificationType type, Member member) {
+    private void saveNotification(String image, String title, String content, String targetUrl, NotificationType type, Member member) {
         log.info("Start Saving Notification Before Sending FCM Notification.");
-        notificationService.saveNotification(title, content, targetUrl, type, member);
+        notificationService.saveNotification(image, title, content, targetUrl, type, member);
     }
 
     private Message createFCMMessage(String email, String title, String content, String targetUrl) {
