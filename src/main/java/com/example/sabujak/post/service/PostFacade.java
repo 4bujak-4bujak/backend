@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.sabujak.fcm.constants.FCMConstants.COMMUNITY_URL_PREFIX;
 import static com.example.sabujak.notification.utils.NotificationContent.createCommentContent;
 
 @Slf4j
@@ -154,8 +153,7 @@ public class PostFacade {
         if(!commenterEmail.equals(writerEmail)) {
             log.info("Creating and Publishing Event for Writer Notification.");
             String content = createCommentContent(post.getTitle(), commenter.getMemberNickname());
-            String targetUrl = createTargetUrl(post.getId());
-            publisher.publishEvent(new SaveCommentEvent(targetUrl, content, commenter.getImage().getImageUrl(), writerEmail, writer));
+            publisher.publishEvent(new SaveCommentEvent(postId, content, commenter.getImage().getImageUrl(), writerEmail, writer));
         }
     }
 
@@ -200,9 +198,5 @@ public class PostFacade {
         log.info("Status Checked. Is Writer: [{}]", isWriter);
 
         return CommentResponse.of(comment, writer, isWriter);
-    }
-
-    private String createTargetUrl(Long id) {
-        return COMMUNITY_URL_PREFIX + id;
     }
 }
