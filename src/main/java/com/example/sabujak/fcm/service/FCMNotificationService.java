@@ -30,11 +30,11 @@ public class FCMNotificationService {
     private final Executor callBackTaskExecutor;
     private final ObjectProvider<FCMNotificationService> provider;
 
-    public Message createFCMMessage(String email, String title, String content, String targetUrl) {
+    public Message createFCMMessage(String email, String title, String content, Long targetId) {
         return Message.builder()
                 .setToken(fcmTokenService.getFCMToken(email))
                 .setNotification(createNotification(title, content))
-                .putAllData(createData(targetUrl))
+                .putAllData(createData(targetId))
                 .build();
     }
 
@@ -46,8 +46,8 @@ public class FCMNotificationService {
                 .build();
     }
 
-    private Map<String, String> createData(String targetUrl) {
-        return Map.of(TARGET_URL_KEY, targetUrl);
+    private Map<String, String> createData(Long targetId) {
+        return Map.of(TARGET_ID_KEY, targetId.toString());
     }
 
     public void sendFCMNotificationAsync(String email, Message message) {

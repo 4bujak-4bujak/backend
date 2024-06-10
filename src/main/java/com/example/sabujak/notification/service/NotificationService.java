@@ -40,12 +40,12 @@ public class NotificationService {
     }
 
     @Transactional(propagation = REQUIRED)
-    public void saveNotification(String image, String title, String content, String targetUrl, NotificationType type, Member member) {
+    public void saveNotification(String image, String title, String content, Long targetId, NotificationType type, Member member) {
         Notification notification = Notification.builder()
                 .image(image)
                 .title(title)
                 .content(content)
-                .targetUrl(targetUrl)
+                .targetId(targetId)
                 .type(type)
                 .build();
         notification.setMember(member);

@@ -24,7 +24,7 @@ public class Notification extends BaseEntity {
     private String image;
     private String title;
     private String content;
-    private String targetUrl;
+    private Long targetId;
 
     @Enumerated(STRING)
     private NotificationType type;
@@ -34,11 +34,11 @@ public class Notification extends BaseEntity {
     Member member;
 
     @Builder
-    private Notification(String image, String title, String content, String targetUrl, NotificationType type) {
+    private Notification(String image, String title, String content, Long targetId, NotificationType type) {
         this.image = image;
         this.title = title;
         this.content = content;
-        this.targetUrl = targetUrl;
+        this.targetId = targetId;
         this.type = type;
     }
 

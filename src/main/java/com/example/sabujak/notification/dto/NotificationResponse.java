@@ -9,7 +9,7 @@ public record NotificationResponse(
         String image,
         String title,
         String content,
-        String targetUrl,
+        Long targetId,
         LocalDateTime date
 
 ) {
@@ -19,7 +19,7 @@ public record NotificationResponse(
                 notification.getImage(),
                 notification.getTitle(),
                 notification.getContent(),
-                notification.getTargetUrl(),
+                notification.getTargetId(),
                 notification.getCreatedDate()
         );
     }
