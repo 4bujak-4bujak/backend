@@ -253,18 +253,6 @@ public class ReservationService {
         return new ReservationResponseDto.CheckFocusDeskOverlap(false);
     }
 
-    public ReservationHistoryResponse.TodayReservationCount getTodayReservationCount(String email) {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        final Member member = memberRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
-
-        Integer todayReservationCount = reservationRepository.countTodayReservation(member, now);
-
-        return new ReservationHistoryResponse.TodayReservationCount(todayReservationCount);
-    }
-
     public List<ReservationHistoryResponse.ReservationForList> getTodayReservations(String email) {
         List<ReservationHistoryResponse.ReservationForList> reservationForLists = new ArrayList<>();
 
