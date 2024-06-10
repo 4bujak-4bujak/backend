@@ -15,9 +15,6 @@ import java.util.stream.Collectors;
 
 public class ReservationHistoryResponse {
 
-    public record TodayReservationCount(Integer count) {
-    }
-
     @Getter
     public static class ReservationForList {
         private Long reservationId;
