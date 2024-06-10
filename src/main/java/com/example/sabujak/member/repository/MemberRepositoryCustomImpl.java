@@ -56,8 +56,8 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .join(memberReservation.reservation, reservation)
                 .where(memberReservation.member.eq(member),
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
-                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
-                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                        reservation.reservationStartDateTime.between(startAt, endAt.minusSeconds(1))
+                                .or(reservation.reservationEndDateTime.between(startAt.plusSeconds(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
                                         .and(reservation.reservationEndDateTime.after(endAt))))
                 .notExists();
