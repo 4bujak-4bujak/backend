@@ -5,8 +5,8 @@ import com.example.sabujak.member.entity.Member;
 import java.util.List;
 
 public record FindMeetingRoomEntryNotificationMembersEvent(
-        String targetUrl,
-        String content,
+        Long reservationId,
+        String reservationContent,
         List<Member> members
 ) {
 }
