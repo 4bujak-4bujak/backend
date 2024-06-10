@@ -1,5 +1,6 @@
 package com.example.sabujak.branch.controller;
 
+import com.example.sabujak.branch.dto.response.AvailableSpaceCountDto;
 import com.example.sabujak.branch.dto.response.BranchDistanceResponseDto;
 import com.example.sabujak.branch.dto.response.BranchResponseDto;
 import com.example.sabujak.branch.dto.response.BranchWithSpaceDto;
@@ -72,9 +73,21 @@ public class BranchController {
     public ResponseEntity<Response<List<BranchDistanceResponseDto>>> getNearBranchesByPosition(
             @RequestParam double latitude,
             @RequestParam double longitude
-    ){
+    ) {
         return ResponseEntity.ok(Response.success(branchService.getNearBranchByPosition(latitude, longitude)));
     }
 
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "지점 예약 가능한 공간", description = "지점의 Id를 받아 총, 사용 가능한 회의실 리차징 포커스 개수 반환")
+    @Parameters({
+            @Parameter(name = "branchId", description = "지점 Id", example = "1")
+    })
+    @GetMapping("/{branchId}/available-count")
+    public ResponseEntity<Response<AvailableSpaceCountDto>> getAvailableSpaceCount(@PathVariable Long branchId) {
+        return ResponseEntity.ok(Response.success(branchService.getAvailableSpaceCount(branchId)));
+    }
 
 }
