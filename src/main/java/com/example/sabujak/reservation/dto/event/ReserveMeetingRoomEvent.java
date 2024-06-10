@@ -8,10 +8,9 @@ import java.util.List;
 public record ReserveMeetingRoomEvent(
         Long reservationId,
         LocalDateTime reservationDate,
-        String targetUrl,
         String invitationContent,
         String reservationContent,
         List<Member> participants,
-        List<CancelRechargeRoomNotification> cancelRechargeRoomNotifications
+        List<CancelRechargingRoomNotification> cancelRechargingRoomNotifications
 ) implements ReserveEvent {
 }

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 public record ReserveRechargingRoomEvent(
         Long reservationId,
         LocalDateTime reservationDate,
-        String targetUrl,
         String reservationContent,
         Member member
 ) implements ReserveEvent {
