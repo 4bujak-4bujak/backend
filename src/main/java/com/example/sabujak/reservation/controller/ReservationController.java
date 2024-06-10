@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,6 +61,20 @@ public class ReservationController {
     @GetMapping("/today")
     public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getTodayReservations(@AuthenticationPrincipal AuthRequestDto.Access access) {
         return ResponseEntity.ok(Response.success(reservationService.getTodayReservations(access.getEmail())));
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(implementation = Response.class)))})
+    @Operation(summary = "이번 주 일정 조회", description = "이번주 내에 있는 예약 중 하루 날짜를 받으면 해당 날짜 일정 보여줌 (일단 이번주인지 검증은 안함)")
+    @Parameters({
+            @Parameter(name = "access", hidden = true),
+            @Parameter(name = "localDate", description = "날짜", example = "2024-06-10", required = true)
+    })
+    @GetMapping("/week")
+    public ResponseEntity<Response<List<ReservationHistoryResponse.ReservationForList>>> getWeekReservations(@AuthenticationPrincipal AuthRequestDto.Access access,
+                                                                                                             @RequestParam LocalDate localDate) {
+        return ResponseEntity.ok(Response.success(reservationService.getReservationsOfDay(access.getEmail(), localDate)));
     }
 
     @ApiResponses(value = {
