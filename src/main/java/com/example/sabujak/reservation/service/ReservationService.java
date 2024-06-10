@@ -515,7 +515,8 @@ public class ReservationService {
                 "Reservation ID: [{}], Reservation Date: [{}]", reservationId, reservationDate);
 
         String branchName = rechargingRoom.getBranch().getBranchName();
-        String reservationContent = createRechargingRoomReservationContent(reservationDate, branchName);
+        String spaceName = rechargingRoom.getSpaceName();
+        String reservationContent = createRechargingRoomReservationContent(reservationDate, branchName, spaceName);
         log.info("Branch Name: [{}], Reservation Content: [{}]", branchName, reservationContent);
 
         return new ReserveRechargingRoomEvent(reservationId, reservationDate, reservationContent, member);

@@ -10,7 +10,7 @@ public class FCMConstants {
     public static final String TARGET_ID_KEY = "targetId";
 
     // Notification Title
-    public static final String DEFAULT_TITLE = "offispace";
+    public static final String COMMENT_TITLE = "내 글에 댓글";
     public static final String MEETING_ROOM_INVITATION_TITLE = "참여자 등록";
     public static final String RECHARGING_ROOM_CANCELLATION_TITLE = "리차징룸 예약 취소";
     public static final String MEETING_ROOM_RESERVATION_TITLE = "미팅룸 예약 30분 전";

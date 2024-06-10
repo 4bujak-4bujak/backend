@@ -42,8 +42,8 @@ public class FCMNotificationEventListener {
         log.info("Start Preparing FCM Notification For Comment. " +
                 "Writer Email: [{}], Notification Content: [{}], Target URL: [{}]", email, content, targetId);
 
-        saveNotification(event.commenterImage(), DEFAULT_TITLE, content, targetId, COMMUNITY, event.writer());
-        sendFCMNotification(email, createFCMMessage(email, DEFAULT_TITLE, content, targetId));
+        saveNotification(event.commenterImage(), COMMENT_TITLE, content, targetId, COMMUNITY, event.writer());
+        sendFCMNotification(email, createFCMMessage(email, COMMENT_TITLE, content, targetId));
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
