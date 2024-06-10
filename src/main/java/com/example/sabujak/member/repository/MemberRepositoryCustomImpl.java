@@ -3,6 +3,7 @@ package com.example.sabujak.member.repository;
 import com.example.sabujak.company.entity.Company;
 import com.example.sabujak.company.entity.QCompany;
 import com.example.sabujak.member.entity.Member;
+import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -54,8 +55,9 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .from(memberReservation)
                 .join(memberReservation.reservation, reservation)
                 .where(memberReservation.member.eq(member),
-                        reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
-                                .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        reservation.reservationStartDateTime.between(startAt, endAt.minusSeconds(1))
+                                .or(reservation.reservationEndDateTime.between(startAt.plusSeconds(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
                                         .and(reservation.reservationEndDateTime.after(endAt))))
                 .notExists();

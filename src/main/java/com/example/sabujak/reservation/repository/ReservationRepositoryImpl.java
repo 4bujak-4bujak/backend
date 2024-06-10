@@ -90,8 +90,8 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 
     private BooleanBuilder reservationCondition(LocalDateTime startAt, LocalDateTime endAt) {
         return new BooleanBuilder()
-                .and(reservation.reservationStartDateTime.between(startAt, endAt.minusNanos(1))
-                        .or(reservation.reservationEndDateTime.between(startAt.plusNanos(1), endAt))
+                .and(reservation.reservationStartDateTime.between(startAt, endAt.minusSeconds(1))
+                        .or(reservation.reservationEndDateTime.between(startAt.plusSeconds(1), endAt))
                         .or(reservation.reservationStartDateTime.before(startAt)
                                 .and(reservation.reservationEndDateTime.after(endAt))));
     }
