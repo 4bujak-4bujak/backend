@@ -16,6 +16,7 @@ import static com.example.sabujak.member.entity.QMember.member;
 import static com.example.sabujak.member.entity.QMemberImage.memberImage;
 import static com.example.sabujak.reservation.entity.QMemberReservation.memberReservation;
 import static com.example.sabujak.reservation.entity.QReservation.reservation;
+import static com.example.sabujak.space.entity.QSpace.space;
 
 @RequiredArgsConstructor
 public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
@@ -46,7 +47,8 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     public List<Member> searchMembersCanInviteInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
         return queryFactory.selectFrom(member)
                 .join(member.memberReservations, memberReservation)
-                .where(member.in(members), reservationCondition(startAt, endAt))
+                .where(member.in(members),
+                        reservationCondition(startAt, endAt))
                 .fetch();
     }
 
@@ -54,8 +56,10 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
         return JPAExpressions.selectOne()
                 .from(memberReservation)
                 .join(memberReservation.reservation, reservation)
+                .join(reservation.space, space)
                 .where(memberReservation.member.eq(member),
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
+                        space.dtype.eq("MeetingRoom"),
                         reservation.reservationStartDateTime.between(startAt, endAt.minusSeconds(1))
                                 .or(reservation.reservationEndDateTime.between(startAt.plusSeconds(1), endAt))
                                 .or(reservation.reservationStartDateTime.before(startAt)
