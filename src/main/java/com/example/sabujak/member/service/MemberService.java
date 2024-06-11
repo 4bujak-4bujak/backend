@@ -1,20 +1,21 @@
 package com.example.sabujak.member.service;
 
 import com.example.sabujak.image.service.ImageService;
+import com.example.sabujak.member.dto.response.MemberModalIgnoredResponseDto;
 import com.example.sabujak.member.dto.response.MemberResponseDto;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.entity.MemberImage;
 import com.example.sabujak.member.repository.MemberImageRepository;
 import com.example.sabujak.member.repository.MemberRepository;
 import com.example.sabujak.security.exception.AuthException;
-import io.jsonwebtoken.lang.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static com.example.sabujak.security.exception.AuthErrorCode.ACCOUNT_NOT_EXISTS;
 import static com.example.sabujak.security.exception.AuthErrorCode.INVALID_CURRENT_PASSWORD;
@@ -88,4 +89,29 @@ public class MemberService {
             imageService.deleteImage(exImage.getImageUrl());
 
     }
+
+    @Transactional
+    public void changeModalIgnored(String email){
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+        LocalDateTime now = LocalDateTime.now();
+        member.changeModalIgnoredAndTime(now);
+    }
+
+    public MemberModalIgnoredResponseDto checkModalIgnored(String email){
+        final Member member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
+        LocalDateTime now = LocalDateTime.now();
+        if (member.getMemberModalIgnoredTime() == null)
+            return MemberModalIgnoredResponseDto.of(member.getMemberId(), false);
+
+        if (!member.isMemberModalIgnored()){
+            long betweenHours = Duration.between(now, member.getMemberModalIgnoredTime()).toHours();
+            if (betweenHours < 24L)
+                return MemberModalIgnoredResponseDto.of(member.getMemberId(), true);
+        }
+        return MemberModalIgnoredResponseDto.of(member.getMemberId(), false);
+    }
+
+
 }
