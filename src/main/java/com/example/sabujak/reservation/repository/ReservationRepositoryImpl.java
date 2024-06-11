@@ -201,7 +201,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .where(memberReservation.member.eq(member),
                         memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
                         space.dtype.eq("MeetingRoom"),
-                        reservation.reservationStartDateTime.eq(startAt))
+                        reservationCondition(startAt, startAt.plusMinutes(30)))
                 .fetchFirst() != null;
     }
 }
