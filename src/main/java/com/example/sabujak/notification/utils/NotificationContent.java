@@ -13,8 +13,8 @@ public final class NotificationContent {
     private static final String COMMENT_NOTIFICATION_FORMAT = "%s님이 회원님의 게시글에 댓글을 남겼습니다.";
     private static final String MEETING_ROOM_INVITATION_NOTIFICATION_FORMAT = "%s에 초대된 미팅이 있습니다.";
     private static final String RECHARGING_ROOM_CANCELLATION_NOTIFICATION_FORMAT = "%s에 리차징룸 예약이 미팅 일정과 중복되어 자동 취소되었습니다.";
-    private static final String MEETING_ROOM_RESERVATION_NOTIFICATION_FORMAT = "%s에 %s %s에서 이용 예정입니다.";
-    private static final String RECHARGING_ROOM__RESERVATION_NOTIFICATION_FORMAT = "%s에 %s %s 이용 예정입니다.";
+    private static final String MEETING_ROOM_RESERVATION_NOTIFICATION_FORMAT = "%s에 %s %s에서 미팅이 있습니다. 이용 시간을 준수해주세요.";
+    private static final String RECHARGING_ROOM__RESERVATION_NOTIFICATION_FORMAT = "%s에 %s %s 이용 예정입니다. 이용 시간을 준수해주세요.";
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 HH:mm");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
