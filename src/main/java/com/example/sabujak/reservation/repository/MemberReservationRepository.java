@@ -11,6 +11,6 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     @Query("select mr from MemberReservation mr join fetch mr.member m join fetch m.image where mr.reservation in :reservations and mr.memberReservationStatus = 'ACCEPTED'")
     List<MemberReservation> findMemberReservationsByReservations(List<Reservation> reservations);
 
-    @Query("select mr from MemberReservation mr join fetch mr.member m join fetch m.image where mr.reservation = :reservation and mr.memberReservationStatus = 'ACCEPTED'")
+    @Query("select mr from MemberReservation mr join fetch mr.member m join fetch m.image where mr.reservation = :reservation")
     List<MemberReservation> findByReservation(Reservation reservation);
 }

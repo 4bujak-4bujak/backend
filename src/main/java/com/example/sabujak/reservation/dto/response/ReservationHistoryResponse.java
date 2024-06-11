@@ -4,6 +4,7 @@ import com.example.sabujak.member.dto.response.MemberResponseDto;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.reservation.entity.MemberReservationType;
 import com.example.sabujak.reservation.entity.Reservation;
+import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.example.sabujak.space.dto.SpaceType;
 import com.example.sabujak.space.entity.FocusDesk;
 import com.example.sabujak.space.entity.Space;
@@ -72,8 +73,10 @@ public class ReservationHistoryResponse {
         private List<MemberResponseDto.MemberListForReservation> participants;
         private MemberReservationType myMemberType;
         private ReservationProgress reservationProgress;
+        private ReservationStatus reservationStatus;
 
-        public static ReservationDetails of(Reservation reservation, Space space, Member representative, List<Member> participants, MemberReservationType myMemberType, ReservationProgress reservationProgress) {
+        public static ReservationDetails of(Reservation reservation, Space space, Member representative, List<Member> participants,
+                                            MemberReservationType myMemberType, ReservationProgress reservationProgress, ReservationStatus reservationStatus) {
             ReservationDetails reservationDetails = new ReservationDetails();
             reservationDetails.reservationId = reservation.getReservationId();
             reservationDetails.reservationName = reservation.getReservationName();
@@ -99,6 +102,7 @@ public class ReservationHistoryResponse {
                     .collect(Collectors.toList());
             reservationDetails.myMemberType = myMemberType;
             reservationDetails.reservationProgress = reservationProgress;
+            reservationDetails.reservationStatus = reservationStatus;
 
             return reservationDetails;
         }
