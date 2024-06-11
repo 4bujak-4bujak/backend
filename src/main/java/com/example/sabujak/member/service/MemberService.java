@@ -102,10 +102,11 @@ public class MemberService {
         final Member member = memberRepository.findByMemberEmail(email)
                 .orElseThrow(() -> new AuthException(ACCOUNT_NOT_EXISTS));
         LocalDateTime now = LocalDateTime.now();
+
         if (member.getMemberModalIgnoredTime() == null)
             return MemberModalIgnoredResponseDto.of(member.getMemberId(), false);
 
-        if (!member.isMemberModalIgnored()){
+        if (member.isMemberModalIgnored()){
             long betweenHours = Duration.between(now, member.getMemberModalIgnoredTime()).toHours();
             if (betweenHours < 24L)
                 return MemberModalIgnoredResponseDto.of(member.getMemberId(), true);
