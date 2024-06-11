@@ -3,11 +3,7 @@ package com.example.sabujak.reservation.service;
 import com.example.sabujak.common.dto.ToastType;
 import com.example.sabujak.member.entity.Member;
 import com.example.sabujak.member.repository.MemberRepository;
-import com.example.sabujak.reservation.dto.event.CancelRechargingRoomNotification;
-import com.example.sabujak.reservation.dto.event.FindMeetingRoomEntryNotificationMembersEvent;
-import com.example.sabujak.reservation.dto.event.FindRechargingRoomEntryNotificationMemberEvent;
-import com.example.sabujak.reservation.dto.event.ReserveMeetingRoomEvent;
-import com.example.sabujak.reservation.dto.event.ReserveRechargingRoomEvent;
+import com.example.sabujak.reservation.dto.event.*;
 import com.example.sabujak.reservation.dto.request.ReservationRequestDto;
 import com.example.sabujak.reservation.dto.response.ReservationHistoryResponse;
 import com.example.sabujak.reservation.dto.response.ReservationProgress;
@@ -15,6 +11,7 @@ import com.example.sabujak.reservation.dto.response.ReservationResponseDto;
 import com.example.sabujak.reservation.entity.MemberReservation;
 import com.example.sabujak.reservation.entity.MemberReservationType;
 import com.example.sabujak.reservation.entity.Reservation;
+import com.example.sabujak.reservation.entity.ReservationStatus;
 import com.example.sabujak.reservation.exception.ReservationException;
 import com.example.sabujak.reservation.repository.MemberReservationRepository;
 import com.example.sabujak.reservation.repository.ReservationRepository;
@@ -372,6 +369,7 @@ public class ReservationService {
         List<Member> participants = new ArrayList<>();
 
         boolean checkMyReservation = false;
+        ReservationStatus reservationStatus = null;
 
         for (MemberReservation memberReservation : memberReservations) {
             if (memberReservation.getMemberReservationType().equals(MemberReservationType.REPRESENTATIVE)) {
@@ -382,6 +380,7 @@ public class ReservationService {
 
             if (memberReservation.getMember().getMemberId() == member.getMemberId()) {
                 checkMyReservation = true;
+                reservationStatus = memberReservation.getMemberReservationStatus();
             }
         }
 
@@ -410,7 +409,9 @@ public class ReservationService {
                 representative,
                 participants,
                 myMemberType,
-                reservationProgress);
+                reservationProgress,
+                reservationStatus
+        );
     }
 
     @Transactional
@@ -483,7 +484,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_EXISTS));
 
-        if(reservation.getMemberReservations().get(0).getMember().getMemberId() != member.getMemberId()) {
+        if (reservation.getMemberReservations().get(0).getMember().getMemberId() != member.getMemberId()) {
             throw new ReservationException(NOT_RESERVED_BY_MEMBER);
         } else if (reservation.getReservationEndDateTime().isBefore(LocalDateTime.now())) {
             throw new ReservationException(ALREADY_ENDED_RESERVATION);

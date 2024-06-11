@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +56,12 @@ public class Member extends BaseEntity {
     @Column(name = "member_deleteCheck", nullable = false)
     private Boolean memberDeleteCheck = false;
 
+    @Column(name = "member_modal_ignored", nullable = false)
+    private boolean memberModalIgnored = false;
+
+    @Column(name = "member_modal_ignored_time")
+    private LocalDateTime memberModalIgnoredTime;
+
     @Column(name = "member_role")
     @Enumerated(EnumType.STRING)
     private Role memberRole = Role.ROLE_USER;
@@ -83,6 +91,9 @@ public class Member extends BaseEntity {
         this.memberJob = memberJob;
         this.memberSmsAgree = memberSmsAgree;
         this.memberNickname = generateRandomNickname();
+        this.memberModalIgnoredTime = LocalDateTime.parse(
+                "2024-06-09 11:11:11.111", 
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 
     public void signOut() {
@@ -91,6 +102,11 @@ public class Member extends BaseEntity {
 
     public void changeMemberPassword(String encryptedPassword) {
         this.memberPassword = encryptedPassword;
+    }
+
+    public void changeModalIgnoredAndTime(LocalDateTime now){
+        this.memberModalIgnored = true;
+        this.memberModalIgnoredTime = now;
     }
 
     private String generateRandomNickname() {
