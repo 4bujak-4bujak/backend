@@ -11,6 +11,7 @@ import lombok.*;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +91,9 @@ public class Member extends BaseEntity {
         this.memberJob = memberJob;
         this.memberSmsAgree = memberSmsAgree;
         this.memberNickname = generateRandomNickname();
+        this.memberModalIgnoredTime = LocalDateTime.parse(
+                "2024-06-09 11:11:11.111", 
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 
     public void signOut() {
