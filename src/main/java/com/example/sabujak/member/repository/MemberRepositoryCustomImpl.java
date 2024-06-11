@@ -46,7 +46,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     @Override
     public List<Member> searchMembersCanInviteInMembers(List<Member> members, LocalDateTime startAt, LocalDateTime endAt) {
         return queryFactory.selectFrom(member)
-                .join(member.memberReservations, memberReservation)
+                .leftJoin(member.memberReservations, memberReservation)
                 .where(member.in(members),
                         reservationCondition(startAt, endAt))
                 .fetch();
