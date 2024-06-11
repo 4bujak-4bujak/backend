@@ -114,7 +114,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     @Override
     public List<Reservation> findReservationsWithDuration(Member member, LocalDateTime now, int durationStart, int durationEnd) {
         LocalDateTime startAt = now.plusDays(durationStart).with(LocalTime.MIDNIGHT);
-        LocalDateTime endAt = now.plusDays(durationEnd).with(LocalTime.MAX);
+        LocalDateTime endAt = now.plusDays(durationEnd).with(LocalTime.MAX).minusSeconds(1);
 
         return queryFactory.selectFrom(reservation)
                 .join(reservation.memberReservations, memberReservation)
@@ -149,22 +149,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 
     private BooleanExpression startAfterNowAndBeforeTodayMax(LocalDateTime now) {
         return reservation.reservationStartDateTime.after(now)
-                .and(reservation.reservationStartDateTime.before(now.with(LocalTime.MAX)));
-    }
-
-    @Override
-    public Integer countTodayReservation(Member member, LocalDateTime now) {
-        LocalDateTime startAt = now.with(LocalTime.MIDNIGHT);
-        LocalDateTime endAt = now.with(LocalTime.MAX);
-
-        return Math.toIntExact(queryFactory.select(reservation.count())
-                .from(reservation)
-                .join(reservation.memberReservations, memberReservation)
-                .join(reservation.space, space)
-                .where(memberReservation.member.eq(member),
-                        memberReservation.memberReservationStatus.eq(ReservationStatus.ACCEPTED),
-                        reservation.reservationStartDateTime.between(startAt, endAt))
-                .fetchFirst());
+                .and(reservation.reservationStartDateTime.before(now.with(LocalTime.MAX).minusSeconds(1)));
     }
 
     @Override
