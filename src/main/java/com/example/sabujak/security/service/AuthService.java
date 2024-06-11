@@ -120,7 +120,7 @@ public class AuthService {
 
         redisService.set(PHONE_CODE_PREFIX + phone.phoneNumber(), verificationCode, (long) PHONE_CODE_EXPIRATION_MILLIS);
 
-        smsService.sendSms(phone.phoneNumber(), createSmsVerificationText(verificationCode));
+        //smsService.sendSms(phone.phoneNumber(), createSmsVerificationText(verificationCode));
     }
 
     private String generateVerifyCode() {
@@ -142,12 +142,12 @@ public class AuthService {
     }
 
     public boolean verifyPhoneCode(VerifyRequestDto.PhoneCode phoneCode) {
-        String codeInRedis = redisService.get(PHONE_CODE_PREFIX + phoneCode.phoneNumber(), String.class)
-                .orElseThrow(() -> new AuthException(EXPIRED_PHONE_CODE));
-
-        if (!codeInRedis.equals(phoneCode.code())) {
-            throw new AuthException(INVALID_PHONE_CODE);
-        }
+//        String codeInRedis = redisService.get(PHONE_CODE_PREFIX + phoneCode.phoneNumber(), String.class)
+//                .orElseThrow(() -> new AuthException(EXPIRED_PHONE_CODE));
+//
+//        if (!codeInRedis.equals(phoneCode.code())) {
+//            throw new AuthException(INVALID_PHONE_CODE);
+//        }
         return true;
     }
 
